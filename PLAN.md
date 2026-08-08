@@ -1127,22 +1127,22 @@ Permettre de tester et jouer sans groupe complet.
 
 ## Tâches
 
-- [ ] Créer une abstraction de contrôleur.
-- [ ] Ajouter un bot simple.
-- [ ] Ajouter navigation dans l’arène.
-- [ ] Ajouter détection des plateformes.
-- [ ] Ajouter choix de cible.
-- [ ] Ajouter décision de tir.
-- [ ] Ajouter décision de mêlée.
-- [ ] Ajouter esquive.
-- [ ] Ajouter recherche de sang.
-- [ ] Ajouter décision de transfusion.
-- [ ] Ajouter plusieurs niveaux de difficulté.
-- [ ] Ajouter comportement d’équipe.
-- [ ] Ajouter mode entraînement.
-- [ ] Ajouter mannequins de test.
-- [ ] Ajouter affichage des hitboxes.
-- [ ] Ajouter rechargement instantané de l’arène de test.
+- [x] Créer une abstraction de contrôleur.
+- [x] Ajouter un bot simple.
+- [x] Ajouter navigation dans l’arène.
+- [x] Ajouter détection des plateformes.
+- [x] Ajouter choix de cible.
+- [x] Ajouter décision de tir.
+- [x] Ajouter décision de mêlée.
+- [x] Ajouter esquive.
+- [x] Ajouter recherche de sang.
+- [x] Ajouter décision de transfusion.
+- [x] Ajouter plusieurs niveaux de difficulté.
+- [x] Ajouter comportement d’équipe.
+- [x] Ajouter mode entraînement.
+- [x] Ajouter mannequins de test.
+- [x] Ajouter affichage des hitboxes.
+- [x] Ajouter rechargement instantané de l’arène de test.
 
 ## Critères de validation
 
