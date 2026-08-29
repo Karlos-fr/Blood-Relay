@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GAME_HEIGHT, GAME_WIDTH } from '../config/game';
-import { calculateContainedViewport } from './mobileViewport';
+import { calculateContainedViewport, selectViewportSize } from './mobileViewport';
 
 describe('calculateContainedViewport', () => {
   it('centers a 16:9 arena inside a wider landscape viewport', () => {
@@ -21,5 +21,21 @@ describe('calculateContainedViewport', () => {
     expect(viewport.x).toBeCloseTo(0);
     expect(viewport.y).toBeCloseTo(312.3125);
     expect(viewport.zoom).toBeCloseTo(390 / 960);
+  });
+});
+
+describe('selectViewportSize', () => {
+  it('prefers VisualViewport when standalone iOS still exposes stale inner dimensions', () => {
+    expect(selectViewportSize(844, 390, 390, 844)).toEqual({
+      width: 844,
+      height: 390,
+    });
+  });
+
+  it('falls back to inner dimensions when VisualViewport is unavailable', () => {
+    expect(selectViewportSize(undefined, undefined, 844, 390)).toEqual({
+      width: 844,
+      height: 390,
+    });
   });
 });
