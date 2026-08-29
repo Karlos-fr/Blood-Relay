@@ -1,5 +1,7 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
+import { isMobileDevice } from '../platform/device';
 import type { PlayerControls } from './playerControls';
+import './mobileControls.css';
 
 type MobileAction = 'left' | 'right' | 'down' | 'jump';
 
@@ -11,9 +13,19 @@ interface TouchState {
   jumpPressed: boolean;
 }
 
-const BUTTON_COLOR = 0xe7474f;
-const BUTTON_IDLE_ALPHA = 0.18;
-const BUTTON_ACTIVE_ALPHA = 0.46;
+const BUTTON_LABELS: Record<MobileAction, string> = {
+  left: '←',
+  right: '→',
+  down: '↓',
+  jump: '↑',
+};
+
+const BUTTON_ARIA_LABELS: Record<MobileAction, string> = {
+  left: 'Aller à gauche',
+  right: 'Aller à droite',
+  down: 'Descendre',
+  jump: 'Sauter',
+};
 
 export class MobileControls {
   public readonly controls: PlayerControls;
@@ -27,11 +39,10 @@ export class MobileControls {
     jumpPressed: false,
   };
 
-  private readonly uiScale: number;
+  private overlay?: HTMLDivElement;
 
   public constructor(scene: Phaser.Scene) {
-    this.uiScale = 1 / scene.cameras.main.zoom;
-    this.isVisible = MobileControls.isTouchDevice();
+    this.isVisible = isMobileDevice();
     this.controls = {
       isLeftDown: () => this.state.left,
       isRightDown: () => this.state.right,
@@ -47,68 +58,65 @@ export class MobileControls {
       return;
     }
 
-    scene.input.addPointer(3);
+    const gameRoot = document.getElementById('game');
+    if (!gameRoot) {
+      throw new Error('Mobile controls require the #game root element.');
+    }
 
-    this.createButton(scene, 'left', 78, 446, 36, '←');
-    this.createButton(scene, 'right', 158, 446, 36, '→');
-    this.createButton(scene, 'down', 790, 446, 34, '↓');
-    this.createButton(scene, 'jump', 878, 434, 42, '↑');
+    this.overlay = document.createElement('div');
+    this.overlay.className = 'mobile-controls';
+
+    const leftCluster = this.createCluster('left');
+    leftCluster.append(this.createButton('left'), this.createButton('right'));
+
+    const rightCluster = this.createCluster('right');
+    rightCluster.append(this.createButton('down'), this.createButton('jump'));
+
+    this.overlay.append(leftCluster, rightCluster);
+    gameRoot.append(this.overlay);
+
+    window.addEventListener('blur', this.releaseAll);
+    scene.events.once('shutdown', this.destroy, this);
+    scene.events.once('destroy', this.destroy, this);
   }
 
-  private static isTouchDevice(): boolean {
-    return navigator.maxTouchPoints > 0 || window.matchMedia('(pointer: coarse)').matches;
+  private createCluster(side: 'left' | 'right'): HTMLDivElement {
+    const cluster = document.createElement('div');
+    cluster.className = `mobile-controls__cluster mobile-controls__cluster--${side}`;
+    return cluster;
   }
 
-  private createButton(
-    scene: Phaser.Scene,
-    action: MobileAction,
-    screenX: number,
-    screenY: number,
-    radius: number,
-    label: string,
-  ): void {
-    const x = screenX * this.uiScale;
-    const y = screenY * this.uiScale;
+  private createButton(action: MobileAction): HTMLButtonElement {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'mobile-controls__button';
+    button.textContent = BUTTON_LABELS[action];
+    button.setAttribute('aria-label', BUTTON_ARIA_LABELS[action]);
+    button.tabIndex = -1;
 
-    const background = scene.add
-      .circle(x, y, radius, BUTTON_COLOR, BUTTON_IDLE_ALPHA)
-      .setStrokeStyle(2, 0xffffff, 0.28)
-      .setScale(this.uiScale)
-      .setScrollFactor(0)
-      .setDepth(2000);
+    if (action === 'jump') {
+      button.classList.add('mobile-controls__button--jump');
+    }
 
-    scene.add
-      .text(x, y - this.uiScale, label, {
-        color: '#ffffffdd',
-        fontFamily: 'monospace',
-        fontSize: action === 'jump' ? '28px' : '24px',
-      })
-      .setOrigin(0.5)
-      .setScale(this.uiScale)
-      .setScrollFactor(0)
-      .setDepth(2001);
-
-    const zone = scene.add
-      .zone(x, y, radius * 2.2, radius * 2.2)
-      .setOrigin(0.5)
-      .setScale(this.uiScale)
-      .setScrollFactor(0)
-      .setDepth(2002)
-      .setInteractive();
-
-    const activate = (): void => {
-      background.setFillStyle(BUTTON_COLOR, BUTTON_ACTIVE_ALPHA);
+    button.addEventListener('pointerdown', (event) => {
+      event.preventDefault();
+      button.setPointerCapture(event.pointerId);
+      button.dataset.active = 'true';
       this.setAction(action, true);
-    };
+    });
 
-    const deactivate = (): void => {
-      background.setFillStyle(BUTTON_COLOR, BUTTON_IDLE_ALPHA);
+    const release = (event: PointerEvent): void => {
+      event.preventDefault();
+      button.dataset.active = 'false';
       this.setAction(action, false);
     };
 
-    zone.on('pointerdown', activate);
-    zone.on('pointerup', deactivate);
-    zone.on('pointerout', deactivate);
+    button.addEventListener('pointerup', release);
+    button.addEventListener('pointercancel', release);
+    button.addEventListener('lostpointercapture', release);
+    button.addEventListener('contextmenu', (event) => event.preventDefault());
+
+    return button;
   }
 
   private setAction(action: MobileAction, active: boolean): void {
@@ -121,5 +129,24 @@ export class MobileControls {
     }
 
     this.state[action] = active;
+  }
+
+  private readonly releaseAll = (): void => {
+    this.state.left = false;
+    this.state.right = false;
+    this.state.down = false;
+    this.state.jumpDown = false;
+    this.overlay
+      ?.querySelectorAll<HTMLButtonElement>('.mobile-controls__button')
+      .forEach((button) => {
+        button.dataset.active = 'false';
+      });
+  };
+
+  private destroy(): void {
+    window.removeEventListener('blur', this.releaseAll);
+    this.releaseAll();
+    this.overlay?.remove();
+    this.overlay = undefined;
   }
 }
