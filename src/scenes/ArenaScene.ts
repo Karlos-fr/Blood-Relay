@@ -14,6 +14,8 @@ import { createKeyboardProfile } from '../input/keyboardProfiles';
 import { MobileControls } from '../input/MobileControls';
 import { combinePlayerControls } from '../input/playerControls';
 
+const GRID_STEP = 45;
+
 export class ArenaScene extends Phaser.Scene {
   private players: Player[] = [];
   private platforms: Phaser.GameObjects.Rectangle[] = [];
@@ -88,12 +90,12 @@ export class ArenaScene extends Phaser.Scene {
 
     this.debugGraphics = this.add.graphics().setDepth(1000).setVisible(false);
     this.debugText = this.add
-      .text(16, 16, '', {
+      .text(12, 12, '', {
         color: '#c9ff7a',
         fontFamily: 'monospace',
-        fontSize: '12px',
+        fontSize: '9px',
         backgroundColor: '#09090fcc',
-        padding: { x: 6, y: 4 },
+        padding: { x: 4.5, y: 3 },
       })
       .setDepth(1001)
       .setVisible(false);
@@ -143,13 +145,13 @@ export class ArenaScene extends Phaser.Scene {
     this.add.rectangle(ARENA_WIDTH / 2, ARENA_HEIGHT / 2, ARENA_WIDTH, ARENA_HEIGHT, 0x0d0d15);
 
     const grid = this.add.graphics().setDepth(1);
-    grid.lineStyle(1, 0x20202c, 0.35);
+    grid.lineStyle(1.5, 0x20202c, 0.35);
 
-    for (let x = 0; x <= ARENA_WIDTH; x += 60) {
+    for (let x = 0; x <= ARENA_WIDTH; x += GRID_STEP) {
       grid.lineBetween(x, 0, x, ARENA_HEIGHT - FLOOR_HEIGHT);
     }
 
-    for (let y = 0; y < ARENA_HEIGHT - FLOOR_HEIGHT; y += 60) {
+    for (let y = 0; y < ARENA_HEIGHT - FLOOR_HEIGHT; y += GRID_STEP) {
       grid.lineBetween(0, y, ARENA_WIDTH, y);
     }
   }
@@ -163,14 +165,14 @@ export class ArenaScene extends Phaser.Scene {
     }
 
     graphics.clear();
-    graphics.lineStyle(2, 0x8cff66, 0.9);
+    graphics.lineStyle(1.5, 0x8cff66, 0.9);
 
     for (const surface of [this.floor, ...this.platforms]) {
       const bounds = surface.getBounds();
       graphics.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
     }
 
-    graphics.lineStyle(2, 0xffd166, 0.95);
+    graphics.lineStyle(1.5, 0xffd166, 0.95);
     for (const player of this.players) {
       const bounds = player.gameObject.getBounds();
       graphics.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
