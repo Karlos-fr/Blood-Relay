@@ -145,7 +145,7 @@ export class ArenaScene extends Phaser.Scene {
     this.add.rectangle(ARENA_WIDTH / 2, ARENA_HEIGHT / 2, ARENA_WIDTH, ARENA_HEIGHT, 0x0d0d15);
 
     const grid = this.add.graphics().setDepth(1);
-    grid.lineStyle(1.5, 0x20202c, 0.35);
+    grid.lineStyle(0.75, 0x20202c, 0.35);
 
     for (let x = 0; x <= ARENA_WIDTH; x += GRID_STEP) {
       grid.lineBetween(x, 0, x, ARENA_HEIGHT - FLOOR_HEIGHT);
