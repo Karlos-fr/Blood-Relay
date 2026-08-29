@@ -6,18 +6,41 @@ La mécanique centrale à venir : le sang perdu pendant les combats reste dans l
 
 ## Phase actuelle
 
-**Phase 0 — Socle minimal**
+**Phase 1 — Arène et déplacement à deux**
 
-Le dépôt contient pour l'instant uniquement le bootstrap technique :
+La version actuelle contient :
 
 - Vite + TypeScript strict ;
 - Phaser 3 + Arcade Physics ;
 - résolution logique 960 × 540 en 16:9 ;
-- `BootScene` et `ArenaScene` ;
-- arène vide avec sol temporaire ;
-- Vitest, ESLint et Prettier.
+- une arène fixe avec sol et deux plateformes traversables ;
+- deux joueurs locaux avec collisions, accélération, décélération et saut ;
+- un debug des hitboxes activable avec `F1` ;
+- déploiement automatique sur GitHub Pages après lint, tests et build.
 
-## Prérequis
+## Contrôles
+
+### Joueur 1
+
+- `Q` / `D` : gauche / droite ;
+- `Z` : sauter ;
+- `S` + `Z` : descendre à travers une plateforme.
+
+### Joueur 2
+
+- `←` / `→` : gauche / droite ;
+- `↑` : sauter ;
+- `↓` + `↑` : descendre à travers une plateforme.
+
+### Debug
+
+- `F1` : afficher ou masquer les hitboxes et l'état de mouvement.
+
+## Version jouable
+
+https://karlos-fr.github.io/Blood-Relay/
+
+## Prérequis locaux
 
 - Node.js 20.19+ ;
 - npm.
@@ -28,8 +51,6 @@ Le dépôt contient pour l'instant uniquement le bootstrap technique :
 npm install
 npm run dev
 ```
-
-Puis ouvrir l'URL indiquée par Vite.
 
 ## Vérifications
 
