@@ -36,7 +36,7 @@ export function getSteamPlumeProfile(progress: number): { alpha: number; rise: n
   const p = clamp(progress, 0, 1);
   const envelope = Math.sin(p * Math.PI);
   return {
-    alpha: envelope * 0.46,
+    alpha: envelope * 0.76,
     rise: p * 78,
     drift: Math.sin(p * Math.PI * 1.25) * 10,
     scale: 0.9 + p * 1.35,
@@ -105,10 +105,10 @@ export function attachArenaBackdropAnimation(scene: Phaser.Scene, container: Pha
     for (let slot = -6; slot <= 6; slot += 6) ventGraphics.lineBetween(origin.x + slot, origin.y - 2, origin.x + slot, origin.y + 2);
   }
   const steamPuffs = steamOrigins.flatMap((origin, originIndex) =>
-    [0,1,2,3,4,5].map((puffIndex) => ({
+    [0,1,2,3,4,5,6].map((puffIndex) => ({
       origin,
-      phaseOffset: origin.offset + puffIndex * 0.052 + originIndex * 0.02,
-      circle: scene.add.circle(origin.x, origin.y, 12 + puffIndex * 2, 0xd3d7dd, 0),
+      phaseOffset: origin.offset + puffIndex * 0.045 + originIndex * 0.02,
+      circle: scene.add.circle(origin.x, origin.y, 13 + puffIndex * 2.1, 0xf0f2f4, 0),
     })),
   );
 
@@ -129,8 +129,8 @@ export function attachArenaBackdropAnimation(scene: Phaser.Scene, container: Pha
     });
     steamPuffs.forEach((puff) => {
       const cycle = getLoopProgress(time + puff.phaseOffset * STEAM_PERIOD, STEAM_PERIOD);
-      if (cycle >= 0.62) { puff.circle.setAlpha(0); return; }
-      const profile = getSteamPlumeProfile(cycle / 0.62);
+      if (cycle >= 0.68) { puff.circle.setAlpha(0); return; }
+      const profile = getSteamPlumeProfile(cycle / 0.68);
       puff.circle.setPosition(puff.origin.x + profile.drift, puff.origin.y - profile.rise).setScale(profile.scale).setAlpha(profile.alpha);
     });
   };
