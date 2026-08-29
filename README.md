@@ -21,7 +21,7 @@ La version actuelle contient :
 - Vite + TypeScript strict ;
 - Phaser 3 + Arcade Physics ;
 - résolution logique 960 × 540 en 16:9 ;
-- une arène de 1280 × 720 entièrement visible avec caméra à 75 % ;
+- une arène 960 × 540 entièrement visible à l'échelle native, caméra à 100 % ;
 - trois niveaux verticaux de plateformes traversables ;
 - deux joueurs locaux avec collisions, accélération, décélération et saut ;
 - commandes tactiles iPhone pour le joueur 1 ;
