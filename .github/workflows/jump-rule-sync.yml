@@ -1,0 +1,57 @@
+name: Sync jump design rule once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/jump-rule-sync.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync-plan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Update PLAN jump rule
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('PLAN.md')
+          text = path.read_text(encoding='utf-8')
+
+          anchor = 'Ne pas introduire Matter.js sauf besoin concret démontré par une mécanique validée.\n'
+          rule = '''\n### Règle de saut et de level design\n\n- Toutes les plateformes nécessaires au parcours normal doivent être atteignables avec le **saut standard** depuis au moins un support adjacent logique.\n- La hauteur et la vitesse du saut sont des paramètres de **game feel** : elles sont validées manuellement en jouant sur GitHub Pages et ne doivent pas être figées par un seuil numérique arbitraire dans les tests unitaires.\n- Le level design doit être construit autour du réglage de saut validé ; toute modification ultérieure du saut impose de retester manuellement les liaisons entre plateformes.\n- Réglage provisoire du prototype : `PLAYER_JUMP_SPEED = 600` avec `GRAVITY_Y = 1200`, soit environ 150 px de hauteur théorique. Ce réglage reste ajustable après test joueur.\n'''
+          if '### Règle de saut et de level design' not in text:
+              text = text.replace(anchor, anchor + rule, 1)
+
+          phase_anchor = '- [x] Ajouter une lecture visuelle claire de la direction regardée.\n'
+          validation = '- [ ] Valider manuellement la hauteur du saut et l’accessibilité de toutes les plateformes de référence.\n'
+          phase_start = text.index('# Phase 1 — Arène et déplacement à deux')
+          phase_end = text.index('# Phase 2 — Premier combat')
+          phase = text[phase_start:phase_end]
+          if validation.strip() not in phase:
+              phase = phase.replace(phase_anchor, phase_anchor + validation, 1)
+              text = text[:phase_start] + phase + text[phase_end:]
+
+          criterion = '- Toutes les plateformes de référence sont atteignables avec le saut standard validé.\n'
+          phase_start = text.index('# Phase 1 — Arène et déplacement à deux')
+          phase_end = text.index('# Phase 2 — Premier combat')
+          phase = text[phase_start:phase_end]
+          if criterion.strip() not in phase:
+              phase = phase.replace('- Le saut est réactif.\n', '- Le saut est réactif.\n' + criterion, 1)
+              text = text[:phase_start] + phase + text[phase_end:]
+
+          path.write_text(text, encoding='utf-8')
+
+      - name: Commit PLAN and remove one-shot workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm .github/workflows/jump-rule-sync.yml
+          git add PLAN.md .github/workflows/jump-rule-sync.yml
+          git commit -m "docs: add jump and platform reachability rule"
+          git push
