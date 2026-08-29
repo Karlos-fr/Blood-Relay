@@ -16,12 +16,13 @@ describe('arena layout', () => {
   });
 
   it('uses three platform levels in a 2-1-2 pattern and keeps the relay sightline clear', () => {
+    const tiers = PLATFORM_LAYOUT.map((platform) => platform.tier);
     const counts = [1, 2, 3].map(
       (tier) => PLATFORM_LAYOUT.filter((platform) => platform.tier === tier).length,
     );
 
     expect(counts).toEqual([2, 1, 2]);
-    expect(PLATFORM_LAYOUT.some((platform) => platform.tier === 4)).toBe(false);
+    expect(Math.max(...tiers)).toBe(3);
   });
 
   it('uses widths that produce centered symmetric procedural patterns', () => {
