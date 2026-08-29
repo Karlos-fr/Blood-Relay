@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
 
 interface Point {
   x: number;
@@ -25,6 +25,8 @@ const HEARTBEAT_PERIOD = 1600;
 const FLOW_PERIOD = 3600;
 const RING_PERIOD = 18000;
 const STEAM_PERIOD = 5200;
+const UPDATE_EVENT = 'update';
+const SHUTDOWN_EVENT = 'shutdown';
 
 export function getLoopProgress(timeMs: number, periodMs: number): number {
   if (periodMs <= 0) {
@@ -60,12 +62,9 @@ export function samplePolyline(points: Point[], progress: number): Point {
   const lengths: number[] = [];
   let totalLength = 0;
   for (let index = 1; index < points.length; index += 1) {
-    const length = Phaser.Math.Distance.Between(
-      points[index - 1].x,
-      points[index - 1].y,
-      points[index].x,
-      points[index].y,
-    );
+    const dx = points[index].x - points[index - 1].x;
+    const dy = points[index].y - points[index - 1].y;
+    const length = Math.hypot(dx, dy);
     lengths.push(length);
     totalLength += length;
   }
@@ -74,7 +73,7 @@ export function samplePolyline(points: Point[], progress: number): Point {
     return { ...points[0] };
   }
 
-  let remaining = Phaser.Math.Clamp(progress, 0, 1) * totalLength;
+  let remaining = clamp(progress, 0, 1) * totalLength;
   for (let index = 0; index < lengths.length; index += 1) {
     const segmentLength = lengths[index];
     if (remaining <= segmentLength || index === lengths.length - 1) {
@@ -82,8 +81,8 @@ export function samplePolyline(points: Point[], progress: number): Point {
       const end = points[index + 1];
       const t = segmentLength > 0 ? remaining / segmentLength : 0;
       return {
-        x: Phaser.Math.Linear(start.x, end.x, t),
-        y: Phaser.Math.Linear(start.y, end.y, t),
+        x: start.x + (end.x - start.x) * t,
+        y: start.y + (end.y - start.y) * t,
       };
     }
     remaining -= segmentLength;
@@ -101,23 +100,15 @@ export function attachArenaBackdropAnimation(
   const animatedLayer = scene.add.container(0, 0);
   container.add(animatedLayer);
 
-  const heartGlow = scene.add
-    .circle(machine.x, machine.y, machine.radius * 0.39, 0xd52f3d, 0.08)
-    .setBlendMode(Phaser.BlendModes.ADD);
-  const heartCore = scene.add
-    .circle(machine.x, machine.y, machine.radius * 0.24, 0xc32c38, 0.38)
-    .setBlendMode(Phaser.BlendModes.ADD);
+  const heartGlow = scene.add.circle(machine.x, machine.y, machine.radius * 0.39, 0xd52f3d, 0.08);
+  const heartCore = scene.add.circle(machine.x, machine.y, machine.radius * 0.24, 0xc32c38, 0.38);
 
-  const rotatingRing = scene.add.graphics();
+  const rotatingRing = scene.add.graphics().setPosition(machine.x, machine.y);
   rotatingRing.lineStyle(2, 0x8d929f, 0.36);
   rotatingRing.beginPath();
-  rotatingRing.arc(machine.x, machine.y, machine.radius * 0.72, -0.75, 0.85, false);
-  rotatingRing.arc(machine.x, machine.y, machine.radius * 0.72, 2.35, 3.65, false);
+  rotatingRing.arc(0, 0, machine.radius * 0.72, -0.75, 0.85, false);
+  rotatingRing.arc(0, 0, machine.radius * 0.72, 2.35, 3.65, false);
   rotatingRing.strokePath();
-  rotatingRing.setPosition(machine.x, machine.y);
-  rotatingRing.setOrigin(0.5, 0.5);
-  rotatingRing.x = 0;
-  rotatingRing.y = 0;
 
   const ledOffsets = [
     { x: -machine.radius - 34, y: -24, color: 0x42d9e8 },
@@ -132,8 +123,8 @@ export function attachArenaBackdropAnimation(
   const redPipes = layout.pipes.filter((pipe) => pipe.accent === 'red');
   const flowParticles = redPipes.map((pipe) => ({
     pipe,
-    glow: scene.add.circle(0, 0, 4.5, 0xb52c39, 0.1).setBlendMode(Phaser.BlendModes.ADD),
-    core: scene.add.circle(0, 0, 1.7, 0xe24551, 0.72).setBlendMode(Phaser.BlendModes.ADD),
+    glow: scene.add.circle(0, 0, 4.5, 0xb52c39, 0.1),
+    core: scene.add.circle(0, 0, 1.7, 0xe24551, 0.72),
   }));
 
   const steamOrigins = [
@@ -198,9 +189,9 @@ export function attachArenaBackdropAnimation(
     });
   };
 
-  scene.events.on(Phaser.Scenes.Events.UPDATE, update);
-  scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-    scene.events.off(Phaser.Scenes.Events.UPDATE, update);
+  scene.events.on(UPDATE_EVENT, update);
+  scene.events.once(SHUTDOWN_EVENT, () => {
+    scene.events.off(UPDATE_EVENT, update);
   });
 }
 
@@ -213,4 +204,8 @@ function pulseAtCyclePhase(
   const directDistance = Math.abs(phase - center);
   const wrappedDistance = Math.min(directDistance, period - directDistance);
   return Math.max(0, 1 - wrappedDistance / halfWidth);
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
 }
