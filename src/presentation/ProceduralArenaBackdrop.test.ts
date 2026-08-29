@@ -31,7 +31,18 @@ describe('buildArenaBackdropLayout', () => {
 
     expect(layout.panels.length).toBeGreaterThanOrEqual(12);
     expect(layout.panels.length).toBeLessThanOrEqual(28);
-    expect(layout.pipes.length).toBeGreaterThanOrEqual(3);
-    expect(layout.pipes.length).toBeLessThanOrEqual(7);
+    expect(layout.pipes.length).toBeGreaterThanOrEqual(5);
+    expect(layout.pipes.length).toBeLessThanOrEqual(8);
+  });
+
+  it('routes every blood-filled pipe into the relay machine', () => {
+    const layout = buildArenaBackdropLayout(960, 502, 'arena-01');
+
+    for (const pipe of layout.pipes) {
+      expect(pipe.accent).toBe('red');
+      const end = pipe.points[pipe.points.length - 1];
+      const distance = Math.hypot(end.x - layout.machine.x, end.y - layout.machine.y);
+      expect(distance).toBeLessThanOrEqual(layout.machine.radius + 4);
+    }
   });
 });
