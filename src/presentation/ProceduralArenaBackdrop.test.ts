@@ -17,13 +17,13 @@ describe('buildArenaBackdropLayout', () => {
     expect(second.pipes).not.toEqual(first.pipes);
   });
 
-  it('keeps the relay machine centered and inside the upper half of the arena', () => {
+  it('keeps the relay machine centered, imposing, and fully visible', () => {
     const layout = buildArenaBackdropLayout(960, 502, 'arena-01');
 
     expect(layout.machine.x).toBe(480);
-    expect(layout.machine.y).toBeGreaterThan(70);
-    expect(layout.machine.y).toBeLessThan(240);
-    expect(layout.machine.radius).toBeGreaterThan(45);
+    expect(layout.machine.radius).toBeGreaterThanOrEqual(105);
+    expect(layout.machine.y - layout.machine.radius).toBeGreaterThanOrEqual(20);
+    expect(layout.machine.y + layout.machine.radius).toBeLessThan(320);
   });
 
   it('creates a restrained amount of wall detail', () => {
