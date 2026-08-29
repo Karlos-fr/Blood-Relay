@@ -4,6 +4,14 @@ Blood Relay est un jeu d'action 2D multijoueur en arènes fixes, développé en 
 
 La mécanique centrale à venir : le sang perdu pendant les combats reste dans l'arène et devient une ressource que les joueurs peuvent récupérer puis transfuser pour se soigner.
 
+## Direction visuelle
+
+La maquette de référence validée pour la direction générale du jeu est conservée dans le dépôt :
+
+![Blood Relay — direction visuelle](./docs/visual/blood-relay-visual-direction.webp)
+
+Elle fixe notamment la vue de côté, les sprites volontairement lisibles, l'ambiance industrielle sombre, le sang comme ressource et le contraste entre pixel art rétro et effets modernes.
+
 ## Phase actuelle
 
 **Phase 1 — Arène et déplacement à deux**
@@ -15,6 +23,7 @@ La version actuelle contient :
 - résolution logique 960 × 540 en 16:9 ;
 - une arène fixe avec sol et deux plateformes traversables ;
 - deux joueurs locaux avec collisions, accélération, décélération et saut ;
+- commandes tactiles iPhone pour le joueur 1 ;
 - un debug des hitboxes activable avec `F1` ;
 - déploiement automatique sur GitHub Pages après lint, tests et build.
 
@@ -22,9 +31,17 @@ La version actuelle contient :
 
 ### Joueur 1
 
+Clavier :
+
 - `Q` / `D` : gauche / droite ;
 - `Z` : sauter ;
 - `S` + `Z` : descendre à travers une plateforme.
+
+Sur iPhone ou appareil tactile, des boutons apparaissent automatiquement :
+
+- `←` / `→` : déplacement ;
+- `↑` : saut ;
+- `↓` + `↑` : descendre à travers une plateforme.
 
 ### Joueur 2
 
