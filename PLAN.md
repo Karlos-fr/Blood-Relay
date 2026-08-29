@@ -184,6 +184,13 @@ Utiliser **Phaser Arcade Physics** pour :
 
 Ne pas introduire Matter.js sauf besoin concret démontré par une mécanique validée.
 
+### Règle de saut et de level design
+
+- Toutes les plateformes nécessaires au parcours normal doivent être atteignables avec le **saut standard** depuis au moins un support adjacent logique.
+- La hauteur et la vitesse du saut sont des paramètres de **game feel** : elles sont validées manuellement en jouant sur GitHub Pages et ne doivent pas être figées par un seuil numérique arbitraire dans les tests unitaires.
+- Le level design doit être construit autour du réglage de saut validé ; toute modification ultérieure du saut impose de retester manuellement les liaisons entre plateformes.
+- Réglage provisoire du prototype : `PLAYER_JUMP_SPEED = 600` avec `GRAVITY_Y = 1200`, soit environ 150 px de hauteur théorique. Ce réglage reste ajustable après test joueur.
+
 ## 4.4 Modèle du sang
 
 Le sang possède deux représentations séparées.
@@ -373,12 +380,14 @@ Pouvoir jouer à deux sur le même clavier dans une arène de côté tenant int�
 
 - [x] Utiliser des formes ou sprites temporaires simples.
 - [x] Ajouter une lecture visuelle claire de la direction regardée.
+- [ ] Valider manuellement la hauteur du saut et l’accessibilité de toutes les plateformes de référence.
 - [ ] Valider manuellement la Phase 1 sur GitHub Pages avec deux joueurs au clavier.
 
 ## Critères de validation
 
 - Deux joueurs peuvent se déplacer simultanément.
 - Le saut est réactif.
+- Toutes les plateformes de référence sont atteignables avec le saut standard validé.
 - Les plateformes fonctionnent.
 - Aucun joueur ne quitte l'écran.
 - Aucun scrolling n'est nécessaire.
