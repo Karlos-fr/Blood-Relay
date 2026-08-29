@@ -19,11 +19,11 @@ const scaleYFromFloor = (y: number): number =>
   scaledFloorTop - (BASE_FLOOR_TOP - y) * ARENA_CONTENT_SCALE;
 
 export const PLATFORM_LAYOUT = [
-  { x: scaleX(247.5), y: scaleYFromFloor(411), width: 225 * ARENA_CONTENT_SCALE, tier: 1 },
-  { x: scaleX(712.5), y: scaleYFromFloor(411), width: 225 * ARENA_CONTENT_SCALE, tier: 1 },
+  { x: scaleX(247.5), y: scaleYFromFloor(411), width: 240 * ARENA_CONTENT_SCALE, tier: 1 },
+  { x: scaleX(712.5), y: scaleYFromFloor(411), width: 240 * ARENA_CONTENT_SCALE, tier: 1 },
   { x: scaleX(480), y: scaleYFromFloor(317.25), width: 240 * ARENA_CONTENT_SCALE, tier: 2 },
-  { x: scaleX(341.25), y: scaleYFromFloor(223.5), width: 195 * ARENA_CONTENT_SCALE, tier: 3 },
-  { x: scaleX(618.75), y: scaleYFromFloor(223.5), width: 195 * ARENA_CONTENT_SCALE, tier: 3 },
+  { x: scaleX(341.25), y: scaleYFromFloor(223.5), width: 160 * ARENA_CONTENT_SCALE, tier: 3 },
+  { x: scaleX(618.75), y: scaleYFromFloor(223.5), width: 160 * ARENA_CONTENT_SCALE, tier: 3 },
   { x: scaleX(480), y: scaleYFromFloor(129.75), width: 240 * ARENA_CONTENT_SCALE, tier: 4 },
 ] as const;
 
