@@ -29,9 +29,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 canvas {
   display: block;
   image-rendering: pixelated;
+  touch-action: none;
 }
