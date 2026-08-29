@@ -1,0 +1,97 @@
+.mobile-controls {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.mobile-controls__cluster {
+  position: absolute;
+  bottom: max(22px, calc(env(safe-area-inset-bottom) + 14px));
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(12px, 2.2vw, 20px);
+}
+
+.mobile-controls__cluster--left {
+  left: max(22px, calc(env(safe-area-inset-left) + 14px));
+}
+
+.mobile-controls__cluster--right {
+  right: max(22px, calc(env(safe-area-inset-right) + 14px));
+}
+
+.mobile-controls__button {
+  --button-size: clamp(78px, 9vw, 92px);
+  position: relative;
+  width: var(--button-size);
+  height: var(--button-size);
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 28px;
+  color: rgba(255, 255, 255, 0.96);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.055) 48%, rgba(255, 255, 255, 0.1)),
+    rgba(18, 18, 28, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -14px 28px rgba(0, 0, 0, 0.14),
+    0 10px 30px rgba(0, 0, 0, 0.28),
+    0 0 0 1px rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(18px) saturate(175%);
+  -webkit-backdrop-filter: blur(18px) saturate(175%);
+  font: 600 clamp(30px, 4.8vw, 42px) / 1 system-ui, -apple-system, sans-serif;
+  text-shadow: 0 1px 10px rgba(255, 255, 255, 0.28);
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 90ms ease-out,
+    border-color 90ms ease-out,
+    background 90ms ease-out,
+    box-shadow 90ms ease-out;
+}
+
+.mobile-controls__button::before {
+  content: '';
+  position: absolute;
+  inset: 7px 9px auto 9px;
+  height: 30%;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
+.mobile-controls__button[data-active='true'] {
+  transform: scale(0.94);
+  border-color: rgba(255, 255, 255, 0.74);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1) 45%, rgba(255, 255, 255, 0.16)),
+    rgba(64, 70, 92, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    inset 0 -12px 24px rgba(0, 0, 0, 0.12),
+    0 5px 18px rgba(0, 0, 0, 0.22),
+    0 0 24px rgba(205, 225, 255, 0.24);
+}
+
+.mobile-controls__button--jump {
+  --button-size: clamp(88px, 10vw, 104px);
+  border-radius: 34px;
+}
+
+@media (orientation: portrait) {
+  .mobile-controls__cluster {
+    bottom: max(34px, calc(env(safe-area-inset-bottom) + 24px));
+  }
+
+  .mobile-controls__button {
+    --button-size: clamp(74px, 20vw, 90px);
+  }
+
+  .mobile-controls__button--jump {
+    --button-size: clamp(84px, 22vw, 100px);
+  }
+}
