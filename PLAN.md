@@ -291,10 +291,10 @@ Obtenir un projet Phaser extrêmement simple, testable et compilable.
 - [x] Ajouter un README minimal décrivant le lancement.
 - [x] Configurer Vite pour le chemin GitHub Pages `/Blood-Relay/`.
 - [x] Ajouter un workflow GitHub Pages déclenché sur `main`.
-- [ ] Vérifier le build de production via GitHub Actions.
-- [ ] Vérifier les tests et le lint via GitHub Actions.
-- [ ] Vérifier le déploiement GitHub Pages.
-- [ ] Valider visuellement la version déployée sur GitHub Pages.
+- [x] Vérifier le build de production via GitHub Actions.
+- [x] Vérifier les tests et le lint via GitHub Actions.
+- [x] Vérifier le déploiement GitHub Pages.
+- [x] Valider visuellement la version déployée sur GitHub Pages.
 
 ## Ne pas faire dans cette phase
 
@@ -340,39 +340,40 @@ Pouvoir jouer à deux sur le même clavier dans une arène de côté tenant int�
 
 ### Arène
 
-- [ ] Créer l'arène de référence du prototype.
-- [ ] Ajouter le sol.
-- [ ] Ajouter deux plateformes traversables.
-- [ ] Ajouter deux points d'apparition.
-- [ ] Définir les limites de l'arène.
-- [ ] Empêcher toute sortie de l'écran.
-- [ ] Garder la caméra fixe sur toute l'arène.
-- [ ] Ajouter un affichage debug facultatif des collisions.
+- [x] Créer l'arène de référence du prototype.
+- [x] Ajouter le sol.
+- [x] Ajouter deux plateformes traversables.
+- [x] Ajouter deux points d'apparition.
+- [x] Définir les limites de l'arène.
+- [x] Empêcher toute sortie de l'écran.
+- [x] Garder la caméra fixe sur toute l'arène.
+- [x] Ajouter un affichage debug facultatif des collisions.
 
 ### Joueurs
 
-- [ ] Créer une entité `Player` minimale.
-- [ ] Créer deux joueurs avec couleurs distinctes.
-- [ ] Ajouter la position et la vélocité.
-- [ ] Ajouter l'orientation gauche/droite.
-- [ ] Ajouter l'état sol / air.
-- [ ] Ajouter les collisions joueur-décor.
-- [ ] Ajouter les collisions joueur-joueur si elles améliorent le gameplay.
+- [x] Créer une entité `Player` minimale.
+- [x] Créer deux joueurs avec couleurs distinctes.
+- [x] Ajouter la position et la vélocité.
+- [x] Ajouter l'orientation gauche/droite.
+- [x] Ajouter l'état sol / air.
+- [x] Ajouter les collisions joueur-décor.
+- [x] Ajouter les collisions joueur-joueur si elles améliorent le gameplay.
 
 ### Contrôles temporaires
 
-- [ ] Ajouter un mapping clavier joueur 1.
-- [ ] Ajouter un mapping clavier joueur 2.
-- [ ] Ajouter déplacement gauche/droite.
-- [ ] Ajouter accélération et décélération simples.
-- [ ] Ajouter saut.
-- [ ] Ajouter chute.
-- [ ] Ajouter descente à travers les plateformes.
+- [x] Ajouter un mapping clavier joueur 1.
+- [x] Ajouter un mapping clavier joueur 2.
+- [x] Ajouter déplacement gauche/droite.
+- [x] Ajouter accélération et décélération simples.
+- [x] Ajouter saut.
+- [x] Ajouter chute.
+- [x] Ajouter descente à travers les plateformes.
 
 ### Placeholders
 
-- [ ] Utiliser des formes ou sprites temporaires simples.
-- [ ] Ajouter une lecture visuelle claire de la direction regardée.
+- [x] Utiliser des formes ou sprites temporaires simples.
+- [x] Ajouter une lecture visuelle claire de la direction regardée.
+- [ ] Valider manuellement la Phase 1 sur GitHub Pages avec deux joueurs au clavier.
 
 ## Critères de validation
 
