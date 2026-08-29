@@ -45,4 +45,16 @@ describe('buildArenaBackdropLayout', () => {
       expect(distance).toBeLessThanOrEqual(layout.machine.radius + 4);
     }
   });
+
+  it('balances left and right pipe lanes instead of clustering one side', () => {
+    const layout = buildArenaBackdropLayout(960, 502, 'arena-01');
+    const left = layout.pipes.filter((pipe) => pipe.points[0].x < 0);
+    const right = layout.pipes.filter((pipe) => pipe.points[0].x > 960);
+
+    expect(Math.abs(left.length - right.length)).toBeLessThanOrEqual(1);
+    const pairedCount = Math.min(left.length, right.length);
+    for (let index = 0; index < pairedCount; index += 1) {
+      expect(Math.abs(left[index].points[0].y - right[index].points[0].y)).toBeLessThanOrEqual(32);
+    }
+  });
 });
