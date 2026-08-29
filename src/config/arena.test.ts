@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { PLAYER_JUMP_SPEED } from '../gameplay/player/movement';
+import { isSymmetricPlatformWidth } from '../presentation/platformTiles';
 import { GAME_HEIGHT, GAME_WIDTH, GRAVITY_Y } from './game';
 import {
   ARENA_CAMERA_ZOOM,
@@ -30,6 +31,12 @@ describe('arena layout', () => {
     );
 
     expect(counts).toEqual([2, 1, 2, 1]);
+  });
+
+  it('uses widths that produce centered symmetric procedural patterns', () => {
+    expect(PLATFORM_LAYOUT.every((platform) => isSymmetricPlatformWidth(platform.width))).toBe(
+      true,
+    );
   });
 
   it('keeps a full jump from the fourth level inside the screen', () => {
