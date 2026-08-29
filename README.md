@@ -14,14 +14,15 @@ Elle fixe notamment la vue de côté, les sprites volontairement lisibles, l'amb
 
 ## Phase actuelle
 
-**Phase 1 — Arène et déplacement à deux**
+**Phase 1 — Arène et déplacement à deux / consolidation du design**
 
 La version actuelle contient :
 
 - Vite + TypeScript strict ;
 - Phaser 3 + Arcade Physics ;
 - résolution logique 960 × 540 en 16:9 ;
-- une arène fixe avec sol et deux plateformes traversables ;
+- une arène de 1280 × 720 entièrement visible avec caméra à 75 % ;
+- trois niveaux verticaux de plateformes traversables ;
 - deux joueurs locaux avec collisions, accélération, décélération et saut ;
 - commandes tactiles iPhone pour le joueur 1 ;
 - un debug des hitboxes activable avec `F1` ;
