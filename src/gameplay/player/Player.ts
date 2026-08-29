@@ -10,10 +10,12 @@ import {
   type FacingDirection,
 } from './movement';
 
-const PLAYER_WIDTH = 30;
-const PLAYER_HEIGHT = 46;
+const PLAYER_WIDTH = 22.5;
+const PLAYER_HEIGHT = 34.5;
 const DROP_THROUGH_MS = 220;
-const PLATFORM_LANDING_TOLERANCE = 18;
+const PLATFORM_LANDING_TOLERANCE = 13.5;
+const MAX_FALL_SPEED = 675;
+const DROP_THROUGH_SPEED = 67.5;
 
 export type PlayerMovementState = 'grounded' | 'airborne';
 
@@ -41,25 +43,25 @@ export class Player {
 
     this.gameObject = scene.add
       .rectangle(config.x, config.y, PLAYER_WIDTH, PLAYER_HEIGHT, config.color)
-      .setStrokeStyle(2, 0xffffff, 0.35)
+      .setStrokeStyle(1.5, 0xffffff, 0.35)
       .setDepth(10);
 
     scene.physics.add.existing(this.gameObject);
     this.body = this.gameObject.body as Phaser.Physics.Arcade.Body;
     this.body.setCollideWorldBounds(true);
-    this.body.setMaxVelocity(PLAYER_MOVE_SPEED, 900);
+    this.body.setMaxVelocity(PLAYER_MOVE_SPEED, MAX_FALL_SPEED);
     this.body.setDragX(PLAYER_DRAG);
     this.body.setSize(PLAYER_WIDTH, PLAYER_HEIGHT, true);
 
     this.facingMarker = scene.add
-      .rectangle(config.x, config.y, 10, 4, 0xffffff)
+      .rectangle(config.x, config.y, 7.5, 3, 0xffffff)
       .setDepth(11);
 
     this.label = scene.add
-      .text(config.x, config.y - PLAYER_HEIGHT / 2 - 12, `P${config.id}`, {
+      .text(config.x, config.y - PLAYER_HEIGHT / 2 - 9, `P${config.id}`, {
         color: '#ffffff',
         fontFamily: 'monospace',
-        fontSize: '11px',
+        fontSize: '8.25px',
       })
       .setOrigin(0.5)
       .setDepth(11);
@@ -76,7 +78,7 @@ export class Player {
 
     if (jumpPressed && this.controls.isDownDown() && this.isGrounded) {
       this.dropThroughUntil = time + DROP_THROUGH_MS;
-      this.body.setVelocityY(90);
+      this.body.setVelocityY(DROP_THROUGH_SPEED);
     } else if (jumpPressed && this.isGrounded) {
       this.body.setVelocityY(-PLAYER_JUMP_SPEED);
     }
@@ -110,9 +112,9 @@ export class Player {
 
   private syncDecorations(): void {
     this.facingMarker.setPosition(
-      this.gameObject.x + this.facing * (PLAYER_WIDTH / 2 + 4),
-      this.gameObject.y - 4,
+      this.gameObject.x + this.facing * (PLAYER_WIDTH / 2 + 3),
+      this.gameObject.y - 3,
     );
-    this.label.setPosition(this.gameObject.x, this.gameObject.y - PLAYER_HEIGHT / 2 - 12);
+    this.label.setPosition(this.gameObject.x, this.gameObject.y - PLAYER_HEIGHT / 2 - 9);
   }
 }
