@@ -14,6 +14,7 @@ import { createKeyboardProfile } from '../input/keyboardProfiles';
 import { MobileControls } from '../input/MobileControls';
 import { combinePlayerControls } from '../input/playerControls';
 import { isMobileDevice } from '../platform/device';
+import { updateArenaBackdropAnimation } from '../presentation/ArenaBackdropAnimation';
 import { calculateContainedViewport } from '../presentation/mobileViewport';
 import { drawIndustrialPlatform } from '../presentation/PlatformVisual';
 import { drawProceduralArenaBackdrop } from '../presentation/ProceduralArenaBackdrop';
@@ -105,6 +106,8 @@ export class ArenaScene extends Phaser.Scene {
   }
 
   public update(time: number): void {
+    updateArenaBackdropAnimation(this, time);
+
     if (this.debugKey && Phaser.Input.Keyboard.JustDown(this.debugKey)) {
       this.debugEnabled = !this.debugEnabled;
       this.debugGraphics?.setVisible(this.debugEnabled);
