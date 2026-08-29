@@ -28,26 +28,26 @@
   width: var(--button-size);
   height: var(--button-size);
   padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.26);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 28px;
   color: rgba(255, 255, 255, 0.9);
   background:
-    radial-gradient(circle at 35% 16%, rgba(255, 255, 255, 0.13), transparent 39%),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.012) 52%, rgba(255, 255, 255, 0.035)),
-    rgba(9, 11, 20, 0.055);
+    radial-gradient(circle at 35% 16%, rgba(255, 255, 255, 0.065), transparent 38%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.004) 52%, rgba(255, 255, 255, 0.018)),
+    rgba(9, 11, 20, 0.018);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.35),
-    inset 0 -10px 24px rgba(0, 0, 0, 0.055),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -8px 20px rgba(0, 0, 0, 0.025),
     -1.5px 0 0 rgba(54, 225, 255, 0.2),
     1.5px 0 0 rgba(255, 54, 190, 0.18),
-    0 10px 28px rgba(0, 0, 0, 0.14);
-  backdrop-filter: blur(15px) saturate(165%) contrast(106%);
-  -webkit-backdrop-filter: blur(15px) saturate(165%) contrast(106%);
+    0 8px 22px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(6px) saturate(125%) contrast(103%);
+  -webkit-backdrop-filter: blur(6px) saturate(125%) contrast(103%);
   font: 560 clamp(30px, 4.8vw, 42px) / 1 system-ui, -apple-system, sans-serif;
   text-shadow:
-    -1.25px 0 0 rgba(46, 226, 255, 0.32),
-    1.25px 0 0 rgba(255, 45, 189, 0.28),
-    0 1px 9px rgba(255, 255, 255, 0.2);
+    -1.25px 0 0 rgba(46, 226, 255, 0.34),
+    1.25px 0 0 rgba(255, 45, 189, 0.3),
+    0 1px 7px rgba(255, 255, 255, 0.12);
   pointer-events: auto;
   touch-action: none;
   user-select: none;
@@ -65,9 +65,9 @@
   position: absolute;
   z-index: -1;
   inset: 7px 9px auto 9px;
-  height: 27%;
+  height: 25%;
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0));
   pointer-events: none;
 }
 
@@ -80,43 +80,42 @@
   border-radius: inherit;
   background: linear-gradient(
     125deg,
-    rgba(42, 225, 255, 0.58),
-    rgba(255, 255, 255, 0.08) 30%,
-    rgba(255, 255, 255, 0.16) 52%,
-    rgba(255, 53, 190, 0.56) 78%,
-    rgba(255, 255, 255, 0.08)
+    rgba(42, 225, 255, 0.6),
+    rgba(255, 255, 255, 0.04) 30%,
+    rgba(255, 255, 255, 0.08) 52%,
+    rgba(255, 53, 190, 0.58) 78%,
+    rgba(255, 255, 255, 0.04)
   );
   -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
-  opacity: 0.62;
+  opacity: 0.52;
   pointer-events: none;
 }
 
 .mobile-controls__button[data-active='true'] {
   transform: scale(0.94);
-  border-color: rgba(255, 255, 255, 0.46);
+  border-color: rgba(255, 255, 255, 0.3);
   background:
-    radial-gradient(circle at 35% 16%, rgba(255, 255, 255, 0.2), transparent 42%),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.025) 50%, rgba(255, 255, 255, 0.065)),
-    rgba(28, 31, 48, 0.09);
+    radial-gradient(circle at 35% 16%, rgba(255, 255, 255, 0.1), transparent 42%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.008) 50%, rgba(255, 255, 255, 0.028)),
+    rgba(28, 31, 48, 0.035);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.48),
-    inset 0 -10px 22px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -8px 18px rgba(0, 0, 0, 0.025),
     -2px 0 8px rgba(42, 225, 255, 0.24),
     2px 0 8px rgba(255, 53, 190, 0.22),
-    0 6px 18px rgba(0, 0, 0, 0.12);
+    0 5px 14px rgba(0, 0, 0, 0.08);
 }
 
 .mobile-controls__button[data-active='true']::after {
-  opacity: 0.9;
+  opacity: 0.82;
 }
 
 .mobile-controls__button--jump {
-  --button-size: clamp(88px, 10vw, 104px);
-  border-radius: 34px;
+  border-radius: 28px;
 }
 
 @media (orientation: portrait) {
@@ -126,9 +125,5 @@
 
   .mobile-controls__button {
     --button-size: clamp(74px, 20vw, 90px);
-  }
-
-  .mobile-controls__button--jump {
-    --button-size: clamp(84px, 22vw, 100px);
   }
 }
