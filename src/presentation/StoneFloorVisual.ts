@@ -12,7 +12,7 @@ export interface StoneFloorBlock {
   cracked: boolean;
 }
 
-const STONE_BASE_WIDTHS = [72, 84, 66, 78, 90, 70, 82] as const;
+const STONE_BASE_WIDTHS = [22, 28, 20, 26, 30, 18, 24] as const;
 const STONE_TONES = [0x34343b, 0x3a3940, 0x302f36, 0x3d3c43, 0x36353c] as const;
 const MORTAR = 0x17171d;
 const TOP_HIGHLIGHT = 0x5a5960;
@@ -27,7 +27,7 @@ export function buildStoneFloorPattern(width: number, height: number): StoneFloo
 
   for (let row = 0; row < rowCount; row += 1) {
     let index = 0;
-    let cursor = -halfWidth - (row % 2 === 1 ? 38 : 0);
+    let cursor = -halfWidth - (row % 2 === 1 ? 12 : 0);
 
     while (cursor < halfWidth) {
       const nominalWidth = STONE_BASE_WIDTHS[(index + row * 2) % STONE_BASE_WIDTHS.length];
@@ -84,26 +84,26 @@ function drawStone(graphics: Phaser.GameObjects.Graphics, stone: StoneFloorBlock
 
   graphics.fillStyle(stone.tone, 1);
 
-  if (stone.chipped && drawWidth > 20) {
-    graphics.fillTriangle(left, top + 4, left + 5, top, left + 5, top + 5);
-    graphics.fillRect(left + 4, top, drawWidth - 4, drawHeight);
+  if (stone.chipped && drawWidth > 14) {
+    graphics.fillTriangle(left, top + 4, left + 4, top, left + 4, top + 4);
+    graphics.fillRect(left + 3, top, drawWidth - 3, drawHeight);
   } else {
     graphics.fillRect(left, top, drawWidth, drawHeight);
   }
 
   graphics.fillStyle(TOP_HIGHLIGHT, 0.38);
-  graphics.fillRect(left + 3, top + 1, Math.max(2, drawWidth - 6), 1);
+  graphics.fillRect(left + 2, top + 1, Math.max(2, drawWidth - 4), 1);
 
   graphics.fillStyle(LOWER_SHADOW, 0.65);
   graphics.fillRect(left + 2, top + drawHeight - 2, Math.max(2, drawWidth - 4), 1.5);
 
-  if (stone.cracked && drawWidth > 28) {
+  if (stone.cracked && drawWidth > 18) {
     const crackX = left + drawWidth * 0.58;
     graphics.lineStyle(1, CRACK, 0.9);
     graphics.beginPath();
     graphics.moveTo(crackX, top + 3);
-    graphics.lineTo(crackX - 3, top + drawHeight * 0.45);
-    graphics.lineTo(crackX + 2, top + drawHeight - 4);
+    graphics.lineTo(crackX - 2, top + drawHeight * 0.45);
+    graphics.lineTo(crackX + 1, top + drawHeight - 4);
     graphics.strokePath();
   }
 }
