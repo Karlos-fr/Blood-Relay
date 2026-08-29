@@ -42,7 +42,7 @@ export function buildArenaBackdropLayout(width: number, height: number, seed: st
     }
   }
 
-  const machine = { x: width / 2, y: Math.min(176, height * 0.34), radius: 58 };
+  const machine = { x: width / 2, y: Math.min(142, height * 0.29), radius: 110 };
   const pipeCount = 6 + Math.floor(random() * 2);
   const pipes: ArenaPipe[] = [];
 
