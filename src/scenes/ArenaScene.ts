@@ -13,6 +13,8 @@ import { Player } from '../gameplay/player/Player';
 import { createKeyboardProfile } from '../input/keyboardProfiles';
 import { MobileControls } from '../input/MobileControls';
 import { combinePlayerControls } from '../input/playerControls';
+import { isMobileDevice } from '../platform/device';
+import { calculateContainedViewport } from '../presentation/mobileViewport';
 
 const GRID_STEP = 45;
 
@@ -24,6 +26,7 @@ export class ArenaScene extends Phaser.Scene {
   private debugText?: Phaser.GameObjects.Text;
   private debugKey?: Phaser.Input.Keyboard.Key;
   private debugEnabled = false;
+  private mobileViewportEnabled = false;
 
   public constructor() {
     super('ArenaScene');
@@ -123,10 +126,41 @@ export class ArenaScene extends Phaser.Scene {
     const camera = this.cameras.main;
     camera.setBackgroundColor(0x09090f);
     camera.setBounds(0, 0, ARENA_WIDTH, ARENA_HEIGHT);
-    camera.setZoom(ARENA_CAMERA_ZOOM);
-    camera.centerOn(ARENA_WIDTH / 2, ARENA_HEIGHT / 2);
+
+    this.mobileViewportEnabled = isMobileDevice();
+    if (this.mobileViewportEnabled) {
+      this.applyMobileViewport();
+      this.scale.on('resize', this.handleScaleResize, this);
+      this.events.once('shutdown', () => {
+        this.scale.off('resize', this.handleScaleResize, this);
+      });
+    } else {
+      camera.setViewport(0, 0, ARENA_WIDTH, ARENA_HEIGHT);
+      camera.setZoom(ARENA_CAMERA_ZOOM);
+      camera.centerOn(ARENA_WIDTH / 2, ARENA_HEIGHT / 2);
+    }
 
     this.physics.world.setBounds(0, 0, ARENA_WIDTH, ARENA_HEIGHT);
+  }
+
+  private handleScaleResize(): void {
+    if (this.mobileViewportEnabled) {
+      this.applyMobileViewport();
+    }
+  }
+
+  private applyMobileViewport(): void {
+    const viewport = calculateContainedViewport(
+      this.scale.width,
+      this.scale.height,
+      ARENA_WIDTH,
+      ARENA_HEIGHT,
+    );
+    const camera = this.cameras.main;
+
+    camera.setViewport(viewport.x, viewport.y, viewport.width, viewport.height);
+    camera.setZoom(viewport.zoom);
+    camera.centerOn(ARENA_WIDTH / 2, ARENA_HEIGHT / 2);
   }
 
   private createStaticSurface(
@@ -184,7 +218,7 @@ export class ArenaScene extends Phaser.Scene {
     );
 
     text.setText([
-      `v${GAME_VERSION} · arena ${ARENA_WIDTH}×${ARENA_HEIGHT} · zoom ${ARENA_CAMERA_ZOOM}`,
+      `v${GAME_VERSION} · arena ${ARENA_WIDTH}×${ARENA_HEIGHT} · zoom ${this.cameras.main.zoom.toFixed(2)}`,
       ...playerLines,
     ]);
   }
