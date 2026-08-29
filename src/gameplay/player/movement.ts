@@ -1,7 +1,7 @@
-export const PLAYER_MOVE_SPEED = 220;
-export const PLAYER_ACCELERATION = 1500;
-export const PLAYER_DRAG = 1800;
-export const PLAYER_JUMP_SPEED = 600;
+export const PLAYER_MOVE_SPEED = 165;
+export const PLAYER_ACCELERATION = 1125;
+export const PLAYER_DRAG = 1350;
+export const PLAYER_JUMP_SPEED = 450;
 
 export type HorizontalIntent = -1 | 0 | 1;
 export type FacingDirection = -1 | 1;
