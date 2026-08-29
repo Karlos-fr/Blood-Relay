@@ -1,25 +1,53 @@
 import Phaser from 'phaser';
 import { attachArenaBackdropAnimation } from './ArenaBackdropAnimation';
+import { buildRoundedOrthogonalPath, type PipePathSegment, type PipePoint } from './pipeGeometry';
 
-export interface ArenaWallPanel { x: number; y: number; width: number; height: number; tone: number; repaired: boolean; }
-export interface ArenaPipe { points: Array<{ x: number; y: number }>; thickness: number; accent: 'none' | 'red'; }
-export interface ArenaRelayMachine { x: number; y: number; radius: number; }
-export interface ArenaBackdropLayout { panels: ArenaWallPanel[]; pipes: ArenaPipe[]; machine: ArenaRelayMachine; }
+export interface ArenaWallPanel {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  tone: number;
+  repaired: boolean;
+}
+
+export interface ArenaPipe {
+  points: PipePoint[];
+  thickness: number;
+  accent: 'none' | 'red';
+}
+
+export interface ArenaRelayMachine {
+  x: number;
+  y: number;
+  radius: number;
+}
+
+export interface ArenaBackdropLayout {
+  panels: ArenaWallPanel[];
+  pipes: ArenaPipe[];
+  machine: ArenaRelayMachine;
+}
 
 const WALL = 0x0d0e13;
 const PANEL_STROKE = 0x22242d;
 const PANEL_TONES = [0x111219, 0x14151c, 0x171820, 0x12131a] as const;
 const REPAIR = 0x262832;
-const PIPE_DARK = 0x292c34;
-const PIPE_EDGE = 0x484c57;
-const PIPE_RED = 0x8f2732;
+const PIPE_DARK = 0x262a32;
+const PIPE_EDGE = 0x565b66;
+const PIPE_RED = 0x9d2734;
+const PIPE_RED_HIGHLIGHT = 0xeb4553;
 const MACHINE_DARK = 0x171920;
 const MACHINE_MID = 0x292c35;
-const MACHINE_EDGE = 0x535865;
-const MACHINE_RED = 0xa52a36;
+const MACHINE_EDGE = 0x626775;
+const MACHINE_RED = 0xb32d3a;
 const MACHINE_RED_DARK = 0x40151b;
 
-export function buildArenaBackdropLayout(width: number, height: number, seed: string): ArenaBackdropLayout {
+export function buildArenaBackdropLayout(
+  width: number,
+  height: number,
+  seed: string,
+): ArenaBackdropLayout {
   const random = createSeededRandom(seed);
   const panels: ArenaWallPanel[] = [];
   const columns = 5;
@@ -42,44 +70,63 @@ export function buildArenaBackdropLayout(width: number, height: number, seed: st
     }
   }
 
-  const machine = { x: width / 2, y: Math.min(142, height * 0.29), radius: 110 };
-  const pipeCount = 6 + Math.floor(random() * 2);
+  const machine = {
+    x: width / 2,
+    y: Math.min(142, height * 0.29),
+    radius: 110,
+  };
+
+  const laneFractions = [0.19, 0.48, 0.79] as const;
+  const laneYs = laneFractions.map((fraction) => height * fraction + (random() - 0.5) * 18);
+  const portOffsets = [-0.58, 0, 0.58] as const;
   const pipes: ArenaPipe[] = [];
 
-  for (let index = 0; index < pipeCount; index += 1) {
-    const fromLeft = index % 2 === 0;
-    const startX = fromLeft ? -24 : width + 24;
-    const edgeX = fromLeft ? 72 + random() * 130 : width - 72 - random() * 130;
-    const startY = 42 + random() * Math.max(80, height - 125);
-    const approachX = machine.x + (fromLeft ? -1 : 1) * (machine.radius + 54 + random() * 55);
-    const portAngle = fromLeft ? Math.PI + (random() - 0.5) * 1.55 : (random() - 0.5) * 1.55;
-    const port = {
-      x: machine.x + Math.cos(portAngle) * (machine.radius - 2),
-      y: machine.y + Math.sin(portAngle) * (machine.radius - 2),
-    };
-    const approachY = Math.max(24, Math.min(height - 35, port.y + (random() - 0.5) * 65));
+  for (let pairIndex = 0; pairIndex < 3; pairIndex += 1) {
+    for (const fromLeft of [true, false]) {
+      const side = fromLeft ? -1 : 1;
+      const startX = fromLeft ? -24 : width + 24;
+      const startY = laneYs[pairIndex] + (random() - 0.5) * 10;
+      const edgeX = fromLeft
+        ? 78 + random() * 96
+        : width - 78 - random() * 96;
+      const portAngle = fromLeft
+        ? Math.PI - portOffsets[pairIndex]
+        : portOffsets[pairIndex];
+      const port = {
+        x: machine.x + Math.cos(portAngle) * (machine.radius - 3),
+        y: machine.y + Math.sin(portAngle) * (machine.radius - 3),
+      };
+      const approachX = machine.x + side * (machine.radius + 52 + random() * 34);
+      const approachY = Math.max(26, Math.min(height - 36, port.y + (random() - 0.5) * 28));
 
-    pipes.push({
-      points: [
-        { x: startX, y: startY },
-        { x: edgeX, y: startY },
-        { x: edgeX, y: approachY },
-        { x: approachX, y: approachY },
-        { x: approachX, y: port.y },
-        port,
-      ],
-      thickness: 7 + Math.floor(random() * 4),
-      accent: 'red',
-    });
+      pipes.push({
+        points: [
+          { x: startX, y: startY },
+          { x: edgeX, y: startY },
+          { x: edgeX, y: approachY },
+          { x: approachX, y: approachY },
+          { x: approachX, y: port.y },
+          port,
+        ],
+        thickness: 8 + Math.floor(random() * 3),
+        accent: 'red',
+      });
+    }
   }
 
   return { panels, pipes, machine };
 }
 
-export function drawProceduralArenaBackdrop(scene: Phaser.Scene, width: number, height: number, seed = 'arena-01'): Phaser.GameObjects.Container {
+export function drawProceduralArenaBackdrop(
+  scene: Phaser.Scene,
+  width: number,
+  height: number,
+  seed = 'arena-01',
+): Phaser.GameObjects.Container {
   const container = scene.add.container(0, 0).setDepth(0);
   const layout = buildArenaBackdropLayout(width, height, seed);
   container.add(scene.add.rectangle(width / 2, height / 2, width, height, WALL));
+
   const graphics = scene.add.graphics();
   drawWallPanels(graphics, layout.panels);
   drawPipes(graphics, layout.pipes);
@@ -90,16 +137,18 @@ export function drawProceduralArenaBackdrop(scene: Phaser.Scene, width: number, 
 }
 
 function drawWallPanels(graphics: Phaser.GameObjects.Graphics, panels: ArenaWallPanel[]): void {
-  for (const panel of panels) {
+  panels.forEach((panel, index) => {
     const left = panel.x - panel.width / 2;
     const top = panel.y - panel.height / 2;
     graphics.fillStyle(panel.tone, 1);
     graphics.fillRoundedRect(left, top, panel.width, panel.height, 2);
     graphics.lineStyle(1, PANEL_STROKE, 0.72);
     graphics.strokeRoundedRect(left, top, panel.width, panel.height, 2);
+
     graphics.fillStyle(0x3a3c45, 0.28);
     graphics.fillRect(left + 8, top + 7, 12, 1);
     graphics.fillRect(left + panel.width - 20, top + panel.height - 8, 12, 1);
+
     if (panel.repaired) {
       graphics.fillStyle(REPAIR, 0.8);
       graphics.fillRect(panel.x - 18, panel.y - 7, 36, 14);
@@ -107,61 +156,234 @@ function drawWallPanels(graphics: Phaser.GameObjects.Graphics, panels: ArenaWall
       graphics.fillRect(panel.x - 15, panel.y - 4, 2, 2);
       graphics.fillRect(panel.x + 13, panel.y + 2, 2, 2);
     }
+
+    drawPanelMicroDetails(graphics, panel, index);
+  });
+}
+
+function drawPanelMicroDetails(
+  graphics: Phaser.GameObjects.Graphics,
+  panel: ArenaWallPanel,
+  index: number,
+): void {
+  const left = panel.x - panel.width / 2;
+  const top = panel.y - panel.height / 2;
+
+  if (index % 4 === 1) {
+    const ventWidth = Math.min(34, panel.width * 0.24);
+    graphics.fillStyle(0x0a0b0f, 0.92);
+    graphics.fillRect(panel.x - ventWidth / 2, panel.y - 9, ventWidth, 18);
+    graphics.lineStyle(1, 0x3d414c, 0.6);
+    graphics.strokeRect(panel.x - ventWidth / 2, panel.y - 9, ventWidth, 18);
+    for (let line = 0; line < 4; line += 1) {
+      graphics.lineBetween(
+        panel.x - ventWidth / 2 + 5,
+        panel.y - 5 + line * 3,
+        panel.x + ventWidth / 2 - 5,
+        panel.y - 5 + line * 3,
+      );
+    }
+  }
+
+  if (index % 5 === 2) {
+    graphics.fillStyle(0x2d3039, 0.7);
+    graphics.fillRect(left + 18, top + 22, 42, 16);
+    graphics.fillStyle(0x707581, 0.25);
+    graphics.fillRect(left + 23, top + 27, 20, 2);
+    graphics.fillRect(left + 23, top + 32, 28, 1);
+  }
+
+  if (index % 3 === 0) {
+    graphics.lineStyle(1, 0x08090c, 0.42);
+    const streakX = left + panel.width * 0.72;
+    graphics.lineBetween(streakX, top + 10, streakX - 2, top + panel.height * 0.45);
+    graphics.lineBetween(streakX + 4, top + 16, streakX + 1, top + panel.height * 0.33);
+  }
+
+  if (index % 7 === 4) {
+    graphics.lineStyle(1, 0x4b2a2d, 0.42);
+    graphics.beginPath();
+    graphics.moveTo(left + panel.width * 0.2, top + panel.height * 0.72);
+    graphics.lineTo(left + panel.width * 0.27, top + panel.height * 0.66);
+    graphics.lineTo(left + panel.width * 0.32, top + panel.height * 0.75);
+    graphics.strokePath();
   }
 }
 
 function drawPipes(graphics: Phaser.GameObjects.Graphics, pipes: ArenaPipe[]): void {
   for (const pipe of pipes) {
-    drawPipePath(graphics, pipe.points, pipe.thickness + 3, 0x090a0d, 0.8);
-    drawPipePath(graphics, pipe.points, pipe.thickness, PIPE_DARK, 1);
-    drawPipePath(graphics, pipe.points, Math.max(1, pipe.thickness - 4), PIPE_EDGE, 0.35);
-    drawPipePath(graphics, pipe.points, 2.4, PIPE_RED, 0.88);
-    for (let index = 1; index < pipe.points.length - 1; index += 1) {
-      const point = pipe.points[index];
-      graphics.fillStyle(0x111217, 1);
-      graphics.fillCircle(point.x, point.y, pipe.thickness * 0.85);
-      graphics.lineStyle(1, PIPE_EDGE, 0.5);
-      graphics.strokeCircle(point.x, point.y, pipe.thickness * 0.65);
-    }
+    const radius = Math.max(11, pipe.thickness * 1.45);
+    const path = buildRoundedOrthogonalPath(pipe.points, radius);
+
+    drawPipePath(graphics, path, pipe.thickness + 5, 0x08090d, 0.9);
+    drawPipePath(graphics, path, pipe.thickness + 1, PIPE_DARK, 1);
+    drawPipePath(graphics, path, Math.max(2, pipe.thickness - 3), PIPE_EDGE, 0.34);
+
+    // Blood sits inside the dark tube rather than reading as the pipe itself.
+    drawPipePath(graphics, path, Math.max(2.8, pipe.thickness * 0.34), PIPE_RED, 0.66);
+    drawPipePath(graphics, path, 1, PIPE_RED_HIGHLIGHT, 0.36);
+
+    drawPipeCollars(graphics, pipe, path);
   }
 }
 
-function drawPipePath(graphics: Phaser.GameObjects.Graphics, points: Array<{ x: number; y: number }>, thickness: number, color: number, alpha: number): void {
+function drawPipeCollars(
+  graphics: Phaser.GameObjects.Graphics,
+  pipe: ArenaPipe,
+  path: PipePathSegment[],
+): void {
+  const lineSegments = path.filter((segment) => segment.kind === 'line');
+  for (let index = 1; index < lineSegments.length; index += 2) {
+    const segment = lineSegments[index];
+    const midpoint = {
+      x: (segment.from.x + segment.to.x) / 2,
+      y: (segment.from.y + segment.to.y) / 2,
+    };
+    const horizontal = Math.abs(segment.to.x - segment.from.x) > Math.abs(segment.to.y - segment.from.y);
+    graphics.fillStyle(0x111318, 1);
+    if (horizontal) {
+      graphics.fillRect(midpoint.x - 3, midpoint.y - pipe.thickness * 0.82, 6, pipe.thickness * 1.64);
+    } else {
+      graphics.fillRect(midpoint.x - pipe.thickness * 0.82, midpoint.y - 3, pipe.thickness * 1.64, 6);
+    }
+    graphics.lineStyle(1, 0x676b76, 0.55);
+    graphics.strokeRect(midpoint.x - 3, midpoint.y - 3, 6, 6);
+  }
+}
+
+function drawPipePath(
+  graphics: Phaser.GameObjects.Graphics,
+  path: PipePathSegment[],
+  thickness: number,
+  color: number,
+  alpha: number,
+): void {
+  if (path.length === 0) return;
   graphics.lineStyle(thickness, color, alpha);
   graphics.beginPath();
-  graphics.moveTo(points[0].x, points[0].y);
-  for (let index = 1; index < points.length; index += 1) graphics.lineTo(points[index].x, points[index].y);
+  graphics.moveTo(path[0].from.x, path[0].from.y);
+  for (const segment of path) {
+    if (segment.kind === 'line') {
+      graphics.lineTo(segment.to.x, segment.to.y);
+    } else {
+      graphics.arc(
+        segment.center.x,
+        segment.center.y,
+        segment.radius,
+        segment.startAngle,
+        segment.endAngle,
+        segment.anticlockwise,
+      );
+    }
+  }
   graphics.strokePath();
 }
 
-function drawRelayMachine(graphics: Phaser.GameObjects.Graphics, machine: ArenaRelayMachine): void {
+function drawRelayMachine(
+  graphics: Phaser.GameObjects.Graphics,
+  machine: ArenaRelayMachine,
+): void {
   const { x, y, radius } = machine;
-  graphics.fillStyle(0x08090c, 0.92); graphics.fillCircle(x, y + 5, radius + 16);
-  graphics.fillStyle(MACHINE_DARK, 1); graphics.fillCircle(x, y, radius + 10);
-  graphics.lineStyle(4, MACHINE_EDGE, 0.45); graphics.strokeCircle(x, y, radius + 8);
-  graphics.fillStyle(MACHINE_MID, 1); graphics.fillCircle(x, y, radius - 2);
-  graphics.lineStyle(2, 0x6a6f7d, 0.45); graphics.strokeCircle(x, y, radius - 8);
-  graphics.fillStyle(MACHINE_RED_DARK, 1); graphics.fillCircle(x, y, radius * 0.52);
-  graphics.lineStyle(3, MACHINE_RED, 0.82); graphics.strokeCircle(x, y, radius * 0.52);
-  graphics.fillStyle(MACHINE_RED, 0.52); graphics.fillCircle(x - radius * 0.12, y - radius * 0.12, radius * 0.18);
-  for (let index = 0; index < 8; index += 1) {
-    const angle = (Math.PI * 2 * index) / 8;
-    graphics.fillStyle(0x777b86, 0.75);
-    graphics.fillCircle(x + Math.cos(angle) * (radius + 2), y + Math.sin(angle) * (radius + 2), 2);
+
+  graphics.fillStyle(0x08090c, 0.94);
+  graphics.fillCircle(x, y + 6, radius + 18);
+  graphics.fillStyle(MACHINE_DARK, 1);
+  graphics.fillCircle(x, y, radius + 11);
+  graphics.lineStyle(5, MACHINE_EDGE, 0.48);
+  graphics.strokeCircle(x, y, radius + 8);
+
+  // Outer mechanical collar and radial clamps.
+  for (let index = 0; index < 12; index += 1) {
+    const angle = (Math.PI * 2 * index) / 12;
+    const cx = x + Math.cos(angle) * (radius + 1);
+    const cy = y + Math.sin(angle) * (radius + 1);
+    graphics.fillStyle(index % 3 === 0 ? 0x373b46 : 0x252832, 1);
+    graphics.fillCircle(cx, cy, index % 3 === 0 ? 5 : 3);
+    graphics.fillStyle(0x858a96, 0.72);
+    graphics.fillCircle(cx, cy, 1.4);
   }
-  graphics.fillStyle(0x17181e, 1); graphics.fillRect(x - 74, y + radius + 10, 148, 18);
-  graphics.lineStyle(1, 0x474a55, 0.5); graphics.strokeRect(x - 74, y + radius + 10, 148, 18);
-  graphics.fillStyle(MACHINE_RED, 0.7); graphics.fillRect(x - 45, y + radius + 17, 28, 3);
-  graphics.fillStyle(0x4a4e58, 0.7); graphics.fillRect(x + 10, y + radius + 17, 36, 3);
+
+  graphics.fillStyle(MACHINE_MID, 1);
+  graphics.fillCircle(x, y, radius - 3);
+  graphics.lineStyle(3, 0x747986, 0.44);
+  graphics.strokeCircle(x, y, radius - 15);
+  graphics.lineStyle(2, 0x3c404a, 0.9);
+  graphics.strokeCircle(x, y, radius * 0.72);
+
+  // Inner spokes and conduits make it read as a pump, not a single eye.
+  for (let index = 0; index < 6; index += 1) {
+    const angle = (Math.PI * 2 * index) / 6 + 0.28;
+    graphics.lineStyle(5, 0x1d2027, 0.9);
+    graphics.lineBetween(
+      x + Math.cos(angle) * radius * 0.54,
+      y + Math.sin(angle) * radius * 0.54,
+      x + Math.cos(angle) * radius * 0.69,
+      y + Math.sin(angle) * radius * 0.69,
+    );
+    graphics.lineStyle(1, 0x676c78, 0.55);
+    graphics.lineBetween(
+      x + Math.cos(angle) * radius * 0.55,
+      y + Math.sin(angle) * radius * 0.55,
+      x + Math.cos(angle) * radius * 0.68,
+      y + Math.sin(angle) * radius * 0.68,
+    );
+  }
+
+  // Blood chamber.
+  graphics.fillStyle(MACHINE_RED_DARK, 1);
+  graphics.fillCircle(x, y, radius * 0.5);
+  graphics.lineStyle(4, MACHINE_RED, 0.88);
+  graphics.strokeCircle(x, y, radius * 0.5);
+  graphics.fillStyle(0x8f202d, 0.72);
+  graphics.fillEllipse(x - radius * 0.07, y + radius * 0.02, radius * 0.54, radius * 0.7);
+  graphics.fillStyle(0xd43a48, 0.44);
+  graphics.fillEllipse(x - radius * 0.2, y - radius * 0.2, radius * 0.26, radius * 0.19);
+
+  // Gauge.
+  const gaugeX = x + radius * 0.38;
+  const gaugeY = y - radius * 0.46;
+  graphics.fillStyle(0x15171c, 1);
+  graphics.fillCircle(gaugeX, gaugeY, 15);
+  graphics.lineStyle(2, 0x858a96, 0.72);
+  graphics.strokeCircle(gaugeX, gaugeY, 14);
+  graphics.lineStyle(2, 0xc9404b, 0.9);
+  graphics.lineBetween(gaugeX, gaugeY, gaugeX + 7, gaugeY - 4);
+  graphics.fillStyle(0xb8bdc7, 0.8);
+  graphics.fillCircle(gaugeX, gaugeY, 2);
+
+  // Lower valve and service console.
+  const valveY = y + radius * 0.76;
+  graphics.fillStyle(0x17191f, 1);
+  graphics.fillCircle(x, valveY, 15);
+  graphics.lineStyle(3, 0x686d78, 0.75);
+  graphics.strokeCircle(x, valveY, 12);
+  graphics.lineBetween(x - 9, valveY, x + 9, valveY);
+  graphics.lineBetween(x, valveY - 9, x, valveY + 9);
+
+  const consoleY = y + radius + 10;
+  graphics.fillStyle(0x17181e, 1);
+  graphics.fillRect(x - 98, consoleY, 196, 20);
+  graphics.lineStyle(1, 0x545864, 0.58);
+  graphics.strokeRect(x - 98, consoleY, 196, 20);
+  graphics.fillStyle(MACHINE_RED, 0.72);
+  graphics.fillRect(x - 66, consoleY + 8, 36, 4);
+  graphics.fillStyle(0x42c7d8, 0.62);
+  graphics.fillRect(x + 28, consoleY + 8, 42, 4);
 }
 
 function createSeededRandom(seed: string): () => number {
   let state = hashSeed(seed);
-  return () => { state = (state * 1664525 + 1013904223) >>> 0; return state / 0x100000000; };
+  return () => {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    return state / 0x100000000;
+  };
 }
 
 function hashSeed(seed: string): number {
   let hash = 2166136261;
-  for (let index = 0; index < seed.length; index += 1) { hash ^= seed.charCodeAt(index); hash = Math.imul(hash, 16777619); }
+  for (let index = 0; index < seed.length; index += 1) {
+    hash ^= seed.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
   return hash >>> 0;
 }
