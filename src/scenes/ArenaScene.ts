@@ -41,6 +41,7 @@ export class ArenaScene extends Phaser.Scene {
     this.floor = this.createStaticSurface(ARENA_WIDTH / 2, floorY, ARENA_WIDTH, FLOOR_HEIGHT);
     drawIndustrialPlatform(this, ARENA_WIDTH / 2, floorY, ARENA_WIDTH, FLOOR_HEIGHT, {
       visualDepth: FLOOR_HEIGHT,
+      symmetric: false,
     });
 
     this.platforms = PLATFORM_LAYOUT.map((platform) => {
