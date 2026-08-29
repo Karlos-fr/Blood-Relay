@@ -15,6 +15,7 @@ import { MobileControls } from '../input/MobileControls';
 import { combinePlayerControls } from '../input/playerControls';
 import { isMobileDevice } from '../platform/device';
 import { calculateContainedViewport } from '../presentation/mobileViewport';
+import { drawIndustrialPlatform } from '../presentation/PlatformVisual';
 
 const GRID_STEP = 45;
 
@@ -36,23 +37,22 @@ export class ArenaScene extends Phaser.Scene {
     this.configureWorld();
     this.drawArenaBackdrop();
 
-    this.floor = this.createStaticSurface(
-      ARENA_WIDTH / 2,
-      ARENA_HEIGHT - FLOOR_HEIGHT / 2,
-      ARENA_WIDTH,
-      FLOOR_HEIGHT,
-      0x252530,
-    );
+    const floorY = ARENA_HEIGHT - FLOOR_HEIGHT / 2;
+    this.floor = this.createStaticSurface(ARENA_WIDTH / 2, floorY, ARENA_WIDTH, FLOOR_HEIGHT);
+    drawIndustrialPlatform(this, ARENA_WIDTH / 2, floorY, ARENA_WIDTH, FLOOR_HEIGHT, {
+      visualDepth: FLOOR_HEIGHT,
+    });
 
-    this.platforms = PLATFORM_LAYOUT.map((platform) =>
-      this.createStaticSurface(
+    this.platforms = PLATFORM_LAYOUT.map((platform) => {
+      const surface = this.createStaticSurface(
         platform.x,
         platform.y,
         platform.width,
         PLATFORM_HEIGHT,
-        0x343442,
-      ),
-    );
+      );
+      drawIndustrialPlatform(this, platform.x, platform.y, platform.width, PLATFORM_HEIGHT);
+      return surface;
+    });
 
     const playerOneProfile = createKeyboardProfile(this, 0);
     const playerTwoProfile = createKeyboardProfile(this, 1);
@@ -168,9 +168,8 @@ export class ArenaScene extends Phaser.Scene {
     y: number,
     width: number,
     height: number,
-    color: number,
   ): Phaser.GameObjects.Rectangle {
-    const surface = this.add.rectangle(x, y, width, height, color).setDepth(5);
+    const surface = this.add.rectangle(x, y, width, height, 0x000000, 0).setDepth(5);
     this.physics.add.existing(surface, true);
     return surface;
   }
