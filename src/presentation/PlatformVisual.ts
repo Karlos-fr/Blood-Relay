@@ -1,8 +1,12 @@
 import Phaser from 'phaser';
-import { buildPlatformTileLayout, type PlatformTile } from './platformTiles';
+import {
+  buildPlatformTileLayout,
+  buildSymmetricPlatformTileLayout,
+  PLATFORM_CAP_WIDTH,
+  PLATFORM_CENTER_TILE_WIDTH,
+  type PlatformTile,
+} from './platformTiles';
 
-const CAP_WIDTH = 18;
-const CENTER_TILE_WIDTH = 36;
 const FLOATING_PLATFORM_DEPTH = 25;
 
 const METAL_TOP = 0x56616c;
@@ -17,6 +21,7 @@ const RED_SCRATCH = 0x8d3033;
 export interface PlatformVisualOptions {
   visualDepth?: number;
   showAccent?: boolean;
+  symmetric?: boolean;
 }
 
 export function drawIndustrialPlatform(
@@ -30,7 +35,10 @@ export function drawIndustrialPlatform(
   const visualDepth = options.visualDepth ?? FLOATING_PLATFORM_DEPTH;
   const top = collisionY - collisionHeight / 2;
   const graphics = scene.add.graphics().setPosition(x, top).setDepth(5);
-  const tiles = buildPlatformTileLayout(width, CAP_WIDTH, CENTER_TILE_WIDTH);
+  const tiles =
+    options.symmetric === false
+      ? buildPlatformTileLayout(width, PLATFORM_CAP_WIDTH, PLATFORM_CENTER_TILE_WIDTH)
+      : buildSymmetricPlatformTileLayout(width, PLATFORM_CAP_WIDTH, PLATFORM_CENTER_TILE_WIDTH);
 
   drawUnderside(graphics, width, visualDepth);
   tiles.forEach((tile, index) => drawTile(graphics, tile, index, visualDepth, options));
@@ -81,20 +89,42 @@ function drawTile(
   if (tile.kind === 'left-cap') {
     graphics.fillStyle(METAL_FACE, 1);
     graphics.fillTriangle(left, 7, left + 6, 15, left + 6, visualDepth - 2);
-  } else if (tile.kind === 'right-cap') {
-    graphics.fillStyle(METAL_FACE, 1);
-    graphics.fillTriangle(right, 7, right - 6, 15, right - 6, visualDepth - 2);
-  } else if (options.showAccent !== false && index % 2 === 0) {
-    const accentWidth = Math.min(18, Math.max(8, tile.width - 12));
-    graphics.fillStyle(CYAN, 0.9);
-    graphics.fillRect(tile.x - accentWidth / 2, 14, accentWidth, 2);
-    graphics.fillStyle(CYAN, 0.18);
-    graphics.fillRect(tile.x - accentWidth / 2 - 2, 13, accentWidth + 4, 4);
+    return;
   }
 
-  if (tile.kind === 'center' && index === 3 && tile.width >= 20) {
-    graphics.fillStyle(RED_SCRATCH, 0.7);
-    graphics.fillRect(tile.x + 2, 2, 7, 1);
-    graphics.fillRect(tile.x + 6, 3, 5, 1);
+  if (tile.kind === 'right-cap') {
+    graphics.fillStyle(METAL_FACE, 1);
+    graphics.fillTriangle(right, 7, right - 6, 15, right - 6, visualDepth - 2);
+    return;
   }
+
+  if (options.symmetric === false) {
+    if (options.showAccent !== false && index % 2 === 0) {
+      drawCyanAccent(graphics, tile);
+    }
+    return;
+  }
+
+  if (tile.decoration === 'cyan' && options.showAccent !== false) {
+    drawCyanAccent(graphics, tile);
+  } else if (tile.decoration === 'red-center') {
+    drawCenteredRedDetail(graphics, tile);
+  }
+}
+
+function drawCyanAccent(graphics: Phaser.GameObjects.Graphics, tile: PlatformTile): void {
+  const accentWidth = Math.min(18, Math.max(8, tile.width - 12));
+  graphics.fillStyle(CYAN, 0.9);
+  graphics.fillRect(tile.x - accentWidth / 2, 14, accentWidth, 2);
+  graphics.fillStyle(CYAN, 0.18);
+  graphics.fillRect(tile.x - accentWidth / 2 - 2, 13, accentWidth + 4, 4);
+}
+
+function drawCenteredRedDetail(
+  graphics: Phaser.GameObjects.Graphics,
+  tile: PlatformTile,
+): void {
+  graphics.fillStyle(RED_SCRATCH, 0.7);
+  graphics.fillRect(tile.x - 4, 2, 8, 1);
+  graphics.fillRect(tile.x - 2, 3, 4, 1);
 }
