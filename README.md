@@ -8,7 +8,7 @@ La mécanique centrale à venir : le sang perdu pendant les combats reste dans l
 
 La maquette de référence validée pour la direction générale du jeu est conservée dans le dépôt :
 
-![Blood Relay — direction visuelle](./docs/visual/blood-relay-visual-direction.webp)
+<img src="https://raw.githubusercontent.com/Karlos-fr/Blood-Relay/main/docs/visual/blood-relay-visual-direction.webp" alt="Blood Relay — direction visuelle" width="100%">
 
 Elle fixe notamment la vue de côté, les sprites volontairement lisibles, l'ambiance industrielle sombre, le sang comme ressource et le contraste entre pixel art rétro et effets modernes.
 
