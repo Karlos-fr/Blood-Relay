@@ -10,8 +10,16 @@ const HEARTBEAT_PERIOD = 1600;
 const FLOW_PERIOD = 3300;
 const RING_PERIOD = 18000;
 const STEAM_PERIOD = 4200;
-const UPDATE_EVENT = 'update';
-const SHUTDOWN_EVENT = 'shutdown';
+
+export class ArenaBackdropAnimationController {
+  public constructor(private readonly renderFrame: (time: number) => void) {}
+
+  public update(time: number): void {
+    this.renderFrame(time);
+  }
+}
+
+const sceneControllers = new WeakMap<object, ArenaBackdropAnimationController>();
 
 export function getLoopProgress(timeMs: number, periodMs: number): number {
   if (periodMs <= 0) return 0;
@@ -50,14 +58,16 @@ export function samplePolyline(points: Point[], progress: number): Point {
   let totalLength = 0;
   for (let index = 1; index < points.length; index += 1) {
     const length = Math.hypot(points[index].x - points[index - 1].x, points[index].y - points[index - 1].y);
-    lengths.push(length); totalLength += length;
+    lengths.push(length);
+    totalLength += length;
   }
   if (totalLength <= 0) return { ...points[0] };
   let remaining = clamp(progress, 0, 1) * totalLength;
   for (let index = 0; index < lengths.length; index += 1) {
     const segmentLength = lengths[index];
     if (remaining <= segmentLength || index === lengths.length - 1) {
-      const start = points[index]; const end = points[index + 1];
+      const start = points[index];
+      const end = points[index + 1];
       const t = segmentLength > 0 ? remaining / segmentLength : 0;
       return { x: start.x + (end.x - start.x) * t, y: start.y + (end.y - start.y) * t };
     }
@@ -66,7 +76,15 @@ export function samplePolyline(points: Point[], progress: number): Point {
   return { ...points[points.length - 1] };
 }
 
-export function attachArenaBackdropAnimation(scene: Phaser.Scene, container: Phaser.GameObjects.Container, layout: ArenaBackdropAnimationLayout): void {
+export function updateArenaBackdropAnimation(scene: Phaser.Scene, time: number): void {
+  sceneControllers.get(scene)?.update(time);
+}
+
+export function attachArenaBackdropAnimation(
+  scene: Phaser.Scene,
+  container: Phaser.GameObjects.Container,
+  layout: ArenaBackdropAnimationLayout,
+): ArenaBackdropAnimationController {
   const { machine } = layout;
   const animatedLayer = scene.add.container(0, 0);
   container.add(animatedLayer);
@@ -76,7 +94,10 @@ export function attachArenaBackdropAnimation(scene: Phaser.Scene, container: Pha
   const heartCore = scene.add.circle(machine.x, machine.y, machine.radius * 0.25, 0xe13b49, 0.58);
   const rotatingRing = scene.add.graphics().setPosition(machine.x, machine.y);
   rotatingRing.lineStyle(2, 0xa3a8b5, 0.48);
-  rotatingRing.beginPath(); rotatingRing.arc(0, 0, machine.radius * 0.72, -0.75, 0.85, false); rotatingRing.arc(0, 0, machine.radius * 0.72, 2.35, 3.65, false); rotatingRing.strokePath();
+  rotatingRing.beginPath();
+  rotatingRing.arc(0, 0, machine.radius * 0.72, -0.75, 0.85, false);
+  rotatingRing.arc(0, 0, machine.radius * 0.72, 2.35, 3.65, false);
+  rotatingRing.strokePath();
 
   const ledRadius = machine.radius;
   const ledOffsets = [
@@ -84,7 +105,9 @@ export function attachArenaBackdropAnimation(scene: Phaser.Scene, container: Pha
     [0.9,-0.42,0xd83a48],[0.78,-0.14,0x42d9e8],[0.88,0.2,0xd83a48],[0.68,0.49,0x42d9e8],
     [-0.3,-0.8,0x42d9e8],[0,-0.86,0xd83a48],[0.3,-0.8,0x42d9e8],[0,0.84,0xd83a48],
   ] as const;
-  const leds = ledOffsets.map(([x,y,color]) => scene.add.circle(machine.x + x * ledRadius, machine.y + y * ledRadius, 3.2, color, 0.5));
+  const leds = ledOffsets.map(([x,y,color]) =>
+    scene.add.circle(machine.x + x * ledRadius, machine.y + y * ledRadius, 3.2, color, 0.5),
+  );
 
   const flowParticles = layout.pipes.map((pipe) => ({
     path: buildRoundedOrthogonalPath(pipe.points, Math.max(11, pipe.thickness * 1.45)),
@@ -99,11 +122,16 @@ export function attachArenaBackdropAnimation(scene: Phaser.Scene, container: Pha
     { x: machine.x + machine.radius * 0.72, y: ventY, offset: 0.43 },
   ];
   for (const origin of steamOrigins) {
-    ventGraphics.fillStyle(0x3c404a, 1); ventGraphics.fillRoundedRect(origin.x - 12, origin.y - 5, 24, 10, 3);
-    ventGraphics.lineStyle(2, 0x858b98, 0.78); ventGraphics.strokeRoundedRect(origin.x - 12, origin.y - 5, 24, 10, 3);
+    ventGraphics.fillStyle(0x3c404a, 1);
+    ventGraphics.fillRoundedRect(origin.x - 12, origin.y - 5, 24, 10, 3);
+    ventGraphics.lineStyle(2, 0x858b98, 0.78);
+    ventGraphics.strokeRoundedRect(origin.x - 12, origin.y - 5, 24, 10, 3);
     ventGraphics.lineStyle(2, 0x16181d, 0.9);
-    for (let slot = -6; slot <= 6; slot += 6) ventGraphics.lineBetween(origin.x + slot, origin.y - 2, origin.x + slot, origin.y + 2);
+    for (let slot = -6; slot <= 6; slot += 6) {
+      ventGraphics.lineBetween(origin.x + slot, origin.y - 2, origin.x + slot, origin.y + 2);
+    }
   }
+
   const steamPuffs = steamOrigins.flatMap((origin, originIndex) =>
     [0,1,2,3,4,5,6].map((puffIndex) => ({
       origin,
@@ -112,34 +140,64 @@ export function attachArenaBackdropAnimation(scene: Phaser.Scene, container: Pha
     })),
   );
 
-  animatedLayer.add([outerGlow, heartGlow, heartCore, rotatingRing, ventGraphics, ...leds, ...flowParticles.flatMap((p) => [p.glow,p.core]), ...steamPuffs.map((p) => p.circle)]);
+  animatedLayer.add([
+    outerGlow,
+    heartGlow,
+    heartCore,
+    rotatingRing,
+    ventGraphics,
+    ...leds,
+    ...flowParticles.flatMap((particle) => [particle.glow, particle.core]),
+    ...steamPuffs.map((puff) => puff.circle),
+  ]);
 
-  const update = (time: number): void => {
+  const controller = new ArenaBackdropAnimationController((time) => {
     const heartbeat = getHeartbeatIntensity(time);
     heartCore.setScale(0.96 + heartbeat * 0.12).setAlpha(0.38 + heartbeat * 0.55);
     heartGlow.setScale(0.9 + heartbeat * 0.34).setAlpha(0.1 + heartbeat * 0.28);
     outerGlow.setScale(0.94 + heartbeat * 0.14).setAlpha(0.045 + heartbeat * 0.12);
     rotatingRing.setRotation(getLoopProgress(time, RING_PERIOD) * Math.PI * 2);
-    leds.forEach((led,index) => { const intensity = getLedIntensity(time,index); led.setAlpha(intensity).setScale(0.9 + intensity * 0.32); });
-    flowParticles.forEach((particle,index) => {
-      const point = sampleRoundedPath(particle.path, getLoopProgress(time + index * 430, FLOW_PERIOD));
-      particle.core.setPosition(point.x, point.y); particle.glow.setPosition(point.x, point.y);
-      const shimmer = 0.8 + Math.sin(time * 0.01 + index) * 0.18;
-      particle.core.setAlpha(shimmer); particle.glow.setAlpha(0.12 + shimmer * 0.14);
+
+    leds.forEach((led, index) => {
+      const intensity = getLedIntensity(time, index);
+      led.setAlpha(intensity).setScale(0.9 + intensity * 0.32);
     });
+
+    flowParticles.forEach((particle, index) => {
+      const point = sampleRoundedPath(
+        particle.path,
+        getLoopProgress(time + index * 430, FLOW_PERIOD),
+      );
+      particle.core.setPosition(point.x, point.y);
+      particle.glow.setPosition(point.x, point.y);
+      const shimmer = 0.8 + Math.sin(time * 0.01 + index) * 0.18;
+      particle.core.setAlpha(shimmer);
+      particle.glow.setAlpha(0.12 + shimmer * 0.14);
+    });
+
     steamPuffs.forEach((puff) => {
       const cycle = getLoopProgress(time + puff.phaseOffset * STEAM_PERIOD, STEAM_PERIOD);
-      if (cycle >= 0.68) { puff.circle.setAlpha(0); return; }
+      if (cycle >= 0.68) {
+        puff.circle.setAlpha(0);
+        return;
+      }
       const profile = getSteamPlumeProfile(cycle / 0.68);
-      puff.circle.setPosition(puff.origin.x + profile.drift, puff.origin.y - profile.rise).setScale(profile.scale).setAlpha(profile.alpha);
+      puff.circle
+        .setPosition(puff.origin.x + profile.drift, puff.origin.y - profile.rise)
+        .setScale(profile.scale)
+        .setAlpha(profile.alpha);
     });
-  };
-  scene.events.on(UPDATE_EVENT, update);
-  scene.events.once(SHUTDOWN_EVENT, () => scene.events.off(UPDATE_EVENT, update));
+  });
+
+  sceneControllers.set(scene, controller);
+  return controller;
 }
 
 function pulseAtCyclePhase(phase: number, center: number, halfWidth: number, period: number): number {
   const directDistance = Math.abs(phase - center);
   return Math.max(0, 1 - Math.min(directDistance, period - directDistance) / halfWidth);
 }
-function clamp(value: number, min: number, max: number): number { return Math.min(max, Math.max(min, value)); }
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
