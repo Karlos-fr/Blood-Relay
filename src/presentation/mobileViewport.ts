@@ -6,6 +6,23 @@ export interface ContainedViewport {
   zoom: number;
 }
 
+export interface ViewportSize {
+  width: number;
+  height: number;
+}
+
+export function selectViewportSize(
+  visualWidth: number | undefined,
+  visualHeight: number | undefined,
+  innerWidth: number,
+  innerHeight: number,
+): ViewportSize {
+  const width = visualWidth && visualWidth > 0 ? visualWidth : innerWidth;
+  const height = visualHeight && visualHeight > 0 ? visualHeight : innerHeight;
+
+  return { width, height };
+}
+
 export function calculateContainedViewport(
   containerWidth: number,
   containerHeight: number,
