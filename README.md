@@ -21,10 +21,11 @@ La version actuelle contient :
 - Vite + TypeScript strict ;
 - Phaser 3 + Arcade Physics ;
 - résolution logique 960 × 540 en 16:9 ;
-- une arène 960 × 540 entièrement visible à l'échelle native, caméra à 100 % ;
+- une arène 960 × 540 entièrement visible à l'échelle native, caméra à 100 % sur desktop ;
+- sur mobile, un canvas adapté au viewport réel tout en conservant l'intégralité de la scène 16:9 sans crop ni déformation ;
 - trois niveaux verticaux de plateformes traversables ;
 - deux joueurs locaux avec collisions, accélération, décélération et saut ;
-- commandes tactiles iPhone pour le joueur 1 ;
+- commandes tactiles mobiles pour le joueur 1, affichées uniquement sur appareil tactile mobile, avec boutons Crystal Glass adaptés aux safe areas iPhone ;
 - un debug des hitboxes activable avec `F1` ;
 - déploiement automatique sur GitHub Pages après lint, tests et build.
 
@@ -38,7 +39,7 @@ Clavier :
 - `Z` : sauter ;
 - `S` + `Z` : descendre à travers une plateforme.
 
-Sur iPhone ou appareil tactile, des boutons apparaissent automatiquement :
+Sur mobile tactile, de grands boutons en verre apparaissent automatiquement :
 
 - `←` / `→` : déplacement ;
 - `↑` : saut ;
