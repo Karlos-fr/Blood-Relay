@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_VERSION, GAME_WIDTH } from '../config/game';
 import { Player } from '../gameplay/player/Player';
 import { createKeyboardProfile } from '../input/keyboardProfiles';
+import { MobileControls } from '../input/MobileControls';
+import { combinePlayerControls } from '../input/playerControls';
 
 const FLOOR_HEIGHT = 56;
 const PLATFORM_HEIGHT = 18;
@@ -42,13 +44,16 @@ export class ArenaScene extends Phaser.Scene {
 
     const playerOneProfile = createKeyboardProfile(this, 0);
     const playerTwoProfile = createKeyboardProfile(this, 1);
+    const mobileControls = new MobileControls(this);
 
     const playerOne = new Player(this, {
       id: 1,
       x: 160,
       y: 430,
       color: 0xe7474f,
-      controls: playerOneProfile.controls,
+      controls: mobileControls.isVisible
+        ? combinePlayerControls(playerOneProfile.controls, mobileControls.controls)
+        : playerOneProfile.controls,
     });
 
     const playerTwo = new Player(this, {
@@ -86,11 +91,18 @@ export class ArenaScene extends Phaser.Scene {
       .setDepth(20);
 
     this.add
-      .text(GAME_WIDTH / 2, 52, `${playerOneProfile.label}     ${playerTwoProfile.label}`, {
-        color: '#8d8d99',
-        fontFamily: 'monospace',
-        fontSize: '11px',
-      })
+      .text(
+        GAME_WIDTH / 2,
+        52,
+        mobileControls.isVisible
+          ? 'P1  TOUCH : ← → / ↓ / ↑      P2  ←/→ : bouger   ↑ : sauter   ↓+↑ : descendre'
+          : `${playerOneProfile.label}     ${playerTwoProfile.label}`,
+        {
+          color: '#8d8d99',
+          fontFamily: 'monospace',
+          fontSize: '11px',
+        },
+      )
       .setOrigin(0.5)
       .setDepth(20);
 
