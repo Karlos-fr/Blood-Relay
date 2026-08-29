@@ -77,6 +77,10 @@ npm run lint
 npm run build
 ```
 
+## Règles de développement
+
+Les règles de travail pour ChatGPT et les autres agents sont définies dans [`AGENTS.md`](./AGENTS.md). Elles couvrent notamment la validation humaine, les petits fichiers, les modifications atomiques, la CI, GitHub Pages, les paramètres de game feel et la manière de conserver les décisions dans le dépôt.
+
 ## Plan
 
 La feuille de route complète et son avancement sont dans [`PLAN.md`](./PLAN.md).
