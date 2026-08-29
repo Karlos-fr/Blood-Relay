@@ -3,6 +3,7 @@ import {
   getHeartbeatIntensity,
   getLedIntensity,
   getLoopProgress,
+  getSteamPlumeProfile,
   samplePolyline,
 } from './ArenaBackdropAnimation';
 
@@ -38,5 +39,13 @@ describe('ArenaBackdropAnimation helpers', () => {
 
   it('gives leds phase-shifted blinking cycles', () => {
     expect(getLedIntensity(100, 0)).not.toBe(getLedIntensity(100, 1));
+  });
+
+  it('produces a large visible steam plume on mobile scale', () => {
+    const plume = getSteamPlumeProfile(0.5);
+
+    expect(plume.alpha).toBeGreaterThanOrEqual(0.35);
+    expect(plume.rise).toBeGreaterThanOrEqual(35);
+    expect(plume.scale).toBeGreaterThanOrEqual(1.35);
   });
 });
