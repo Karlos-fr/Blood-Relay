@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { attachArenaBackdropAnimation } from './ArenaBackdropAnimation';
 
 export interface ArenaWallPanel {
   x: number;
@@ -120,6 +121,7 @@ export function drawProceduralArenaBackdrop(
   drawRelayMachine(graphics, layout.machine);
   container.add(graphics);
 
+  attachArenaBackdropAnimation(scene, container, layout);
   return container;
 }
 
