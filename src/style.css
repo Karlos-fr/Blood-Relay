@@ -40,6 +40,14 @@ body {
   -webkit-user-select: none;
 }
 
+html.mobile-runtime #game {
+  position: fixed;
+  right: auto;
+  bottom: auto;
+  max-width: none;
+  max-height: none;
+}
+
 canvas {
   display: block;
   image-rendering: pixelated;
