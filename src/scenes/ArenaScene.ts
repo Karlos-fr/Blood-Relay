@@ -16,9 +16,8 @@ import { combinePlayerControls } from '../input/playerControls';
 import { isMobileDevice } from '../platform/device';
 import { calculateContainedViewport } from '../presentation/mobileViewport';
 import { drawIndustrialPlatform } from '../presentation/PlatformVisual';
+import { drawProceduralArenaBackdrop } from '../presentation/ProceduralArenaBackdrop';
 import { drawStoneFloor } from '../presentation/StoneFloorVisual';
-
-const GRID_STEP = 45;
 
 export class ArenaScene extends Phaser.Scene {
   private players: Player[] = [];
@@ -174,18 +173,12 @@ export class ArenaScene extends Phaser.Scene {
   }
 
   private drawArenaBackdrop(): void {
-    this.add.rectangle(ARENA_WIDTH / 2, ARENA_HEIGHT / 2, ARENA_WIDTH, ARENA_HEIGHT, 0x0d0d15);
-
-    const grid = this.add.graphics().setDepth(1);
-    grid.lineStyle(0.75, 0x20202c, 0.35);
-
-    for (let x = 0; x <= ARENA_WIDTH; x += GRID_STEP) {
-      grid.lineBetween(x, 0, x, ARENA_HEIGHT - FLOOR_HEIGHT);
-    }
-
-    for (let y = 0; y < ARENA_HEIGHT - FLOOR_HEIGHT; y += GRID_STEP) {
-      grid.lineBetween(0, y, ARENA_WIDTH, y);
-    }
+    drawProceduralArenaBackdrop(
+      this,
+      ARENA_WIDTH,
+      ARENA_HEIGHT - FLOOR_HEIGHT,
+      'arena-01',
+    );
   }
 
   private drawCollisionDebug(): void {
