@@ -21,9 +21,11 @@ La version actuelle contient :
 - Vite + TypeScript strict ;
 - Phaser 3 + Arcade Physics ;
 - résolution logique 960 × 540 en 16:9 ;
-- une arène 960 × 540 entièrement visible à l'échelle native, caméra à 100 % sur desktop ;
+- une arène 960 × 540 entièrement visible, caméra à 100 % sur desktop ;
+- contenu du prototype compacté à 90 % pour augmenter l'espace de combat sans modifier le cadrage logique ;
 - sur mobile, un canvas adapté au viewport réel tout en conservant l'intégralité de la scène 16:9 sans crop ni déformation ;
-- trois niveaux verticaux de plateformes traversables ;
+- quatre niveaux verticaux de plateformes traversables selon une structure 2-1-2-1 ;
+- le niveau supérieur conserve une marge suffisante pour qu'un saut complet reste dans l'écran ;
 - deux joueurs locaux avec collisions, accélération, décélération et saut ;
 - commandes tactiles mobiles pour le joueur 1, affichées uniquement sur appareil tactile mobile, avec boutons Crystal Glass adaptés aux safe areas iPhone ;
 - un debug des hitboxes activable avec `F1` ;
