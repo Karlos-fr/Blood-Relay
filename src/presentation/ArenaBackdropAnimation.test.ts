@@ -12,7 +12,6 @@ describe('ArenaBackdropAnimation helpers', () => {
     const firstBeat = getHeartbeatIntensity(0);
     const secondBeat = getHeartbeatIntensity(220);
     const pause = getHeartbeatIntensity(900);
-
     expect(firstBeat).toBeGreaterThan(0.8);
     expect(secondBeat).toBeGreaterThan(0.55);
     expect(pause).toBeLessThan(0.25);
@@ -24,15 +23,7 @@ describe('ArenaBackdropAnimation helpers', () => {
   });
 
   it('samples a point along a polyline by distance', () => {
-    const point = samplePolyline(
-      [
-        { x: 0, y: 0 },
-        { x: 100, y: 0 },
-        { x: 100, y: 100 },
-      ],
-      0.75,
-    );
-
+    const point = samplePolyline([{ x: 0, y: 0 }, { x: 100, y: 0 }, { x: 100, y: 100 }], 0.75);
     expect(point.x).toBeCloseTo(100);
     expect(point.y).toBeCloseTo(50);
   });
@@ -41,10 +32,9 @@ describe('ArenaBackdropAnimation helpers', () => {
     expect(getLedIntensity(100, 0)).not.toBe(getLedIntensity(100, 1));
   });
 
-  it('produces a large visible steam plume on mobile scale', () => {
+  it('produces a high contrast steam plume on mobile scale', () => {
     const plume = getSteamPlumeProfile(0.5);
-
-    expect(plume.alpha).toBeGreaterThanOrEqual(0.35);
+    expect(plume.alpha).toBeGreaterThanOrEqual(0.7);
     expect(plume.rise).toBeGreaterThanOrEqual(35);
     expect(plume.scale).toBeGreaterThanOrEqual(1.35);
   });
