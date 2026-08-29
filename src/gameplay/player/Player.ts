@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import type { PlayerControls } from '../../input/keyboardProfiles';
+import type { PlayerControls } from '../../input/playerControls';
 import {
   getFacingDirection,
   getHorizontalIntent,
@@ -68,13 +68,13 @@ export class Player {
   }
 
   public update(time: number): void {
-    const intent = getHorizontalIntent(this.controls.left.isDown, this.controls.right.isDown);
+    const intent = getHorizontalIntent(this.controls.isLeftDown(), this.controls.isRightDown());
     this.body.setAccelerationX(intent * PLAYER_ACCELERATION);
     this.facing = getFacingDirection(intent, this.facing);
 
-    const jumpPressed = Phaser.Input.Keyboard.JustDown(this.controls.jump);
+    const jumpPressed = this.controls.consumeJumpPressed();
 
-    if (jumpPressed && this.controls.down.isDown && this.isGrounded) {
+    if (jumpPressed && this.controls.isDownDown() && this.isGrounded) {
       this.dropThroughUntil = time + DROP_THROUGH_MS;
       this.body.setVelocityY(90);
     } else if (jumpPressed && this.isGrounded) {
