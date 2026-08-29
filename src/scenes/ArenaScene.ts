@@ -16,6 +16,7 @@ import { combinePlayerControls } from '../input/playerControls';
 import { isMobileDevice } from '../platform/device';
 import { calculateContainedViewport } from '../presentation/mobileViewport';
 import { drawIndustrialPlatform } from '../presentation/PlatformVisual';
+import { drawStoneFloor } from '../presentation/StoneFloorVisual';
 
 const GRID_STEP = 45;
 
@@ -39,10 +40,7 @@ export class ArenaScene extends Phaser.Scene {
 
     const floorY = ARENA_HEIGHT - FLOOR_HEIGHT / 2;
     this.floor = this.createStaticSurface(ARENA_WIDTH / 2, floorY, ARENA_WIDTH, FLOOR_HEIGHT);
-    drawIndustrialPlatform(this, ARENA_WIDTH / 2, floorY, ARENA_WIDTH, FLOOR_HEIGHT, {
-      visualDepth: FLOOR_HEIGHT,
-      symmetric: false,
-    });
+    drawStoneFloor(this, ARENA_WIDTH / 2, floorY, ARENA_WIDTH, FLOOR_HEIGHT);
 
     this.platforms = PLATFORM_LAYOUT.map((platform) => {
       const surface = this.createStaticSurface(
