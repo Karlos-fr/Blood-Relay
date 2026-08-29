@@ -31,4 +31,14 @@ describe('buildStoneFloorPattern', () => {
     expect(secondRow.length).toBeGreaterThan(0);
     expect(secondRow[0].x).not.toBe(firstRow[0].x);
   });
+
+  it('uses compact stone blocks between 18 and 30 pixels wide', () => {
+    const pattern = buildStoneFloorPattern(960, 38);
+    const completeStones = pattern.filter(
+      (stone) => stone.x - stone.width / 2 >= -480 && stone.x + stone.width / 2 <= 480,
+    );
+
+    expect(completeStones.length).toBeGreaterThan(20);
+    expect(completeStones.every((stone) => stone.width >= 18 && stone.width <= 30)).toBe(true);
+  });
 });
