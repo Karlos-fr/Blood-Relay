@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import './style.css';
 import { GAME_HEIGHT, GAME_WIDTH, GRAVITY_Y } from './config/game';
 import { isMobileDevice } from './platform/device';
+import { installMobileViewportSync } from './presentation/mobileViewportSync';
 import { ArenaScene } from './scenes/ArenaScene';
 import { BootScene } from './scenes/BootScene';
 
@@ -38,4 +39,8 @@ const config: Phaser.Types.Core.GameConfig = {
   scene: [BootScene, ArenaScene],
 };
 
-new Phaser.Game(config);
+const game = new Phaser.Game(config);
+
+if (mobile) {
+  installMobileViewportSync(game);
+}
