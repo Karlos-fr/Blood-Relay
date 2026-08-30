@@ -68,19 +68,26 @@ const torsoPieces: Record<TorsoId, readonly PixelPrimitive[]> = {
   ],
 };
 
-export const TORSO_MODULES: Readonly<Record<TorsoId, CharacterModuleDefinition>> = Object.fromEntries(
-  Object.entries(torsoPieces).map(([id, geometry]) => [
+function createTorso(
+  id: TorsoId,
+  geometry: readonly PixelPrimitive[],
+): CharacterModuleDefinition {
+  return {
     id,
-    {
-      id,
-      pieces: [
-        {
-          id: `${id}:torso`,
-          slot: 'torso',
-          anchor: 'torso',
-          views: { right: geometry },
-        },
-      ],
-    },
-  ]),
-) as Record<TorsoId, CharacterModuleDefinition>;
+    pieces: [
+      {
+        id: `${id}:torso`,
+        slot: 'torso',
+        anchor: 'torso',
+        views: { right: geometry },
+      },
+    ],
+  };
+}
+
+export const TORSO_MODULES: Readonly<Record<TorsoId, CharacterModuleDefinition>> = {
+  'prison-jumpsuit': createTorso('prison-jumpsuit', torsoPieces['prison-jumpsuit']),
+  'medical-suit': createTorso('medical-suit', torsoPieces['medical-suit']),
+  'torn-suit': createTorso('torn-suit', torsoPieces['torn-suit']),
+  'light-armor': createTorso('light-armor', torsoPieces['light-armor']),
+};
