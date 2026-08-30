@@ -164,8 +164,8 @@ Les briques suivantes sont ajoutées seulement lorsqu'elles deviennent nécessai
 - Vue **2D de côté**.
 - Gravité verticale.
 - Arène entièrement visible, sans scrolling.
-- Ratio cible **16:9**.
-- Résolution logique de référence **960 × 540**.
+- Format logique panoramique **1120 × 540**.
+- Résolution logique de référence **1120 × 540**.
 - Scaling entier privilégié lorsque possible, avec adaptation propre aux autres résolutions.
 - 60 FPS visés sur une machine modeste.
 - Deux joueurs clavier suffisent jusqu'à validation de la mécanique centrale.
@@ -285,8 +285,8 @@ Obtenir un projet Phaser extrêmement simple, testable et compilable.
 - [x] Activer TypeScript strict.
 - [x] Ajouter Phaser 3.
 - [x] Configurer Arcade Physics.
-- [x] Configurer une résolution logique de 960 × 540.
-- [x] Configurer le scaling 16:9 et le centrage.
+- [x] Configurer une résolution logique de 1120 × 540.
+- [x] Configurer le scaling panoramique et le centrage.
 - [x] Configurer ESLint.
 - [x] Configurer Prettier.
 - [x] Configurer Vitest.
@@ -296,7 +296,7 @@ Obtenir un projet Phaser extrêmement simple, testable et compilable.
 - [x] Afficher une arène vide avec un sol temporaire.
 - [x] Afficher la version du jeu en mode debug.
 - [x] Ajouter un README minimal décrivant le lancement.
-- [x] Configurer Vite pour le chemin GitHub Pages `/Blood-Relay/`.
+- [x] Configurer Vite pour le chemin GitHub Pages `/blood-relay/`.
 - [x] Ajouter un workflow GitHub Pages déclenché sur `main`.
 - [x] Vérifier le build de production via GitHub Actions.
 - [x] Vérifier les tests et le lint via GitHub Actions.
@@ -320,7 +320,7 @@ Obtenir un projet Phaser extrêmement simple, testable et compilable.
 - `npm run test` réussit.
 - `npm run lint` réussit.
 - Le workflow GitHub Pages publie `dist/` depuis `main`.
-- L'arène 960 × 540 s'affiche correctement sur GitHub Pages.
+- L'arène 1120 × 540 s'affiche correctement sur GitHub Pages.
 - La validation visuelle manuelle est effectuée avant de passer à la phase suivante.
 
 ## Boucle de validation
@@ -333,7 +333,7 @@ Obtenir un projet Phaser extrêmement simple, testable et compilable.
 4. la version déployée est testée manuellement ;
 5. les tâches nécessitant une validation visuelle ne sont cochées qu'après ce test.
 
-URL cible : `https://karlos-fr.github.io/Blood-Relay/`.
+URL cible : `https://karlos-fr.github.io/blood-relay/`.
 
 ---
 
