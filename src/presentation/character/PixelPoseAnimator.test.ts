@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { PLAYER_MOVE_SPEED } from '../../gameplay/player/movement';
 import { CHARACTER_RENDER_ORDER, getRigAnchor } from './CharacterRig';
 import { PixelPoseAnimator } from './PixelPoseAnimator';
-import { CHARACTER_ANIMATIONS, LOWER_BODY_SLOTS, UPPER_BODY_SLOTS } from './pixelPoses';
+import { LOWER_BODY_SLOTS, UPPER_BODY_SLOTS } from './pixelPoses';
 
 describe('shared procedural character rig and poses', () => {
   it('mirrors rig x positions while preserving y', () => {
@@ -29,33 +30,59 @@ describe('shared procedural character rig and poses', () => {
     expect(UPPER_BODY_SLOTS).toEqual(['rearArm', 'torso', 'head', 'frontArm', 'weapon']);
   });
 
-  it('contains all initial animations with integer offsets', () => {
-    expect(Object.keys(CHARACTER_ANIMATIONS).sort()).toEqual(
-      ['apex', 'fall', 'idle', 'landing', 'rise', 'run', 'takeoff'].sort(),
-    );
-    for (const frames of Object.values(CHARACTER_ANIMATIONS)) {
-      for (const frame of frames) {
-        for (const offset of Object.values(frame.offsets)) {
-          expect(Number.isInteger(offset?.x)).toBe(true);
-          expect(Number.isInteger(offset?.y)).toBe(true);
-        }
-      }
-    }
+  it('returns deterministic animation and frame indexes', () => {
+    const animator = new PixelPoseAnimator();
+    expect(animator.update(0, { grounded: true, velocityX: 0, velocityY: 0 })).toEqual({
+      animationName: 'idle',
+      frameIndex: 0,
+    });
+    expect(animator.update(181, { grounded: true, velocityX: 0, velocityY: 0 })).toEqual({
+      animationName: 'idle',
+      frameIndex: 1,
+    });
   });
 
   it('selects motion transitions deterministically', () => {
     const animator = new PixelPoseAnimator();
-    animator.update(0, { grounded: true, velocityX: 100, velocityY: 0 });
-    expect(animator.animationName).toBe('run');
-    animator.update(16, { grounded: false, velocityX: 80, velocityY: -300 });
-    expect(animator.animationName).toBe('takeoff');
-    animator.update(180, { grounded: false, velocityX: 80, velocityY: -180 });
-    expect(animator.animationName).toBe('rise');
-    animator.update(360, { grounded: false, velocityX: 60, velocityY: 10 });
-    expect(animator.animationName).toBe('apex');
-    animator.update(520, { grounded: false, velocityX: 40, velocityY: 180 });
-    expect(animator.animationName).toBe('fall');
-    animator.update(700, { grounded: true, velocityX: 20, velocityY: 0 });
-    expect(animator.animationName).toBe('landing');
+    expect(animator.update(0, { grounded: true, velocityX: 100, velocityY: 0 })).toEqual({
+      animationName: 'run',
+      frameIndex: 0,
+    });
+    expect(animator.update(16, { grounded: false, velocityX: 80, velocityY: -300 })).toEqual({
+      animationName: 'takeoff',
+      frameIndex: 0,
+    });
+    expect(animator.update(180, { grounded: false, velocityX: 80, velocityY: -180 })).toEqual({
+      animationName: 'rise',
+      frameIndex: 0,
+    });
+    expect(animator.update(360, { grounded: false, velocityX: 60, velocityY: 10 })).toEqual({
+      animationName: 'apex',
+      frameIndex: 0,
+    });
+    expect(animator.update(520, { grounded: false, velocityX: 40, velocityY: 180 })).toEqual({
+      animationName: 'fall',
+      frameIndex: 0,
+    });
+    expect(animator.update(700, { grounded: true, velocityX: 20, velocityY: 0 })).toEqual({
+      animationName: 'landing',
+      frameIndex: 0,
+    });
+  });
+
+  it('retains velocity-scaled run timing', () => {
+    const animator = new PixelPoseAnimator();
+    expect(
+      animator.update(0, { grounded: true, velocityX: PLAYER_MOVE_SPEED, velocityY: 0 }),
+    ).toEqual({
+      animationName: 'run',
+      frameIndex: 0,
+    });
+    expect(
+      animator.update(80, { grounded: true, velocityX: PLAYER_MOVE_SPEED, velocityY: 0 }),
+    ).toEqual({
+      animationName: 'run',
+      frameIndex: 1,
+    });
   });
 });

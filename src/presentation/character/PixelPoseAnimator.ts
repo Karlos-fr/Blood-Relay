@@ -1,14 +1,16 @@
 import { PLAYER_MOVE_SPEED } from '../../gameplay/player/movement';
-import {
-  CHARACTER_ANIMATIONS,
-  type CharacterAnimationName,
-  type PixelPoseFrame,
-} from './pixelPoses';
+import { CHARACTER_ANIMATIONS } from './anatomy/anatomicalAnimations';
+import type { CharacterAnimationName, CharacterPoseFrame } from './anatomy/AnatomicalPose';
 
 export interface CharacterMotionSnapshot {
   grounded: boolean;
   velocityX: number;
   velocityY: number;
+}
+
+export interface CharacterFrameSelection {
+  animationName: CharacterAnimationName;
+  frameIndex: number;
 }
 
 const TAKEOFF_MS = 140;
@@ -22,7 +24,7 @@ export class PixelPoseAnimator {
   private initialized = false;
   private wasGrounded = true;
 
-  public update(timeMs: number, motion: CharacterMotionSnapshot): PixelPoseFrame {
+  public update(timeMs: number, motion: CharacterMotionSnapshot): CharacterFrameSelection {
     if (!this.initialized) {
       this.initialized = true;
       this.wasGrounded = motion.grounded;
@@ -47,10 +49,13 @@ export class PixelPoseAnimator {
       this.animationName === 'run'
         ? Math.min(1.35, Math.max(0.65, Math.abs(motion.velocityX) / PLAYER_MOVE_SPEED))
         : 1;
-    return sampleFrames(
-      CHARACTER_ANIMATIONS[this.animationName],
-      (timeMs - this.startedAt) * rate,
-    );
+    return {
+      animationName: this.animationName,
+      frameIndex: sampleFrameIndex(
+        CHARACTER_ANIMATIONS[this.animationName].frames,
+        (timeMs - this.startedAt) * rate,
+      ),
+    };
   }
 
   private start(name: CharacterAnimationName, timeMs: number): void {
@@ -76,14 +81,14 @@ function baseAnimation(motion: CharacterMotionSnapshot): CharacterAnimationName 
   return 'apex';
 }
 
-function sampleFrames(frames: readonly PixelPoseFrame[], elapsedMs: number): PixelPoseFrame {
+function sampleFrameIndex(frames: readonly CharacterPoseFrame[], elapsedMs: number): number {
   const total = frames.reduce((sum, frame) => sum + frame.durationMs, 0);
   let cursor = ((elapsedMs % total) + total) % total;
 
-  for (const frame of frames) {
-    if (cursor < frame.durationMs) return frame;
-    cursor -= frame.durationMs;
+  for (let index = 0; index < frames.length; index += 1) {
+    if (cursor < frames[index].durationMs) return index;
+    cursor -= frames[index].durationMs;
   }
 
-  return frames[frames.length - 1];
+  return frames.length - 1;
 }
