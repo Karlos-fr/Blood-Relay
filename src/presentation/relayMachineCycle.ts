@@ -7,11 +7,11 @@ export interface RelayMachineCycleState {
   phaseTimeMs: number;
 }
 
-export const RELAY_CAPACITY = 36;
+export const RELAY_CAPACITY = 72;
 export const RELAY_PRESSURE_THRESHOLD = 0.88;
-export const RELAY_PRESSURIZE_MS = 800;
-export const RELAY_PURGE_MS = 1200;
-export const RELAY_COOLDOWN_MS = 1500;
+export const RELAY_PRESSURIZE_MS = 1000;
+export const RELAY_PURGE_MS = 2400;
+export const RELAY_COOLDOWN_MS = 1600;
 
 export function createRelayMachineCycle(): RelayMachineCycleState {
   return {
@@ -91,11 +91,18 @@ export function stepRelayMachineCycle(
 export function getRelayPurgeBoost(state: RelayMachineCycleState): number {
   if (state.phase !== 'purging') return 0;
   const progress = clamp01(state.phaseTimeMs / RELAY_PURGE_MS);
-  return Math.sin(progress * Math.PI);
+  const attack = smoothstep(0, 0.16, progress);
+  const release = 1 - smoothstep(0.78, 1, progress);
+  return attack * release;
 }
 
 function easeOutCubic(value: number): number {
   return 1 - Math.pow(1 - value, 3);
+}
+
+function smoothstep(edge0: number, edge1: number, value: number): number {
+  const t = clamp01((value - edge0) / (edge1 - edge0));
+  return t * t * (3 - 2 * t);
 }
 
 function clamp01(value: number): number {
