@@ -5,6 +5,7 @@ import { createIndustrialEventSystem } from './industrialEvents';
 import { createMachineLightingSystem } from './machineLighting';
 import { createPanelAmbienceSystem } from './panelAmbience';
 import { buildRoundedOrthogonalPath } from './pipeGeometry';
+import { createRelayMachineSystem } from './relayMachineSystem';
 import { createSteamParticleSystem } from './steamParticles';
 
 interface Point { x: number; y: number; }
@@ -109,19 +110,25 @@ export function attachArenaBackdropAnimation(
   );
   const machineLighting = createMachineLightingSystem(scene, animatedLayer, machine);
 
+  const bloodPipeEffects = layout.pipes.map((pipe) => {
+    const path = buildRoundedOrthogonalPath(pipe.points, Math.max(11, pipe.thickness * 1.45));
+    return createBloodPipeEffect(scene, animatedLayer, path);
+  });
+
+  // Keep a restrained red backlight behind the dynamic reservoir rather than an opaque core.
   const heartGlow = scene.add.circle(
     machine.x,
     machine.y,
-    machine.radius * 0.72,
+    machine.radius * 0.48,
     0xe23343,
-    0.16,
+    0.07,
   );
   const heartCore = scene.add.circle(
     machine.x,
     machine.y,
-    machine.radius * 0.25,
+    machine.radius * 0.085,
     0xe13b49,
-    0.58,
+    0.16,
   );
   const rotatingRing = scene.add.graphics().setPosition(machine.x, machine.y);
   rotatingRing.lineStyle(2, 0xa3a8b5, 0.48);
@@ -139,11 +146,6 @@ export function attachArenaBackdropAnimation(
   const leds = ledOffsets.map(([x, y, color]) =>
     scene.add.circle(machine.x + x * ledRadius, machine.y + y * ledRadius, 3.2, color, 0.5),
   );
-
-  const bloodPipeEffects = layout.pipes.map((pipe) => {
-    const path = buildRoundedOrthogonalPath(pipe.points, Math.max(11, pipe.thickness * 1.45));
-    return createBloodPipeEffect(scene, animatedLayer, path);
-  });
 
   const ventGraphics = scene.add.graphics();
   const ventY = machine.y - machine.radius * 0.72;
@@ -173,30 +175,52 @@ export function attachArenaBackdropAnimation(
   }
 
   animatedLayer.add([heartGlow, heartCore, rotatingRing, ventGraphics, ...leds]);
+  const relayMachine = createRelayMachineSystem(scene, animatedLayer, machine);
   const steamSystem = createSteamParticleSystem(scene, animatedLayer, steamOrigins);
 
+  let previousTime: number | undefined;
+  let ringRotation = 0;
   const controller = new ArenaBackdropAnimationController((time) => {
+    const dtMs = previousTime === undefined ? 16 : clamp(time - previousTime, 0, 50);
+    previousTime = time;
     const heartbeat = getHeartbeatIntensity(time);
+
     moteSystem.update(time);
     panelSystem.update(time);
     industrialSystem.update(time);
-    machineLighting.update(heartbeat);
-    heartCore.setScale(0.96 + heartbeat * 0.12).setAlpha(0.38 + heartbeat * 0.55);
-    heartGlow.setScale(0.9 + heartbeat * 0.28).setAlpha(0.07 + heartbeat * 0.22);
-    rotatingRing.setRotation(getLoopProgress(time, RING_PERIOD) * Math.PI * 2);
-
-    leds.forEach((led, index) => {
-      const intensity = getLedIntensity(time, index);
-      led.setAlpha(intensity).setScale(0.9 + intensity * 0.32);
-    });
 
     bloodPipeEffects.forEach((effect, index) => {
       const progress = getLoopProgress(time + index * 430, FLOW_PERIOD);
       const shimmer = 0.8 + Math.sin(time * 0.01 + index) * 0.18;
-      effect.update(progress, shimmer);
+      const update = effect.update(progress, shimmer);
+      if (update.arrived && update.entryPoint && update.entryVelocity) {
+        relayMachine.acceptBlood(update.entryPoint, update.entryVelocity);
+      }
     });
 
-    steamSystem.update(time);
+    const relayState = relayMachine.update(time, dtMs);
+    const energizedHeartbeat = Math.min(1, heartbeat + relayState.purgeBoost * 0.72);
+    machineLighting.update(energizedHeartbeat);
+
+    heartCore
+      .setScale(0.9 + heartbeat * 0.16 + relayState.purgeBoost * 0.45)
+      .setAlpha(0.1 + heartbeat * 0.18 + relayState.purgeBoost * 0.42);
+    heartGlow
+      .setScale(0.94 + heartbeat * 0.16 + relayState.purgeBoost * 0.12)
+      .setAlpha(0.035 + heartbeat * 0.1 + relayState.purgeBoost * 0.2);
+
+    const baseAngularSpeed = (Math.PI * 2) / (RING_PERIOD / 1000);
+    const angularSpeed =
+      baseAngularSpeed * (1 + relayState.pressure * 0.8) + relayState.purgeBoost * 3.6;
+    ringRotation += angularSpeed * (dtMs / 1000);
+    rotatingRing.setRotation(ringRotation);
+
+    leds.forEach((led, index) => {
+      const intensity = Math.min(1, getLedIntensity(time, index) + relayState.purgeBoost * 0.38);
+      led.setAlpha(intensity).setScale(0.9 + intensity * 0.32);
+    });
+
+    steamSystem.update(time, relayState.purgeBoost);
   });
 
   sceneControllers.set(scene, controller);
