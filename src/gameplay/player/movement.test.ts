@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { getFacingDirection, getHorizontalIntent } from './movement';
+import {
+  getFacingDirection,
+  getHorizontalIntent,
+  getReleasedJumpVelocity,
+  PLAYER_JUMP_RELEASE_SPEED,
+  PLAYER_JUMP_SPEED,
+} from './movement';
 
 describe('player movement intent', () => {
   it('returns left when only left is pressed', () => {
@@ -19,5 +25,24 @@ describe('player movement intent', () => {
     expect(getFacingDirection(0, -1)).toBe(-1);
     expect(getFacingDirection(1, -1)).toBe(1);
     expect(getFacingDirection(-1, 1)).toBe(-1);
+  });
+});
+
+describe('variable jump release', () => {
+  it('cuts a strong upward jump when the jump button is released early', () => {
+    const released = getReleasedJumpVelocity(-PLAYER_JUMP_SPEED);
+
+    expect(released).toBe(-PLAYER_JUMP_RELEASE_SPEED);
+    expect(Math.abs(released)).toBeLessThan(Math.abs(PLAYER_JUMP_SPEED));
+  });
+
+  it('does not boost a jump that is already rising more slowly', () => {
+    expect(getReleasedJumpVelocity(-PLAYER_JUMP_RELEASE_SPEED * 0.5)).toBe(
+      -PLAYER_JUMP_RELEASE_SPEED * 0.5,
+    );
+  });
+
+  it('does not alter downward velocity', () => {
+    expect(getReleasedJumpVelocity(120)).toBe(120);
   });
 });
