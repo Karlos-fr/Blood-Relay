@@ -11,6 +11,9 @@ export const ACCESSORY_IDS = [
   'holster',
 ] as const;
 export const WEAPON_IDS = ['relay-pistol'] as const;
+export const BODY_IDS = ['standard', 'heavy', 'gaunt'] as const;
+export const ARMOR_IDS = ['none', 'scrap-plate', 'industrial-vest'] as const;
+export const MUTATION_IDS = ['none', 'blood-veins', 'bone-growth', 'grafted-arm'] as const;
 export const PALETTE_IDS = [
   'inmate-red',
   'lab-cyan',
@@ -25,6 +28,9 @@ export type LegsId = (typeof LEGS_IDS)[number];
 export type ArmsId = (typeof ARMS_IDS)[number];
 export type AccessoryId = (typeof ACCESSORY_IDS)[number];
 export type WeaponId = (typeof WEAPON_IDS)[number];
+export type BodyId = (typeof BODY_IDS)[number];
+export type ArmorId = (typeof ARMOR_IDS)[number];
+export type MutationId = (typeof MUTATION_IDS)[number];
 export type PaletteId = (typeof PALETTE_IDS)[number];
 
 export interface CharacterAppearance {
@@ -33,6 +39,9 @@ export interface CharacterAppearance {
   legs: LegsId;
   arms: ArmsId;
   weapon: WeaponId;
+  body: BodyId;
+  armor: ArmorId;
+  mutation: MutationId;
   accessories: AccessoryId[];
   palette: PaletteId;
   seed: number;

@@ -1,14 +1,21 @@
 import { describe, expect, it } from 'vitest';
 import {
   ACCESSORY_IDS,
+  ARMOR_IDS,
   ARMS_IDS,
+  BODY_IDS,
   HEAD_IDS,
   LEGS_IDS,
+  MUTATION_IDS,
   PALETTE_IDS,
   TORSO_IDS,
   WEAPON_IDS,
 } from './CharacterAppearance';
-import { buildCharacterAppearance, PLAYER_APPEARANCES } from './deterministicCharacter';
+import {
+  buildCharacterAppearance,
+  PLAYER_APPEARANCES,
+  PREVIEW_APPEARANCES,
+} from './deterministicCharacter';
 
 describe('deterministic procedural character appearance', () => {
   it('rebuilds the same appearance from the same seed', () => {
@@ -24,6 +31,18 @@ describe('deterministic procedural character appearance', () => {
     expect(WEAPON_IDS).toContain(appearance.weapon);
     expect(PALETTE_IDS).toContain(appearance.palette);
     expect(appearance.accessories.every((id) => ACCESSORY_IDS.includes(id))).toBe(true);
+  });
+
+  it('selects valid body, armor, and mutation ids', () => {
+    const appearance = buildCharacterAppearance(0x0badcafe);
+    expect(BODY_IDS).toContain(appearance.body);
+    expect(ARMOR_IDS).toContain(appearance.armor);
+    expect(MUTATION_IDS).toContain(appearance.mutation);
+  });
+
+  it('provides clone, mercenary, mutant, and mixed preview appearances', () => {
+    expect(Object.keys(PREVIEW_APPEARANCES)).toEqual(['clone', 'mercenary', 'mutant', 'mixed']);
+    expect(new Set(Object.values(PREVIEW_APPEARANCES).map((value) => value.seed)).size).toBe(4);
   });
 
   it('keeps the fixed prototype fighters materially different', () => {

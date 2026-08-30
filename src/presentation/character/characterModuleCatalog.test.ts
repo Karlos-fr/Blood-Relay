@@ -13,6 +13,14 @@ describe('complete character module catalog', () => {
   });
 
   it('uses palette roles available in every palette for every authored view', () => {
+    expect(Object.keys(CHARACTER_PALETTES['inmate-red']).sort()).toEqual(
+      [
+        'accent', 'blood', 'cloth', 'clothDark', 'clothLight', 'metal', 'metalDark',
+        'metalLight', 'mutation', 'mutationDark', 'outline', 'shadow', 'skin',
+        'skinDark', 'skinLight',
+      ].sort(),
+    );
+
     const roles = new Set(Object.keys(CHARACTER_PALETTES[PALETTE_IDS[0]]));
     for (const module of getAllCharacterModules()) {
       for (const piece of module.pieces) {
