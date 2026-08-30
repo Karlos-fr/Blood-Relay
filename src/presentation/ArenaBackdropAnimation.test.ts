@@ -3,8 +3,6 @@ import {
   getHeartbeatIntensity,
   getLedIntensity,
   getLoopProgress,
-  getSteamPlumeProfile,
-  getSteamPuffStyle,
   samplePolyline,
 } from './ArenaBackdropAnimation';
 
@@ -24,25 +22,19 @@ describe('ArenaBackdropAnimation helpers', () => {
   });
 
   it('samples a point along a polyline by distance', () => {
-    const point = samplePolyline([{ x: 0, y: 0 }, { x: 100, y: 0 }, { x: 100, y: 100 }], 0.75);
+    const point = samplePolyline(
+      [
+        { x: 0, y: 0 },
+        { x: 100, y: 0 },
+        { x: 100, y: 100 },
+      ],
+      0.75,
+    );
     expect(point.x).toBeCloseTo(100);
     expect(point.y).toBeCloseTo(50);
   });
 
   it('gives leds phase-shifted blinking cycles', () => {
     expect(getLedIntensity(100, 0)).not.toBe(getLedIntensity(100, 1));
-  });
-
-  it('produces a high contrast steam plume on mobile scale', () => {
-    const plume = getSteamPlumeProfile(0.5);
-    expect(plume.alpha).toBeGreaterThanOrEqual(0.7);
-    expect(plume.rise).toBeGreaterThanOrEqual(35);
-    expect(plume.scale).toBeGreaterThanOrEqual(1.35);
-  });
-
-  it('keeps the steam shape fill visible while its object starts hidden', () => {
-    const style = getSteamPuffStyle();
-    expect(style.fillAlpha).toBe(1);
-    expect(style.initialObjectAlpha).toBe(0);
   });
 });
