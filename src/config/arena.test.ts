@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest';
+import { PLAYER_JUMP_SPEED } from '../gameplay/player/movement';
 import { isSymmetricPlatformWidth } from '../presentation/platformTiles';
-import { GAME_HEIGHT, GAME_WIDTH } from './game';
-import { ARENA_CAMERA_ZOOM, ARENA_HEIGHT, ARENA_WIDTH, PLATFORM_LAYOUT } from './arena';
+import { GAME_HEIGHT, GAME_WIDTH, GRAVITY_Y } from './game';
+import {
+  ARENA_CAMERA_ZOOM,
+  ARENA_HEIGHT,
+  ARENA_WIDTH,
+  FLOOR_HEIGHT,
+  PLATFORM_HEIGHT,
+  PLATFORM_LAYOUT,
+} from './arena';
 
 describe('arena layout', () => {
   it('uses a wider native 1:1 arena for desktop', () => {
@@ -17,36 +25,62 @@ describe('arena layout', () => {
     expect(ARENA_HEIGHT * ARENA_CAMERA_ZOOM).toBe(GAME_HEIGHT);
   });
 
-  it('uses three platform levels in a symmetric 2-2-2 pattern', () => {
+  it('uses four platform levels in a symmetric 2-2-2-2 pattern', () => {
     const tiers = PLATFORM_LAYOUT.map((platform) => platform.tier);
-    const counts = [1, 2, 3].map(
+    const counts = [1, 2, 3, 4].map(
       (tier) => PLATFORM_LAYOUT.filter((platform) => platform.tier === tier).length,
     );
 
-    expect(counts).toEqual([2, 2, 2]);
-    expect(Math.max(...tiers)).toBe(3);
+    expect(counts).toEqual([2, 2, 2, 2]);
+    expect(Math.max(...tiers)).toBe(4);
   });
 
-  it('splits tier two around the centered relay machine without changing its height', () => {
-    const tierTwo = PLATFORM_LAYOUT.filter((platform) => platform.tier === 2);
+  it('mirrors every platform pair around the vertical arena axis', () => {
     const center = ARENA_WIDTH / 2;
-    const machineRadius = 110;
 
-    expect(tierTwo).toHaveLength(2);
-    expect(tierTwo[0].y).toBe(tierTwo[1].y);
-    expect(center - tierTwo[0].x).toBeCloseTo(tierTwo[1].x - center);
-    expect(tierTwo[0].x + tierTwo[0].width / 2).toBeLessThan(center - machineRadius);
-    expect(tierTwo[1].x - tierTwo[1].width / 2).toBeGreaterThan(center + machineRadius);
+    for (const tier of [1, 2, 3, 4]) {
+      const pair = PLATFORM_LAYOUT.filter((platform) => platform.tier === tier);
+      expect(pair).toHaveLength(2);
+      expect(pair[0].y).toBe(pair[1].y);
+      expect(pair[0].width).toBe(pair[1].width);
+      expect(center - pair[0].x).toBeCloseTo(pair[1].x - center);
+    }
   });
 
-  it('keeps tier-three platforms away from the relay', () => {
-    const tierThree = PLATFORM_LAYOUT.filter((platform) => platform.tier === 3);
-    const center = ARENA_WIDTH / 2;
+  it('keeps platforms clear of the relay machine footprint', () => {
+    const machine = { x: ARENA_WIDTH / 2, y: 228, radius: 110 };
+    const machineLeft = machine.x - machine.radius;
+    const machineRight = machine.x + machine.radius;
+    const machineTop = machine.y - machine.radius;
+    const machineBottom = machine.y + machine.radius;
 
-    expect(tierThree).toHaveLength(2);
-    expect(tierThree[0].y).toBe(tierThree[1].y);
-    expect(center - tierThree[0].x).toBeGreaterThanOrEqual(205);
-    expect(tierThree[1].x - center).toBeGreaterThanOrEqual(205);
+    for (const platform of PLATFORM_LAYOUT) {
+      const left = platform.x - platform.width / 2;
+      const right = platform.x + platform.width / 2;
+      const top = platform.y - PLATFORM_HEIGHT / 2;
+      const bottom = platform.y + PLATFORM_HEIGHT / 2;
+      const overlapsVertically = bottom > machineTop && top < machineBottom;
+
+      if (overlapsVertically) {
+        expect(right < machineLeft || left > machineRight).toBe(true);
+      }
+    }
+  });
+
+  it('spaces each climb within the current full-jump height', () => {
+    const maxJumpHeight = (PLAYER_JUMP_SPEED * PLAYER_JUMP_SPEED) / (2 * GRAVITY_Y);
+    const tierSurfaceYs = [1, 2, 3, 4].map((tier) => {
+      const platform = PLATFORM_LAYOUT.find((candidate) => candidate.tier === tier);
+      if (!platform) throw new Error(`Missing platform tier ${tier}`);
+      return platform.y - PLATFORM_HEIGHT / 2;
+    });
+    const surfaces = [ARENA_HEIGHT - FLOOR_HEIGHT, ...tierSurfaceYs];
+
+    for (let index = 1; index < surfaces.length; index += 1) {
+      const verticalGap = surfaces[index - 1] - surfaces[index];
+      expect(verticalGap).toBeGreaterThan(0);
+      expect(verticalGap).toBeLessThanOrEqual(maxJumpHeight * 0.9);
+    }
   });
 
   it('uses widths that produce centered symmetric procedural patterns', () => {
