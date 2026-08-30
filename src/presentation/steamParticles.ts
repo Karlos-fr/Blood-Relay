@@ -69,27 +69,29 @@ export function sampleSteamParticle(
   outwardDirection: -1 | 0 | 1 = 0,
   pressureBoost = 0,
 ): SteamParticleSample {
-  if (ageMs < 0 || ageMs > seed.lifetimeMs) {
+  const boost = clamp01(pressureBoost);
+  const effectiveLifetime = seed.lifetimeMs * (1 + boost * 0.45);
+  if (ageMs < 0 || ageMs > effectiveLifetime) {
     return { visible: false, x: 0, y: 0, scale: seed.startScale, alpha: 0, rotation: 0 };
   }
 
-  const boost = clamp01(pressureBoost);
-  const progress = ageMs / seed.lifetimeMs;
+  const lifeProgress = clamp01(ageMs / effectiveLifetime);
+  const progress = clamp01(ageMs / seed.lifetimeMs);
   const smoothProgress = progress * progress * (3 - 2 * progress);
-  const envelope = Math.pow(Math.sin(progress * Math.PI), 0.72);
+  const envelope = Math.pow(Math.sin(lifeProgress * Math.PI), 0.72);
   const turbulence = Math.sin(progress * Math.PI * 2 + seed.wavePhase) * seed.turbulence;
   const outwardBias = outwardDirection * (10 + Math.abs(seed.lateralDrift) * 0.5) * smoothProgress;
   const localDrift = seed.lateralDrift * 0.12 * smoothProgress;
-  const boostedOutward = outwardDirection * boost * 18 * smoothProgress;
-  const boostedRise = 1 + boost * 0.34;
+  const boostedOutward = outwardDirection * boost * 36 * smoothProgress;
+  const boostedRise = 1 + boost * 0.68;
   const baseScale = seed.startScale + (seed.endScale - seed.startScale) * progress;
 
   return {
     visible: true,
-    x: outwardBias + localDrift + turbulence * 0.65 + boostedOutward,
+    x: outwardBias + localDrift + turbulence * (0.65 + boost * 0.18) + boostedOutward,
     y: -seed.riseDistance * boostedRise * smoothProgress,
-    scale: baseScale * (1 + boost * 0.45),
-    alpha: Math.min(1, envelope * seed.peakAlpha * (1 + boost * 0.72)),
+    scale: baseScale * (1 + boost * 0.78),
+    alpha: Math.min(1, envelope * seed.peakAlpha * (1 + boost * 1.22)),
     rotation: seed.startRotation + seed.spin * progress,
   };
 }
