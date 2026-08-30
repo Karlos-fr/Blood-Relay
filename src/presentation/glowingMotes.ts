@@ -1,6 +1,9 @@
 import type Phaser from 'phaser';
 
+export type GlowingMoteDepth = 'far' | 'mid' | 'near';
+
 export interface GlowingMoteSeed {
+  depth: GlowingMoteDepth;
   startX: number;
   startY: number;
   velocityY: number;
@@ -25,33 +28,50 @@ export interface GlowingMoteSystem {
   update(time: number): void;
 }
 
+interface DepthProfile {
+  speed: number;
+  drift: number;
+  scale: number;
+  alpha: number;
+}
+
 export const GLOWING_MOTE_PALETTE = [0xf2c94c, 0xffe08a, 0xfff3bf] as const;
 
-const MOTE_TEXTURE_KEY = 'relay-glowing-mote-warm';
+const MOTE_DEPTHS: GlowingMoteDepth[] = ['far', 'mid', 'near'];
+const DEPTH_PROFILES: Record<GlowingMoteDepth, DepthProfile> = {
+  far: { speed: 0.62, drift: 0.62, scale: 0.62, alpha: 0.72 },
+  mid: { speed: 0.9, drift: 0.9, scale: 0.96, alpha: 1 },
+  near: { speed: 1.22, drift: 1.22, scale: 1.38, alpha: 1.28 },
+};
+const MOTE_TEXTURE_KEY = 'relay-glowing-mote-warm-depth-v2';
 
 export function buildGlowingMoteSeeds(
   width: number,
   height: number,
-  count = 16,
+  count = 36,
 ): GlowingMoteSeed[] {
-  return Array.from({ length: Math.min(20, count) }, (_, index) => {
+  return Array.from({ length: Math.min(60, count) }, (_, index) => {
+    const depth = MOTE_DEPTHS[index % MOTE_DEPTHS.length];
+    const profile = DEPTH_PROFILES[depth];
     const a = fraction(index, 37, 13, 101);
     const b = fraction(index, 61, 29, 103);
     const c = fraction(index, 43, 17, 97);
     const lifetimeMs = 7800 + Math.round(c * 4200);
+    const baseTravel = height * (0.88 + c * 0.18);
 
     return {
+      depth,
       startX: a * width,
       startY: height * (0.76 + b * 0.32),
-      velocityY: -(height * (0.88 + c * 0.18)) / (lifetimeMs / 1000),
-      horizontalDrift: -7 + b * 14,
-      wanderAmplitude: 5 + a * 8,
+      velocityY: -(baseTravel * profile.speed) / (lifetimeMs / 1000),
+      horizontalDrift: (-7 + b * 14) * profile.drift,
+      wanderAmplitude: (5 + a * 8) * profile.drift,
       wanderPhase: c * Math.PI * 2,
       twinklePhase: b * Math.PI * 2,
       lifetimeMs,
       phaseOffsetMs: index === 0 ? 0 : Math.round(a * lifetimeMs),
-      baseAlpha: 0.34 + c * 0.28,
-      scale: 0.6 + b * 0.55,
+      baseAlpha: Math.min(0.92, (0.42 + c * 0.25) * profile.alpha),
+      scale: (0.58 + b * 0.42) * profile.scale,
     };
   });
 }
@@ -67,17 +87,19 @@ export function sampleGlowingMote(
   const seconds = localTime / 1000;
 
   const x = positiveModulo(
-    seed.startX + seed.horizontalDrift * progress + Math.sin(progress * Math.PI * 2 + seed.wanderPhase) * seed.wanderAmplitude,
+    seed.startX +
+      seed.horizontalDrift * progress +
+      Math.sin(progress * Math.PI * 2 + seed.wanderPhase) * seed.wanderAmplitude,
     width,
   );
   const y = seed.startY + seed.velocityY * seconds;
 
-  const fadeIn = smoothstep(0, 0.1, progress);
-  const fadeOut = 1 - smoothstep(0.78, 1, progress);
-  const twinkleA = 0.72 + Math.sin(seconds * 3.1 + seed.twinklePhase) * 0.18;
-  const twinkleB = 0.88 + Math.sin(seconds * 7.3 + seed.wanderPhase) * 0.12;
-  const alpha = seed.baseAlpha * fadeIn * fadeOut * Math.max(0.25, twinkleA * twinkleB);
-  const pulseScale = seed.scale * (0.92 + Math.sin(seconds * 2.4 + seed.twinklePhase) * 0.08);
+  const fadeIn = smoothstep(0, 0.08, progress);
+  const fadeOut = 1 - smoothstep(0.8, 1, progress);
+  const twinkleA = 0.78 + Math.sin(seconds * 3.35 + seed.twinklePhase) * 0.2;
+  const twinkleB = 0.9 + Math.sin(seconds * 8.1 + seed.wanderPhase) * 0.1;
+  const alpha = seed.baseAlpha * fadeIn * fadeOut * Math.max(0.32, twinkleA * twinkleB);
+  const pulseScale = seed.scale * (0.91 + Math.sin(seconds * 2.7 + seed.twinklePhase) * 0.09);
 
   return {
     x,
@@ -94,21 +116,28 @@ export function createGlowingMoteSystem(
   height: number,
 ): GlowingMoteSystem {
   ensureMoteTexture(scene);
-  const seeds = buildGlowingMoteSeeds(width, height, 16);
-  const motes = seeds.map((seed) =>
-    scene.add
-      .image(seed.startX, seed.startY, MOTE_TEXTURE_KEY)
-      .setScale(seed.scale)
-      .setAlpha(0),
-  );
-  container.add(motes);
+  const seeds = buildGlowingMoteSeeds(width, height);
+  const particles = seeds
+    .map((seed) => ({
+      seed,
+      sprite: scene.add
+        .image(seed.startX, seed.startY, MOTE_TEXTURE_KEY)
+        .setScale(seed.scale)
+        .setAlpha(0),
+    }))
+    .sort((first, second) => depthRank(first.seed.depth) - depthRank(second.seed.depth));
+
+  container.add(particles.map((particle) => particle.sprite));
 
   return {
     update(time: number): void {
-      motes.forEach((mote, index) => {
-        const sample = sampleGlowingMote(seeds[index], time, width, height);
-        mote.setPosition(sample.x, sample.y).setScale(sample.scale).setAlpha(sample.alpha);
-      });
+      for (const particle of particles) {
+        const sample = sampleGlowingMote(particle.seed, time, width, height);
+        particle.sprite
+          .setPosition(sample.x, sample.y)
+          .setScale(sample.scale)
+          .setAlpha(sample.alpha);
+      }
     },
   };
 }
@@ -117,14 +146,18 @@ function ensureMoteTexture(scene: Phaser.Scene): void {
   if (scene.textures.exists(MOTE_TEXTURE_KEY)) return;
 
   const graphics = scene.add.graphics().setVisible(false);
-  graphics.fillStyle(GLOWING_MOTE_PALETTE[0], 0.1);
-  graphics.fillCircle(6, 6, 6);
-  graphics.fillStyle(GLOWING_MOTE_PALETTE[1], 0.3);
-  graphics.fillCircle(6, 6, 3.5);
-  graphics.fillStyle(GLOWING_MOTE_PALETTE[2], 0.98);
-  graphics.fillCircle(6, 6, 1.25);
-  graphics.generateTexture(MOTE_TEXTURE_KEY, 12, 12);
+  graphics.fillStyle(GLOWING_MOTE_PALETTE[0], 0.2);
+  graphics.fillCircle(8, 8, 8);
+  graphics.fillStyle(GLOWING_MOTE_PALETTE[1], 0.5);
+  graphics.fillCircle(8, 8, 4.6);
+  graphics.fillStyle(GLOWING_MOTE_PALETTE[2], 1);
+  graphics.fillCircle(8, 8, 1.6);
+  graphics.generateTexture(MOTE_TEXTURE_KEY, 16, 16);
   graphics.destroy();
+}
+
+function depthRank(depth: GlowingMoteDepth): number {
+  return depth === 'far' ? 0 : depth === 'mid' ? 1 : 2;
 }
 
 function fraction(index: number, multiplier: number, offset: number, modulo: number): number {
