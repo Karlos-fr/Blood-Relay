@@ -222,32 +222,6 @@ function drawPipes(graphics: Phaser.GameObjects.Graphics, pipes: ArenaPipe[]): v
     // Blood sits inside the dark tube rather than reading as the pipe itself.
     drawPipePath(graphics, path, Math.max(2.8, pipe.thickness * 0.34), PIPE_RED, 0.66);
     drawPipePath(graphics, path, 1, PIPE_RED_HIGHLIGHT, 0.36);
-
-    drawPipeCollars(graphics, pipe, path);
-  }
-}
-
-function drawPipeCollars(
-  graphics: Phaser.GameObjects.Graphics,
-  pipe: ArenaPipe,
-  path: PipePathSegment[],
-): void {
-  const lineSegments = path.filter((segment) => segment.kind === 'line');
-  for (let index = 1; index < lineSegments.length; index += 2) {
-    const segment = lineSegments[index];
-    const midpoint = {
-      x: (segment.from.x + segment.to.x) / 2,
-      y: (segment.from.y + segment.to.y) / 2,
-    };
-    const horizontal = Math.abs(segment.to.x - segment.from.x) > Math.abs(segment.to.y - segment.from.y);
-    graphics.fillStyle(0x111318, 1);
-    if (horizontal) {
-      graphics.fillRect(midpoint.x - 3, midpoint.y - pipe.thickness * 0.82, 6, pipe.thickness * 1.64);
-    } else {
-      graphics.fillRect(midpoint.x - pipe.thickness * 0.82, midpoint.y - 3, pipe.thickness * 1.64, 6);
-    }
-    graphics.lineStyle(1, 0x676b76, 0.55);
-    graphics.strokeRect(midpoint.x - 3, midpoint.y - 3, 6, 6);
   }
 }
 
@@ -351,15 +325,7 @@ function drawRelayMachine(
   graphics.fillStyle(0xb8bdc7, 0.8);
   graphics.fillCircle(gaugeX, gaugeY, 2);
 
-  // Lower valve and service console.
-  const valveY = y + radius * 0.76;
-  graphics.fillStyle(0x17191f, 1);
-  graphics.fillCircle(x, valveY, 15);
-  graphics.lineStyle(3, 0x686d78, 0.75);
-  graphics.strokeCircle(x, valveY, 12);
-  graphics.lineBetween(x - 9, valveY, x + 9, valveY);
-  graphics.lineBetween(x, valveY - 9, x, valveY + 9);
-
+  // Service console.
   const consoleY = y + radius + 10;
   graphics.fillStyle(0x17181e, 1);
   graphics.fillRect(x - 98, consoleY, 196, 20);
