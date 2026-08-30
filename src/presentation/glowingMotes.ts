@@ -39,9 +39,9 @@ export const GLOWING_MOTE_PALETTE = [0xf2c94c, 0xffe08a, 0xfff3bf] as const;
 
 const MOTE_DEPTHS: GlowingMoteDepth[] = ['far', 'mid', 'near'];
 const DEPTH_PROFILES: Record<GlowingMoteDepth, DepthProfile> = {
-  far: { speed: 0.62, drift: 0.62, scale: 0.62, alpha: 0.72 },
-  mid: { speed: 0.9, drift: 0.9, scale: 0.96, alpha: 1 },
-  near: { speed: 1.22, drift: 1.22, scale: 1.38, alpha: 1.28 },
+  far: { speed: 0.62, drift: 0.62, scale: 0.62, alpha: 0.9 },
+  mid: { speed: 0.9, drift: 0.9, scale: 0.96, alpha: 1.1 },
+  near: { speed: 1.22, drift: 1.22, scale: 1.38, alpha: 1.38 },
 };
 const MOTE_TEXTURE_KEY = 'relay-glowing-mote-warm-depth-v2';
 
@@ -70,7 +70,7 @@ export function buildGlowingMoteSeeds(
       twinklePhase: b * Math.PI * 2,
       lifetimeMs,
       phaseOffsetMs: index === 0 ? 0 : Math.round(a * lifetimeMs),
-      baseAlpha: Math.min(0.92, (0.42 + c * 0.25) * profile.alpha),
+      baseAlpha: Math.min(0.98, (0.46 + c * 0.27) * profile.alpha),
       scale: (0.58 + b * 0.42) * profile.scale,
     };
   });
