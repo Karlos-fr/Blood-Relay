@@ -383,6 +383,18 @@ Pouvoir jouer à deux sur le même clavier dans une arène de côté tenant int�
 - [ ] Valider manuellement la hauteur du saut et l’accessibilité de toutes les plateformes de référence.
 - [ ] Valider manuellement la Phase 1 sur GitHub Pages avec deux joueurs au clavier.
 
+### Personnages procéduraux modulaires
+
+- [x] Remplacer visuellement les rectangles joueurs par des combattants procéduraux modulaires.
+- [x] Conserver exactement la physique, la hitbox et les contrôles existants.
+- [x] Ajouter 4 torses, 5 têtes, 3 jambes, 2 bras, 6 accessoires, 5 palettes et 1 arme placeholder.
+- [x] Ajouter un rig commun et les poses idle, run, takeoff, rise, apex, fall et landing.
+- [x] Ajouter le profil droit canonique et le miroir gauche avec support d’override asymétrique.
+- [x] Réserver le contrat de vue dos sans l’utiliser ni la dessiner dans ce lot.
+- [x] Configurer deux apparences fixes et nettement différentes pour P1 et P2.
+- [ ] Valider manuellement la lisibilité, la taille apparente et les animations des personnages sur GitHub Pages.
+- [ ] Confirmer manuellement que le parcours, le saut et les collisions restent inchangés.
+
 ## Critères de validation
 
 - Deux joueurs peuvent se déplacer simultanément.
