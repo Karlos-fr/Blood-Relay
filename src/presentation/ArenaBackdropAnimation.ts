@@ -1,6 +1,6 @@
 import type Phaser from 'phaser';
-import { createArenaDustSystem } from './arenaDust';
 import { createBloodPipeEffect } from './bloodPipeEffects';
+import { createGlowingMoteSystem } from './glowingMotes';
 import { createIndustrialEventSystem } from './industrialEvents';
 import { createMachineLightingSystem } from './machineLighting';
 import { createPanelAmbienceSystem } from './panelAmbience';
@@ -99,7 +99,7 @@ export function attachArenaBackdropAnimation(
     ...layout.panels.map((panel) => panel.y + panel.height / 2),
     machine.y + machine.radius,
   );
-  const dustSystem = createArenaDustSystem(scene, animatedLayer, ambienceWidth, ambienceHeight);
+  const moteSystem = createGlowingMoteSystem(scene, animatedLayer, ambienceWidth, ambienceHeight);
   const panelSystem = createPanelAmbienceSystem(scene, animatedLayer, layout.panels);
   const industrialSystem = createIndustrialEventSystem(
     scene,
@@ -177,7 +177,7 @@ export function attachArenaBackdropAnimation(
 
   const controller = new ArenaBackdropAnimationController((time) => {
     const heartbeat = getHeartbeatIntensity(time);
-    dustSystem.update(time);
+    moteSystem.update(time);
     panelSystem.update(time);
     industrialSystem.update(time);
     machineLighting.update(heartbeat);
