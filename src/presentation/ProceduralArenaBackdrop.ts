@@ -14,6 +14,7 @@ export interface ArenaWallPanel {
 export interface ArenaPipe {
   points: PipePoint[];
   thickness: number;
+  cornerRadius: number;
   accent: 'none' | 'red';
 }
 
@@ -79,27 +80,37 @@ export function buildArenaBackdropLayout(
   const portRadius = machine.radius - 3;
   const sidePortAngle = 0.5;
   const topPortAngle = 0.42;
+  const lateralStep = 66;
+  const elbowInset = Math.min(width * 0.17, 190);
   const sidePipeDefinitions = [
-    { fromLeft: true, angle: Math.PI + sidePortAngle, thickness: 9 },
-    { fromLeft: true, angle: Math.PI - sidePortAngle, thickness: 10 },
-    { fromLeft: false, angle: -sidePortAngle, thickness: 9 },
-    { fromLeft: false, angle: sidePortAngle, thickness: 10 },
+    { fromLeft: true, angle: Math.PI + sidePortAngle, laneOffset: -lateralStep, thickness: 9 },
+    { fromLeft: true, angle: Math.PI - sidePortAngle, laneOffset: lateralStep, thickness: 10 },
+    { fromLeft: false, angle: -sidePortAngle, laneOffset: -lateralStep, thickness: 9 },
+    { fromLeft: false, angle: sidePortAngle, laneOffset: lateralStep, thickness: 10 },
   ] as const;
 
-  const pipes: ArenaPipe[] = sidePipeDefinitions.map(({ fromLeft, angle, thickness }) => {
-    const port = {
-      x: machine.x + Math.cos(angle) * portRadius,
-      y: machine.y + Math.sin(angle) * portRadius,
-    };
-    return {
-      points: [
-        { x: fromLeft ? -24 : width + 24, y: port.y },
-        port,
-      ],
-      thickness,
-      accent: 'red',
-    };
-  });
+  const pipes: ArenaPipe[] = sidePipeDefinitions.map(
+    ({ fromLeft, angle, laneOffset, thickness }) => {
+      const port = {
+        x: machine.x + Math.cos(angle) * portRadius,
+        y: machine.y + Math.sin(angle) * portRadius,
+      };
+      const startX = fromLeft ? -24 : width + 24;
+      const elbowX = fromLeft ? elbowInset : width - elbowInset;
+      const laneY = port.y + laneOffset;
+      return {
+        points: [
+          { x: startX, y: laneY },
+          { x: elbowX, y: laneY },
+          { x: elbowX, y: port.y },
+          port,
+        ],
+        thickness,
+        cornerRadius: 0,
+        accent: 'red',
+      };
+    },
+  );
 
   const ceilingStartOffset = Math.min(width * 0.19, 212);
   const ceilingY = -24;
@@ -117,6 +128,7 @@ export function buildArenaBackdropLayout(
         port,
       ],
       thickness: 9,
+      cornerRadius: 0,
       accent: 'red',
     });
   }
@@ -219,8 +231,7 @@ function drawPanelMicroDetails(
 
 function drawPipes(graphics: Phaser.GameObjects.Graphics, pipes: ArenaPipe[]): void {
   for (const pipe of pipes) {
-    const radius = Math.max(11, pipe.thickness * 1.45);
-    const path = buildRoundedOrthogonalPath(pipe.points, radius);
+    const path = buildRoundedOrthogonalPath(pipe.points, pipe.cornerRadius);
 
     drawPipePath(graphics, path, pipe.thickness + 5, 0x08090d, 0.9);
     drawPipePath(graphics, path, pipe.thickness + 1, PIPE_DARK, 1);
