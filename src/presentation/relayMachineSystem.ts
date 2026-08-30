@@ -7,6 +7,7 @@ import {
   type ReservoirPoint,
 } from './relayBloodReservoir';
 import {
+  RELAY_PURGE_MS,
   createRelayMachineCycle,
   getRelayPurgeBoost,
   stepRelayMachineCycle,
@@ -25,6 +26,13 @@ export interface RelayMachineGeometry {
   x: number;
   y: number;
   radius: number;
+}
+
+export interface RelayPurgeDynamics {
+  swirlStrength: number;
+  targetAngularVelocity: number;
+  suctionStrength: number;
+  fadeStrength: number;
 }
 
 export interface RelayMachineSimulation {
@@ -50,6 +58,20 @@ export interface RelayMachineSystem {
 }
 
 const FIXED_STEP_MS = 1000 / 120;
+
+export function getRelayPurgeDynamics(progress: number): RelayPurgeDynamics {
+  const p = clamp01(progress);
+  const spinRamp = smoothstep(0.08, 0.72, p);
+  const suctionRamp = smoothstep(0.52, 1, p);
+  const fadeRamp = smoothstep(0.62, 1, p);
+
+  return {
+    swirlStrength: 22 + spinRamp * 24,
+    targetAngularVelocity: 7.4 + spinRamp * 1.9,
+    suctionStrength: 0.06 + suctionRamp * 0.94,
+    fadeStrength: fadeRamp,
+  };
+}
 
 export function createRelayMachineSimulation(chamberRadius = 50): RelayMachineSimulation {
   const cycle = createRelayMachineCycle();
@@ -81,13 +103,19 @@ export function createRelayMachineSimulation(chamberRadius = 50): RelayMachineSi
         arrivalsForNextStep = 0;
         pendingArrivals = 0;
 
-        const purgeBoost = cycle.phase === 'purging'
-          ? 0.55 + getRelayPurgeBoost(cycle) * 0.45
-          : 0;
-        stepReservoir(reservoir, FIXED_STEP_MS / 1000, {
-          purgeStrength: purgeBoost,
-          swirlStrength: 18 + purgeBoost * 34,
-        });
+        if (cycle.phase === 'purging') {
+          const purgeProgress = clamp01(cycle.phaseTimeMs / RELAY_PURGE_MS);
+          const dynamics = getRelayPurgeDynamics(purgeProgress);
+          stepReservoir(reservoir, FIXED_STEP_MS / 1000, {
+            purgeStrength: dynamics.suctionStrength,
+            swirlStrength: dynamics.swirlStrength,
+            targetAngularVelocity: dynamics.targetAngularVelocity,
+          });
+        } else {
+          stepReservoir(reservoir, FIXED_STEP_MS / 1000, {
+            swirlStrength: 18,
+          });
+        }
         stepGaugeNeedle(gauge, cycle.pressure, FIXED_STEP_MS / 1000);
 
         if (previousPhase === 'purging' && cycle.phase === 'cooldown') {
@@ -113,7 +141,7 @@ export function createRelayMachineSystem(
   const simulation = createRelayMachineSimulation(chamberRadius);
   const bloodVisuals = simulation.reservoir.particles.map((_, index) =>
     scene.add
-      .ellipse(machine.x, machine.y, 5.4 + (index % 3) * 0.45, 3.3 + (index % 2) * 0.4, 0xc63242, 1)
+      .ellipse(machine.x, machine.y, 4.8 + (index % 3) * 0.35, 2.9 + (index % 2) * 0.35, 0xc63242, 1)
       .setAlpha(0),
   );
 
@@ -172,6 +200,10 @@ export function createRelayMachineSystem(
     update(time: number, dtMs: number): RelayMachineVisualState {
       simulation.update(dtMs);
       const purgeBoost = simulation.getPurgeBoost();
+      const purgeProgress = simulation.cycle.phase === 'purging'
+        ? clamp01(simulation.cycle.phaseTimeMs / RELAY_PURGE_MS)
+        : 0;
+      const purgeDynamics = getRelayPurgeDynamics(purgeProgress);
 
       bloodVisuals.forEach((visual, index) => {
         const particle = simulation.reservoir.particles[index];
@@ -180,12 +212,16 @@ export function createRelayMachineSystem(
           return;
         }
         const speed = Math.hypot(particle.vx, particle.vy);
-        const stretch = 1 + Math.min(0.45, speed / 130);
+        const stretch = 1 + Math.min(0.42, speed / 160);
+        const distance = Math.hypot(particle.x, particle.y);
+        const centerProximity = 1 - clamp01(distance / simulation.reservoir.chamberRadius);
+        const purgeFade = purgeDynamics.fadeStrength * (0.22 + centerProximity * 0.78);
+        const alpha = (0.78 + Math.min(0.18, speed / 280)) * (1 - purgeFade * 0.92);
         visual
           .setPosition(machine.x + particle.x, machine.y + particle.y)
           .setRotation(Math.atan2(particle.vy, particle.vx))
           .setScale(stretch, 1)
-          .setAlpha(0.76 + Math.min(0.2, speed / 250));
+          .setAlpha(alpha);
       });
 
       const jitter = simulation.cycle.pressure > 0.85
@@ -193,8 +229,8 @@ export function createRelayMachineSystem(
         : 0;
       gaugeNeedle.setRotation(gaugePositionToAngle(simulation.gauge.position) + jitter);
       drainGlow
-        .setAlpha(purgeBoost * 0.72)
-        .setScale(0.75 + purgeBoost * 0.85);
+        .setAlpha(purgeBoost * 0.82)
+        .setScale(0.75 + purgeBoost * 1.05);
 
       visualState.pressure = simulation.cycle.pressure;
       visualState.fill = simulation.cycle.fill;
@@ -211,4 +247,13 @@ function clearReservoir(reservoir: RelayBloodReservoirState): void {
     particle.vx = 0;
     particle.vy = 0;
   }
+}
+
+function smoothstep(edge0: number, edge1: number, value: number): number {
+  const t = clamp01((value - edge0) / (edge1 - edge0));
+  return t * t * (3 - 2 * t);
+}
+
+function clamp01(value: number): number {
+  return Math.min(1, Math.max(0, value));
 }
