@@ -32,7 +32,7 @@ export interface SteamParticleSample {
 }
 
 export interface SteamParticleSystem {
-  update(time: number): void;
+  update(time: number, pressureBoost?: number): void;
 }
 
 const STEAM_LOOP_MS = 1650;
@@ -67,24 +67,29 @@ export function sampleSteamParticle(
   seed: SteamParticleSeed,
   ageMs: number,
   outwardDirection: -1 | 0 | 1 = 0,
+  pressureBoost = 0,
 ): SteamParticleSample {
   if (ageMs < 0 || ageMs > seed.lifetimeMs) {
     return { visible: false, x: 0, y: 0, scale: seed.startScale, alpha: 0, rotation: 0 };
   }
 
+  const boost = clamp01(pressureBoost);
   const progress = ageMs / seed.lifetimeMs;
   const smoothProgress = progress * progress * (3 - 2 * progress);
   const envelope = Math.pow(Math.sin(progress * Math.PI), 0.72);
   const turbulence = Math.sin(progress * Math.PI * 2 + seed.wavePhase) * seed.turbulence;
   const outwardBias = outwardDirection * (10 + Math.abs(seed.lateralDrift) * 0.5) * smoothProgress;
   const localDrift = seed.lateralDrift * 0.12 * smoothProgress;
+  const boostedOutward = outwardDirection * boost * 18 * smoothProgress;
+  const boostedRise = 1 + boost * 0.34;
+  const baseScale = seed.startScale + (seed.endScale - seed.startScale) * progress;
 
   return {
     visible: true,
-    x: outwardBias + localDrift + turbulence * 0.65,
-    y: -seed.riseDistance * smoothProgress,
-    scale: seed.startScale + (seed.endScale - seed.startScale) * progress,
-    alpha: envelope * seed.peakAlpha,
+    x: outwardBias + localDrift + turbulence * 0.65 + boostedOutward,
+    y: -seed.riseDistance * boostedRise * smoothProgress,
+    scale: baseScale * (1 + boost * 0.45),
+    alpha: Math.min(1, envelope * seed.peakAlpha * (1 + boost * 0.72)),
     rotation: seed.startRotation + seed.spin * progress,
   };
 }
@@ -111,7 +116,7 @@ export function createSteamParticleSystem(
   container.add(particles.map((particle) => particle.sprite));
 
   return {
-    update(time: number): void {
+    update(time: number, pressureBoost = 0): void {
       for (const particle of particles) {
         const cycleTime = positiveModulo(
           time + particle.origin.phaseOffsetMs - particle.seed.spawnOffsetMs,
@@ -121,6 +126,7 @@ export function createSteamParticleSystem(
           particle.seed,
           cycleTime,
           particle.origin.outwardDirection,
+          pressureBoost,
         );
 
         if (!sample.visible) {
@@ -173,4 +179,8 @@ function fraction(index: number, multiplier: number, offset: number, modulo: num
 
 function positiveModulo(value: number, divisor: number): number {
   return ((value % divisor) + divisor) % divisor;
+}
+
+function clamp01(value: number): number {
+  return Math.min(1, Math.max(0, value));
 }
