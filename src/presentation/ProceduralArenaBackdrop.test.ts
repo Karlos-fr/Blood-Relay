@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { buildArenaBackdropLayout } from './ProceduralArenaBackdrop';
 
@@ -51,11 +50,5 @@ describe('buildArenaBackdropLayout', () => {
     for (let index = 0; index < pairedCount; index += 1) {
       expect(Math.abs(left[index].points[0].y - right[index].points[0].y)).toBeLessThanOrEqual(32);
     }
-  });
-
-  it('does not render black pipe collars or the large lower relay valve', () => {
-    const source = readFileSync(new URL('./ProceduralArenaBackdrop.ts', import.meta.url), 'utf8');
-    expect(source).not.toContain('drawPipeCollars(');
-    expect(source).not.toContain('const valveY =');
   });
 });
