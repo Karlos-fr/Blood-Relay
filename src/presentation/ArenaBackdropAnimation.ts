@@ -51,6 +51,18 @@ export function getSteamPlumeProfile(progress: number): { alpha: number; rise: n
   };
 }
 
+export function getSteamPuffStyle(): {
+  color: number;
+  fillAlpha: number;
+  initialObjectAlpha: number;
+} {
+  return {
+    color: 0xf0f2f4,
+    fillAlpha: 1,
+    initialObjectAlpha: 0,
+  };
+}
+
 export function samplePolyline(points: Point[], progress: number): Point {
   if (points.length === 0) return { x: 0, y: 0 };
   if (points.length === 1) return { ...points[0] };
@@ -132,11 +144,20 @@ export function attachArenaBackdropAnimation(
     }
   }
 
+  const steamStyle = getSteamPuffStyle();
   const steamPuffs = steamOrigins.flatMap((origin, originIndex) =>
     [0,1,2,3,4,5,6].map((puffIndex) => ({
       origin,
       phaseOffset: origin.offset + puffIndex * 0.045 + originIndex * 0.02,
-      circle: scene.add.circle(origin.x, origin.y, 13 + puffIndex * 2.1, 0xf0f2f4, 0),
+      circle: scene.add
+        .circle(
+          origin.x,
+          origin.y,
+          13 + puffIndex * 2.1,
+          steamStyle.color,
+          steamStyle.fillAlpha,
+        )
+        .setAlpha(steamStyle.initialObjectAlpha),
     })),
   );
 
