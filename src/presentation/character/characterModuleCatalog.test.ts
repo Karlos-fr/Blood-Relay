@@ -1,23 +1,160 @@
 import { describe, expect, it } from 'vitest';
-import { ACCESSORY_IDS, PALETTE_IDS, WEAPON_IDS } from './CharacterAppearance';
+import {
+  ACCESSORY_IDS,
+  ARMOR_IDS,
+  ARMS_IDS,
+  BODY_IDS,
+  HEAD_IDS,
+  LEGS_IDS,
+  MUTATION_IDS,
+  PALETTE_IDS,
+  TORSO_IDS,
+  WEAPON_IDS,
+  type CharacterAppearance,
+} from './CharacterAppearance';
+import { CHARACTER_ANIMATIONS } from './anatomy/anatomicalAnimations';
 import { CHARACTER_PALETTES } from './characterPalettes';
-import { getAllCharacterModules, resolveAppearanceModules } from './characterModuleCatalog';
-import { PLAYER_APPEARANCES } from './deterministicCharacter';
+import {
+  getAllCharacterModules,
+  getAllCharacterRenderModules,
+  resolveAppearanceModules,
+  resolveAppearanceRenderModules,
+} from './characterModuleCatalog';
+import { PLAYER_APPEARANCES, PREVIEW_APPEARANCES } from './deterministicCharacter';
+import { PixelCanvas } from './frame/PixelCanvas';
 import { ACCESSORY_MODULES } from './modules/accessories';
+import { ARMOR_MODULES } from './modules/armor';
+import { BODY_MODULES } from './modules/bodies';
+import { MUTATION_MODULES } from './modules/mutations';
 import { WEAPON_MODULES } from './modules/weapons';
+import { CHARACTER_RENDER_LAYERS } from './rendering/CharacterRenderModule';
+
+const poseFrame = CHARACTER_ANIMATIONS.idle.frames[0];
+
+function renderSignature(
+  appearance: (typeof PREVIEW_APPEARANCES)[keyof typeof PREVIEW_APPEARANCES],
+) {
+  const canvas = new PixelCanvas(48, 56);
+  const context = {
+    canvas,
+    pose: poseFrame.pose,
+    appearance,
+    seed: appearance.seed,
+    accessoryPhase: poseFrame.accessoryPhase,
+  } as const;
+  for (const module of resolveAppearanceRenderModules(appearance)) module.renderRight(context);
+  return canvas.snapshot().pixels.join(',');
+}
 
 describe('complete character module catalog', () => {
-  it('implements all accessories and the one placeholder weapon', () => {
+  it('implements every body, armor, mutation, accessory, and weapon id', () => {
+    expect(Object.keys(BODY_MODULES).sort()).toEqual([...BODY_IDS].sort());
+    expect(Object.keys(ARMOR_MODULES).sort()).toEqual([...ARMOR_IDS].sort());
+    expect(Object.keys(MUTATION_MODULES).sort()).toEqual([...MUTATION_IDS].sort());
     expect(Object.keys(ACCESSORY_MODULES).sort()).toEqual([...ACCESSORY_IDS].sort());
     expect(Object.keys(WEAPON_MODULES).sort()).toEqual([...WEAPON_IDS].sort());
   });
 
-  it('uses palette roles available in every palette for every authored view', () => {
+  it('resolves appearance modules in semantic layer order', () => {
+    const modules = resolveAppearanceRenderModules(PREVIEW_APPEARANCES.mixed);
+    const indexes = modules.map((module) => CHARACTER_RENDER_LAYERS.indexOf(module.layer));
+    expect(indexes).toEqual([...indexes].sort((a, b) => a - b));
+  });
+
+  it('preserves appearance order for accessories sharing a layer', () => {
+    const appearance: CharacterAppearance = {
+      ...PREVIEW_APPEARANCES.clone,
+      accessories: ['blood-bag', 'dorsal-tube', 'medical-pack'],
+    };
+    const rearAccessories = resolveAppearanceRenderModules(appearance).filter(
+      (module) => module.layer === 'rearAccessory',
+    );
+    expect(rearAccessories.map((module) => module.id)).toEqual([
+      'blood-bag',
+      'dorsal-tube',
+      'medical-pack',
+    ]);
+  });
+
+  it('keeps every preview family materially distinct', () => {
+    const signatures = Object.values(PREVIEW_APPEARANCES).map(renderSignature);
+    expect(new Set(signatures).size).toBe(signatures.length);
+  });
+
+  it('uses four deterministic dorsal-tube paths', () => {
+    const snapshots = ([0, 1, 2, 3] as const).map((accessoryPhase) => {
+      const canvas = new PixelCanvas(48, 56);
+      const appearance = PREVIEW_APPEARANCES.clone;
+      ACCESSORY_MODULES['dorsal-tube'].renderRight({
+        canvas,
+        pose: poseFrame.pose,
+        appearance,
+        seed: appearance.seed,
+        accessoryPhase,
+      });
+      return canvas.snapshot().pixels.join(',');
+    });
+    expect(new Set(snapshots).size).toBe(4);
+  });
+
+  it('overlaps every accessory with its anatomical attachment landmark', () => {
+    const attachments = [
+      ['blood-bag', poseFrame.pose.hipRear],
+      ['dorsal-tube', poseFrame.pose.shoulderRear],
+      ['medical-pack', poseFrame.pose.shoulderRear],
+      ['shoulder-plate', poseFrame.pose.shoulderFront],
+      ['external-implant', poseFrame.pose.shoulderFront],
+      ['holster', poseFrame.pose.hipFront],
+    ] as const;
+
+    for (const [id, attachment] of attachments) {
+      const canvas = new PixelCanvas(48, 56);
+      const appearance = PREVIEW_APPEARANCES.clone;
+      ACCESSORY_MODULES[id].renderRight({
+        canvas,
+        pose: poseFrame.pose,
+        appearance,
+        seed: appearance.seed,
+        accessoryPhase: poseFrame.accessoryPhase,
+      });
+      expect(canvas.getPixel(attachment.x, attachment.y)).not.toBeNull();
+    }
+  });
+
+  it('attaches the relay pistol to both weapon and hand landmarks', () => {
+    const canvas = new PixelCanvas(48, 56);
+    const appearance = PREVIEW_APPEARANCES.mixed;
+    WEAPON_MODULES['relay-pistol'].renderRight({
+      canvas,
+      pose: poseFrame.pose,
+      appearance,
+      seed: appearance.seed,
+      accessoryPhase: poseFrame.accessoryPhase,
+    });
+    expect(
+      canvas.getPixel(poseFrame.pose.weaponMount.x, poseFrame.pose.weaponMount.y),
+    ).not.toBeNull();
+    expect(canvas.getPixel(poseFrame.pose.handFront.x, poseFrame.pose.handFront.y)).not.toBeNull();
+  });
+
+  it('uses palette roles available in every palette for legacy authored views', () => {
     expect(Object.keys(CHARACTER_PALETTES['inmate-red']).sort()).toEqual(
       [
-        'accent', 'blood', 'cloth', 'clothDark', 'clothLight', 'metal', 'metalDark',
-        'metalLight', 'mutation', 'mutationDark', 'outline', 'shadow', 'skin',
-        'skinDark', 'skinLight',
+        'accent',
+        'blood',
+        'cloth',
+        'clothDark',
+        'clothLight',
+        'metal',
+        'metalDark',
+        'metalLight',
+        'mutation',
+        'mutationDark',
+        'outline',
+        'shadow',
+        'skin',
+        'skinDark',
+        'skinLight',
       ].sort(),
     );
 
@@ -32,7 +169,20 @@ describe('complete character module catalog', () => {
     }
   });
 
-  it('expands P1/P2 into different module sets and keeps weapon separate', () => {
+  it('returns every renderer once and keeps the legacy runtime resolver available', () => {
+    const renderModules = getAllCharacterRenderModules();
+    expect(renderModules).toHaveLength(
+      BODY_IDS.length +
+        ARMOR_IDS.length +
+        MUTATION_IDS.length +
+        ACCESSORY_IDS.length +
+        WEAPON_IDS.length +
+        HEAD_IDS.length +
+        TORSO_IDS.length +
+        LEGS_IDS.length +
+        ARMS_IDS.length,
+    );
+
     const p1 = resolveAppearanceModules(PLAYER_APPEARANCES[1]);
     const p2 = resolveAppearanceModules(PLAYER_APPEARANCES[2]);
     expect(p1.map((module) => module.id)).not.toEqual(p2.map((module) => module.id));
