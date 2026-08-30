@@ -2,6 +2,7 @@ export interface PlayerControls {
   isLeftDown(): boolean;
   isRightDown(): boolean;
   isDownDown(): boolean;
+  isJumpDown(): boolean;
   consumeJumpPressed(): boolean;
 }
 
@@ -10,6 +11,7 @@ export function combinePlayerControls(...sources: PlayerControls[]): PlayerContr
     isLeftDown: () => sources.some((source) => source.isLeftDown()),
     isRightDown: () => sources.some((source) => source.isRightDown()),
     isDownDown: () => sources.some((source) => source.isDownDown()),
+    isJumpDown: () => sources.some((source) => source.isJumpDown()),
     consumeJumpPressed: () => {
       let pressed = false;
       for (const source of sources) {
