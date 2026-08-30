@@ -15,6 +15,8 @@ import { MobileControls } from '../input/MobileControls';
 import { combinePlayerControls } from '../input/playerControls';
 import { isMobileDevice } from '../platform/device';
 import { updateArenaBackdropAnimation } from '../presentation/ArenaBackdropAnimation';
+import { PLAYER_APPEARANCES } from '../presentation/character/deterministicCharacter';
+import { ProceduralCharacterView } from '../presentation/character/ProceduralCharacterView';
 import { calculateContainedViewport } from '../presentation/mobileViewport';
 import { drawIndustrialPlatform } from '../presentation/PlatformVisual';
 import { drawProceduralArenaBackdrop } from '../presentation/ProceduralArenaBackdrop';
@@ -22,6 +24,7 @@ import { drawStoneFloor } from '../presentation/StoneFloorVisual';
 
 export class ArenaScene extends Phaser.Scene {
   private players: Player[] = [];
+  private characterViews: ProceduralCharacterView[] = [];
   private platforms: Phaser.GameObjects.Rectangle[] = [];
   private floor?: Phaser.GameObjects.Rectangle;
   private debugGraphics?: Phaser.GameObjects.Graphics;
@@ -60,7 +63,6 @@ export class ArenaScene extends Phaser.Scene {
     const playerOne = new Player(this, {
       id: 1,
       ...SPAWN_POINTS[0],
-      color: 0xe7474f,
       controls: mobileControls.isVisible
         ? combinePlayerControls(playerOneProfile.controls, mobileControls.controls)
         : playerOneProfile.controls,
@@ -69,11 +71,14 @@ export class ArenaScene extends Phaser.Scene {
     const playerTwo = new Player(this, {
       id: 2,
       ...SPAWN_POINTS[1],
-      color: 0x36a9e1,
       controls: playerTwoProfile.controls,
     });
 
     this.players = [playerOne, playerTwo];
+    this.characterViews = [
+      new ProceduralCharacterView(this, PLAYER_APPEARANCES[1]),
+      new ProceduralCharacterView(this, PLAYER_APPEARANCES[2]),
+    ];
 
     for (const player of this.players) {
       this.physics.add.collider(player.gameObject, this.floor);
@@ -114,8 +119,10 @@ export class ArenaScene extends Phaser.Scene {
       this.debugText?.setVisible(this.debugEnabled);
     }
 
-    for (const player of this.players) {
+    for (let index = 0; index < this.players.length; index += 1) {
+      const player = this.players[index];
       player.update(time);
+      this.characterViews[index].update(time, player.presentationState);
     }
 
     if (this.debugEnabled) {

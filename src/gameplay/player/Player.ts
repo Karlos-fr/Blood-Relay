@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { ARENA_CONTENT_SCALE } from '../../config/arenaScale';
 import type { PlayerControls } from '../../input/playerControls';
+import { PLAYER_HEIGHT, PLAYER_WIDTH } from './playerGeometry';
+import type { PlayerPresentationState } from './playerPresentationState';
 import {
   getFacingDirection,
   getHorizontalIntent,
@@ -12,18 +14,12 @@ import {
   type FacingDirection,
 } from './movement';
 
-const PLAYER_WIDTH = 22.5 * ARENA_CONTENT_SCALE;
-const PLAYER_HEIGHT = 34.5 * ARENA_CONTENT_SCALE;
 const DROP_THROUGH_MS = 220;
 const PLATFORM_LANDING_TOLERANCE = 13.5 * ARENA_CONTENT_SCALE;
 const MAX_FALL_SPEED = 675 * ARENA_CONTENT_SCALE;
 const DROP_THROUGH_SPEED = 67.5 * ARENA_CONTENT_SCALE;
-const STROKE_WIDTH = 1.5 * ARENA_CONTENT_SCALE;
-const MARKER_WIDTH = 7.5 * ARENA_CONTENT_SCALE;
-const MARKER_HEIGHT = 3 * ARENA_CONTENT_SCALE;
 const LABEL_OFFSET = 9 * ARENA_CONTENT_SCALE;
 const LABEL_FONT_SIZE = 8.25 * ARENA_CONTENT_SCALE;
-const FACING_MARKER_OFFSET = 3 * ARENA_CONTENT_SCALE;
 
 export type PlayerMovementState = 'grounded' | 'airborne';
 
@@ -31,7 +27,6 @@ export interface PlayerConfig {
   id: 1 | 2;
   x: number;
   y: number;
-  color: number;
   controls: PlayerControls;
 }
 
@@ -40,7 +35,6 @@ export class Player {
   public readonly body: Phaser.Physics.Arcade.Body;
 
   private readonly controls: PlayerControls;
-  private readonly facingMarker: Phaser.GameObjects.Rectangle;
   private readonly label: Phaser.GameObjects.Text;
   private facing: FacingDirection;
   private dropThroughUntil = 0;
@@ -50,8 +44,8 @@ export class Player {
     this.facing = config.id === 1 ? 1 : -1;
 
     this.gameObject = scene.add
-      .rectangle(config.x, config.y, PLAYER_WIDTH, PLAYER_HEIGHT, config.color)
-      .setStrokeStyle(STROKE_WIDTH, 0xffffff, 0.35)
+      .rectangle(config.x, config.y, PLAYER_WIDTH, PLAYER_HEIGHT, 0x000000, 0)
+      .setVisible(false)
       .setDepth(10);
 
     scene.physics.add.existing(this.gameObject);
@@ -60,10 +54,6 @@ export class Player {
     this.body.setMaxVelocity(PLAYER_MOVE_SPEED, MAX_FALL_SPEED);
     this.body.setDragX(PLAYER_DRAG);
     this.body.setSize(PLAYER_WIDTH, PLAYER_HEIGHT, true);
-
-    this.facingMarker = scene.add
-      .rectangle(config.x, config.y, MARKER_WIDTH, MARKER_HEIGHT, 0xffffff)
-      .setDepth(11);
 
     this.label = scene.add
       .text(config.x, config.y - PLAYER_HEIGHT / 2 - LABEL_OFFSET, `P${config.id}`, {
@@ -122,11 +112,18 @@ export class Player {
     return this.facing;
   }
 
+  public get presentationState(): PlayerPresentationState {
+    return {
+      x: this.gameObject.x,
+      y: this.gameObject.y,
+      facing: this.facing,
+      grounded: this.isGrounded,
+      velocityX: this.body.velocity.x,
+      velocityY: this.body.velocity.y,
+    };
+  }
+
   private syncDecorations(): void {
-    this.facingMarker.setPosition(
-      this.gameObject.x + this.facing * (PLAYER_WIDTH / 2 + FACING_MARKER_OFFSET),
-      this.gameObject.y - FACING_MARKER_OFFSET,
-    );
     this.label.setPosition(this.gameObject.x, this.gameObject.y - PLAYER_HEIGHT / 2 - LABEL_OFFSET);
   }
 }
