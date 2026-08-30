@@ -18,6 +18,8 @@ export interface CharacterPalette {
   blood: number;
 }
 
+export type PaletteRole = keyof CharacterPalette;
+
 export const CHARACTER_PALETTES: Readonly<Record<PaletteId, CharacterPalette>> = {
   'inmate-red': {
     outline: 0x151419,
