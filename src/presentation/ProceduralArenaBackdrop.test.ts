@@ -23,7 +23,7 @@ describe('buildArenaBackdropLayout', () => {
     expect(layout.machine.y + layout.machine.radius).toBeLessThan(502);
   });
 
-  it('uses four straight lateral feeds and two balanced feeds from the ceiling', () => {
+  it('uses four lateral feeds and two balanced feeds from the ceiling', () => {
     const layout = buildArenaBackdropLayout(1120, 502, 'arena-01');
     const lateral = layout.pipes.filter((pipe) => {
       const start = pipe.points[0];
@@ -34,20 +34,21 @@ describe('buildArenaBackdropLayout', () => {
     expect(layout.pipes).toHaveLength(6);
     expect(lateral).toHaveLength(4);
     expect(ceiling).toHaveLength(2);
-    expect(lateral.every((pipe) => pipe.points.length === 2)).toBe(true);
-    expect(lateral.every((pipe) => pipe.points[0].y === pipe.points[1].y)).toBe(true);
-    expect(ceiling.every((pipe) => pipe.points.length === 3)).toBe(true);
 
     const ceilingStarts = ceiling.map((pipe) => pipe.points[0]).sort((a, b) => a.x - b.x);
     expect(ceilingStarts[0].x + ceilingStarts[1].x).toBeCloseTo(1120, 6);
     expect(ceilingStarts[0].y).toBe(ceilingStarts[1].y);
   });
 
-  it('only creates a rounded elbow where the pipe really changes direction', () => {
+  it('gives every pipe at least one large sharp ninety-degree elbow', () => {
     const layout = buildArenaBackdropLayout(1120, 502, 'arena-01');
 
     for (const pipe of layout.pipes) {
-      expect(pipe.points.length).toBeLessThanOrEqual(3);
+      expect(pipe.points.length).toBeGreaterThanOrEqual(3);
+      expect('cornerRadius' in pipe).toBe(true);
+      if ('cornerRadius' in pipe) expect(pipe.cornerRadius).toBe(0);
+
+      let elbowCount = 0;
       for (let index = 1; index < pipe.points.length - 1; index += 1) {
         const previous = pipe.points[index - 1];
         const current = pipe.points[index];
@@ -56,11 +57,16 @@ describe('buildArenaBackdropLayout', () => {
         const incomingVertical = previous.x === current.x && previous.y !== current.y;
         const outgoingHorizontal = current.y === next.y && current.x !== next.x;
         const outgoingVertical = current.x === next.x && current.y !== next.y;
+        const isRightAngle =
+          (incomingHorizontal && outgoingVertical) || (incomingVertical && outgoingHorizontal);
 
-        expect(
-          (incomingHorizontal && outgoingVertical) || (incomingVertical && outgoingHorizontal),
-        ).toBe(true);
+        expect(isRightAngle).toBe(true);
+        const incomingLength = Math.hypot(current.x - previous.x, current.y - previous.y);
+        const outgoingLength = Math.hypot(next.x - current.x, next.y - current.y);
+        expect(Math.min(incomingLength, outgoingLength)).toBeGreaterThanOrEqual(48);
+        elbowCount += 1;
       }
+      expect(elbowCount).toBeGreaterThanOrEqual(1);
     }
   });
 
