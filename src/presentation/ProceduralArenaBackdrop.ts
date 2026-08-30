@@ -76,42 +76,49 @@ export function buildArenaBackdropLayout(
     radius: 110,
   };
 
-  const laneFractions = [0.19, 0.48, 0.79] as const;
-  const laneYs = laneFractions.map((fraction) => height * fraction + (random() - 0.5) * 18);
-  const portOffsets = [-0.58, 0, 0.58] as const;
-  const pipes: ArenaPipe[] = [];
+  const portRadius = machine.radius - 3;
+  const sidePortAngle = 0.5;
+  const topPortAngle = 0.42;
+  const sidePipeDefinitions = [
+    { fromLeft: true, angle: Math.PI + sidePortAngle, thickness: 9 },
+    { fromLeft: true, angle: Math.PI - sidePortAngle, thickness: 10 },
+    { fromLeft: false, angle: -sidePortAngle, thickness: 9 },
+    { fromLeft: false, angle: sidePortAngle, thickness: 10 },
+  ] as const;
 
-  for (let pairIndex = 0; pairIndex < 3; pairIndex += 1) {
-    for (const fromLeft of [true, false]) {
-      const side = fromLeft ? -1 : 1;
-      const startX = fromLeft ? -24 : width + 24;
-      const startY = laneYs[pairIndex] + (random() - 0.5) * 10;
-      const edgeX = fromLeft
-        ? 78 + random() * 96
-        : width - 78 - random() * 96;
-      const portAngle = fromLeft
-        ? Math.PI - portOffsets[pairIndex]
-        : portOffsets[pairIndex];
-      const port = {
-        x: machine.x + Math.cos(portAngle) * (machine.radius - 3),
-        y: machine.y + Math.sin(portAngle) * (machine.radius - 3),
-      };
-      const approachX = machine.x + side * (machine.radius + 52 + random() * 34);
-      const approachY = Math.max(26, Math.min(height - 36, port.y + (random() - 0.5) * 28));
+  const pipes: ArenaPipe[] = sidePipeDefinitions.map(({ fromLeft, angle, thickness }) => {
+    const port = {
+      x: machine.x + Math.cos(angle) * portRadius,
+      y: machine.y + Math.sin(angle) * portRadius,
+    };
+    return {
+      points: [
+        { x: fromLeft ? -24 : width + 24, y: port.y },
+        port,
+      ],
+      thickness,
+      accent: 'red',
+    };
+  });
 
-      pipes.push({
-        points: [
-          { x: startX, y: startY },
-          { x: edgeX, y: startY },
-          { x: edgeX, y: approachY },
-          { x: approachX, y: approachY },
-          { x: approachX, y: port.y },
-          port,
-        ],
-        thickness: 8 + Math.floor(random() * 3),
-        accent: 'red',
-      });
-    }
+  const ceilingStartOffset = Math.min(width * 0.19, 212);
+  const ceilingY = -24;
+  for (const side of [-1, 1] as const) {
+    const angle = -Math.PI / 2 + side * topPortAngle;
+    const port = {
+      x: machine.x + Math.cos(angle) * portRadius,
+      y: machine.y + Math.sin(angle) * portRadius,
+    };
+    const startX = machine.x + side * ceilingStartOffset;
+    pipes.push({
+      points: [
+        { x: startX, y: ceilingY },
+        { x: startX, y: port.y },
+        port,
+      ],
+      thickness: 9,
+      accent: 'red',
+    });
   }
 
   return { panels, pipes, machine };
