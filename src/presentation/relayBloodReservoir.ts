@@ -117,6 +117,12 @@ export function stepReservoir(
       const tangentialCorrection = (targetTangentialSpeed - currentTangentialSpeed) * coupling;
       particle.vx += tangentX * tangentialCorrection;
       particle.vy += tangentY * tangentialCorrection;
+
+      // A rotating particle needs centripetal acceleration to follow an orbit instead of
+      // flying tangentially into the chamber wall. This preserves the multi-turn vortex.
+      const centripetalAcceleration = targetAngularVelocity * targetAngularVelocity * distance;
+      particle.vx -= nx * centripetalAcceleration * dt;
+      particle.vy -= ny * centripetalAcceleration * dt;
     }
 
     if (purgeStrength > 0) {
