@@ -12,7 +12,7 @@ describe('steam particle system', () => {
     expect(new Set(first.map((particle) => particle.lifetimeMs)).size).toBeGreaterThan(4);
   });
 
-  it('keeps every steam particle below the top-edge travel budget', () => {
+  it('keeps normal steam below the top-edge travel budget', () => {
     const seeds = buildSteamParticleSeeds(14);
 
     expect(seeds.every((seed) => seed.riseDistance >= 35 && seed.riseDistance <= 55)).toBe(true);
@@ -31,7 +31,7 @@ describe('steam particle system', () => {
     expect(right.x).toBeGreaterThan(0);
   });
 
-  it('boosts steam size, brightness and outward travel during relay purge', () => {
+  it('makes purge steam dramatically larger, brighter and farther travelling', () => {
     const seed = buildSteamParticleSeeds(1)[0];
     const age = seed.lifetimeMs * 0.5;
     const normal = sampleSteamParticle(seed, age, 1, 0);
@@ -39,13 +39,21 @@ describe('steam particle system', () => {
     const omittedBoost = sampleSteamParticle(seed, age, 1);
 
     expect(omittedBoost).toEqual(normal);
-    expect(boosted.alpha).toBeGreaterThan(normal.alpha);
-    expect(boosted.scale).toBeGreaterThan(normal.scale);
-    expect(boosted.x).toBeGreaterThan(normal.x);
-    expect(Math.abs(boosted.y)).toBeGreaterThan(Math.abs(normal.y));
+    expect(boosted.alpha).toBeGreaterThan(normal.alpha * 1.8);
+    expect(boosted.scale).toBeGreaterThan(normal.scale * 1.65);
+    expect(boosted.x - normal.x).toBeGreaterThanOrEqual(28);
+    expect(Math.abs(boosted.y)).toBeGreaterThan(Math.abs(normal.y) * 1.55);
   });
 
-  it('rises, disperses, grows and fades during its lifetime', () => {
+  it('keeps boosted purge steam alive longer than normal steam', () => {
+    const seed = buildSteamParticleSeeds(1)[0];
+    const age = seed.lifetimeMs * 1.22;
+
+    expect(sampleSteamParticle(seed, age, 1, 0).visible).toBe(false);
+    expect(sampleSteamParticle(seed, age, 1, 1).visible).toBe(true);
+  });
+
+  it('rises, disperses, grows and fades during its normal lifetime', () => {
     const seed = buildSteamParticleSeeds(1)[0];
     const middle = sampleSteamParticle(seed, seed.lifetimeMs * 0.5, 1);
 
@@ -56,7 +64,7 @@ describe('steam particle system', () => {
     expect(middle.alpha).toBeGreaterThan(0.2);
   });
 
-  it('fully hides a particle after its lifetime', () => {
+  it('fully hides a normal particle after its lifetime', () => {
     const seed = buildSteamParticleSeeds(1)[0];
     const expired = sampleSteamParticle(seed, seed.lifetimeMs + 1, 1);
 
