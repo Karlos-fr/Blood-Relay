@@ -4,6 +4,7 @@ export interface SteamOrigin {
   x: number;
   y: number;
   phaseOffsetMs: number;
+  outwardDirection: -1 | 1;
 }
 
 export interface SteamParticleSeed {
@@ -34,7 +35,7 @@ export interface SteamParticleSystem {
   update(time: number): void;
 }
 
-const STEAM_LOOP_MS = 1900;
+const STEAM_LOOP_MS = 1650;
 const STEAM_PARTICLES_PER_VENT = 14;
 const STEAM_TEXTURE_KEYS = ['relay-steam-a', 'relay-steam-b', 'relay-steam-c'] as const;
 
@@ -47,14 +48,14 @@ export function buildSteamParticleSeeds(count: number): SteamParticleSeed[] {
 
     return {
       spawnOffsetMs: (index / Math.max(1, count)) * STEAM_LOOP_MS,
-      lifetimeMs: 720 + Math.round(b * 430),
+      lifetimeMs: 620 + Math.round(b * 260),
       lateralDrift: -18 + a * 36,
-      riseDistance: 54 + c * 34,
+      riseDistance: 35 + c * 20,
       turbulence: 2.5 + b * 4.5,
       wavePhase: a * Math.PI * 2,
       startScale,
-      endScale: startScale + 0.38 + b * 0.32,
-      peakAlpha: 0.34 + c * 0.28,
+      endScale: startScale + 0.3 + b * 0.24,
+      peakAlpha: 0.3 + c * 0.24,
       startRotation: -0.45 + b * 0.9,
       spin: -0.42 + a * 0.84,
       textureIndex: index % STEAM_TEXTURE_KEYS.length,
@@ -62,7 +63,11 @@ export function buildSteamParticleSeeds(count: number): SteamParticleSeed[] {
   });
 }
 
-export function sampleSteamParticle(seed: SteamParticleSeed, ageMs: number): SteamParticleSample {
+export function sampleSteamParticle(
+  seed: SteamParticleSeed,
+  ageMs: number,
+  outwardDirection: -1 | 0 | 1 = 0,
+): SteamParticleSample {
   if (ageMs < 0 || ageMs > seed.lifetimeMs) {
     return { visible: false, x: 0, y: 0, scale: seed.startScale, alpha: 0, rotation: 0 };
   }
@@ -71,10 +76,12 @@ export function sampleSteamParticle(seed: SteamParticleSeed, ageMs: number): Ste
   const smoothProgress = progress * progress * (3 - 2 * progress);
   const envelope = Math.pow(Math.sin(progress * Math.PI), 0.72);
   const turbulence = Math.sin(progress * Math.PI * 2 + seed.wavePhase) * seed.turbulence;
+  const outwardBias = outwardDirection * (10 + Math.abs(seed.lateralDrift) * 0.5) * smoothProgress;
+  const localDrift = seed.lateralDrift * 0.12 * smoothProgress;
 
   return {
     visible: true,
-    x: seed.lateralDrift * smoothProgress + turbulence,
+    x: outwardBias + localDrift + turbulence * 0.65,
     y: -seed.riseDistance * smoothProgress,
     scale: seed.startScale + (seed.endScale - seed.startScale) * progress,
     alpha: envelope * seed.peakAlpha,
@@ -110,7 +117,11 @@ export function createSteamParticleSystem(
           time + particle.origin.phaseOffsetMs - particle.seed.spawnOffsetMs,
           STEAM_LOOP_MS,
         );
-        const sample = sampleSteamParticle(particle.seed, cycleTime);
+        const sample = sampleSteamParticle(
+          particle.seed,
+          cycleTime,
+          particle.origin.outwardDirection,
+        );
 
         if (!sample.visible) {
           particle.sprite.setAlpha(0);
