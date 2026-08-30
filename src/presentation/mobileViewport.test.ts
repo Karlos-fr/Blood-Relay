@@ -3,24 +3,24 @@ import { GAME_HEIGHT, GAME_WIDTH } from '../config/game';
 import { calculateContainedViewport, selectViewportSize } from './mobileViewport';
 
 describe('calculateContainedViewport', () => {
-  it('centers a 16:9 arena inside a wider landscape viewport', () => {
+  it('centers the widened arena inside a wider landscape viewport', () => {
     const viewport = calculateContainedViewport(932, 430, GAME_WIDTH, GAME_HEIGHT);
 
     expect(viewport.height).toBeCloseTo(430);
-    expect(viewport.width).toBeCloseTo(764.4444, 3);
-    expect(viewport.x).toBeCloseTo(83.7778, 3);
+    expect(viewport.width).toBeCloseTo(891.8519, 3);
+    expect(viewport.x).toBeCloseTo(20.0741, 3);
     expect(viewport.y).toBeCloseTo(0);
     expect(viewport.zoom).toBeCloseTo(430 / 540);
   });
 
-  it('centers the arena vertically in portrait without cropping it', () => {
+  it('centers the widened arena vertically in portrait without cropping it', () => {
     const viewport = calculateContainedViewport(390, 844, GAME_WIDTH, GAME_HEIGHT);
 
     expect(viewport.width).toBeCloseTo(390);
-    expect(viewport.height).toBeCloseTo(219.375);
+    expect(viewport.height).toBeCloseTo(188.0357, 3);
     expect(viewport.x).toBeCloseTo(0);
-    expect(viewport.y).toBeCloseTo(312.3125);
-    expect(viewport.zoom).toBeCloseTo(390 / 960);
+    expect(viewport.y).toBeCloseTo(327.9821, 3);
+    expect(viewport.zoom).toBeCloseTo(390 / 1120);
   });
 });
 
