@@ -24,8 +24,8 @@ export const PLATFORM_LAYOUT = [
   { x: scaleX(247.5), y: scaleYFromFloor(411), width: 240 * ARENA_CONTENT_SCALE, tier: 1 },
   { x: scaleX(712.5), y: scaleYFromFloor(411), width: 240 * ARENA_CONTENT_SCALE, tier: 1 },
   { x: scaleX(480), y: scaleYFromFloor(317.25), width: 240 * ARENA_CONTENT_SCALE, tier: 2 },
-  { x: scaleX(270), y: scaleYFromFloor(223.5), width: 160 * ARENA_CONTENT_SCALE, tier: 3 },
-  { x: scaleX(690), y: scaleYFromFloor(223.5), width: 160 * ARENA_CONTENT_SCALE, tier: 3 },
+  { x: scaleX(250), y: scaleYFromFloor(223.5), width: 160 * ARENA_CONTENT_SCALE, tier: 3 },
+  { x: scaleX(710), y: scaleYFromFloor(223.5), width: 160 * ARENA_CONTENT_SCALE, tier: 3 },
 ] as const;
 
 export const SPAWN_POINTS = [
