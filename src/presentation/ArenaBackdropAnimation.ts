@@ -1,5 +1,7 @@
 import type Phaser from 'phaser';
-import { buildRoundedOrthogonalPath, sampleRoundedPath } from './pipeGeometry';
+import { createBloodPipeEffect } from './bloodPipeEffects';
+import { createMachineLightingSystem } from './machineLighting';
+import { buildRoundedOrthogonalPath } from './pipeGeometry';
 import { createSteamParticleSystem } from './steamParticles';
 
 interface Point { x: number; y: number; }
@@ -84,13 +86,7 @@ export function attachArenaBackdropAnimation(
   const animatedLayer = scene.add.container(0, 0);
   container.add(animatedLayer);
 
-  const outerGlow = scene.add.circle(
-    machine.x,
-    machine.y,
-    machine.radius * 1.28,
-    0xb92735,
-    0.07,
-  );
+  const machineLighting = createMachineLightingSystem(scene, animatedLayer, machine);
   const heartGlow = scene.add.circle(
     machine.x,
     machine.y,
@@ -122,11 +118,10 @@ export function attachArenaBackdropAnimation(
     scene.add.circle(machine.x + x * ledRadius, machine.y + y * ledRadius, 3.2, color, 0.5),
   );
 
-  const flowParticles = layout.pipes.map((pipe) => ({
-    path: buildRoundedOrthogonalPath(pipe.points, Math.max(11, pipe.thickness * 1.45)),
-    glow: scene.add.circle(0, 0, 6.5, 0xd42f40, 0.18),
-    core: scene.add.circle(0, 0, 2.5, 0xff5360, 0.95),
-  }));
+  const bloodPipeEffects = layout.pipes.map((pipe) => {
+    const path = buildRoundedOrthogonalPath(pipe.points, Math.max(11, pipe.thickness * 1.45));
+    return createBloodPipeEffect(scene, animatedLayer, path);
+  });
 
   const ventGraphics = scene.add.graphics();
   const ventY = machine.y - machine.radius * 0.72;
@@ -155,22 +150,14 @@ export function attachArenaBackdropAnimation(
     }
   }
 
-  animatedLayer.add([
-    outerGlow,
-    heartGlow,
-    heartCore,
-    rotatingRing,
-    ventGraphics,
-    ...leds,
-    ...flowParticles.flatMap((particle) => [particle.glow, particle.core]),
-  ]);
+  animatedLayer.add([heartGlow, heartCore, rotatingRing, ventGraphics, ...leds]);
   const steamSystem = createSteamParticleSystem(scene, animatedLayer, steamOrigins);
 
   const controller = new ArenaBackdropAnimationController((time) => {
     const heartbeat = getHeartbeatIntensity(time);
+    machineLighting.update(heartbeat);
     heartCore.setScale(0.96 + heartbeat * 0.12).setAlpha(0.38 + heartbeat * 0.55);
-    heartGlow.setScale(0.9 + heartbeat * 0.34).setAlpha(0.1 + heartbeat * 0.28);
-    outerGlow.setScale(0.94 + heartbeat * 0.14).setAlpha(0.045 + heartbeat * 0.12);
+    heartGlow.setScale(0.9 + heartbeat * 0.28).setAlpha(0.07 + heartbeat * 0.22);
     rotatingRing.setRotation(getLoopProgress(time, RING_PERIOD) * Math.PI * 2);
 
     leds.forEach((led, index) => {
@@ -178,16 +165,10 @@ export function attachArenaBackdropAnimation(
       led.setAlpha(intensity).setScale(0.9 + intensity * 0.32);
     });
 
-    flowParticles.forEach((particle, index) => {
-      const point = sampleRoundedPath(
-        particle.path,
-        getLoopProgress(time + index * 430, FLOW_PERIOD),
-      );
-      particle.core.setPosition(point.x, point.y);
-      particle.glow.setPosition(point.x, point.y);
+    bloodPipeEffects.forEach((effect, index) => {
+      const progress = getLoopProgress(time + index * 430, FLOW_PERIOD);
       const shimmer = 0.8 + Math.sin(time * 0.01 + index) * 0.18;
-      particle.core.setAlpha(shimmer);
-      particle.glow.setAlpha(0.12 + shimmer * 0.14);
+      effect.update(progress, shimmer);
     });
 
     steamSystem.update(time);
