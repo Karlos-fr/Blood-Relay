@@ -303,26 +303,35 @@ function drawRelayMachine(
     );
   }
 
-  // Blood chamber.
-  graphics.fillStyle(MACHINE_RED_DARK, 1);
-  graphics.fillCircle(x, y, radius * 0.5);
-  graphics.lineStyle(4, MACHINE_RED, 0.88);
-  graphics.strokeCircle(x, y, radius * 0.5);
-  graphics.fillStyle(0x8f202d, 0.72);
-  graphics.fillEllipse(x - radius * 0.07, y + radius * 0.02, radius * 0.54, radius * 0.7);
-  graphics.fillStyle(0xd43a48, 0.44);
-  graphics.fillEllipse(x - radius * 0.2, y - radius * 0.2, radius * 0.26, radius * 0.19);
+  // Empty dark glass reservoir. Dynamic blood is rendered above this shell.
+  const chamberRadius = radius * 0.5;
+  graphics.fillStyle(0x100b0e, 1);
+  graphics.fillCircle(x, y, chamberRadius);
+  graphics.fillStyle(MACHINE_RED_DARK, 0.22);
+  graphics.fillEllipse(x, y + chamberRadius * 0.34, chamberRadius * 1.45, chamberRadius * 0.34);
+  graphics.lineStyle(4, MACHINE_RED, 0.58);
+  graphics.strokeCircle(x, y, chamberRadius);
+  graphics.lineStyle(1, 0xa55a63, 0.18);
+  graphics.strokeCircle(x, y, chamberRadius - 5);
 
-  // Gauge.
+  // Gauge body only; the needle is dynamic.
   const gaugeX = x + radius * 0.38;
   const gaugeY = y - radius * 0.46;
   graphics.fillStyle(0x15171c, 1);
   graphics.fillCircle(gaugeX, gaugeY, 15);
   graphics.lineStyle(2, 0x858a96, 0.72);
   graphics.strokeCircle(gaugeX, gaugeY, 14);
-  graphics.lineStyle(2, 0xc9404b, 0.9);
-  graphics.lineBetween(gaugeX, gaugeY, gaugeX + 7, gaugeY - 4);
-  graphics.fillStyle(0xb8bdc7, 0.8);
+  for (let tick = 0; tick < 5; tick += 1) {
+    const angle = Math.PI * (0.82 + tick * 0.34);
+    graphics.lineStyle(1, tick >= 4 ? 0xb93b47 : 0x747986, 0.72);
+    graphics.lineBetween(
+      gaugeX + Math.cos(angle) * 9,
+      gaugeY + Math.sin(angle) * 9,
+      gaugeX + Math.cos(angle) * 12,
+      gaugeY + Math.sin(angle) * 12,
+    );
+  }
+  graphics.fillStyle(0xb8bdc7, 0.7);
   graphics.fillCircle(gaugeX, gaugeY, 2);
 
   drawMaintenanceModule(graphics, x, y + radius + 9);
