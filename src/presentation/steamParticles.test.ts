@@ -31,6 +31,20 @@ describe('steam particle system', () => {
     expect(right.x).toBeGreaterThan(0);
   });
 
+  it('boosts steam size, brightness and outward travel during relay purge', () => {
+    const seed = buildSteamParticleSeeds(1)[0];
+    const age = seed.lifetimeMs * 0.5;
+    const normal = sampleSteamParticle(seed, age, 1, 0);
+    const boosted = sampleSteamParticle(seed, age, 1, 1);
+    const omittedBoost = sampleSteamParticle(seed, age, 1);
+
+    expect(omittedBoost).toEqual(normal);
+    expect(boosted.alpha).toBeGreaterThan(normal.alpha);
+    expect(boosted.scale).toBeGreaterThan(normal.scale);
+    expect(boosted.x).toBeGreaterThan(normal.x);
+    expect(Math.abs(boosted.y)).toBeGreaterThan(Math.abs(normal.y));
+  });
+
   it('rises, disperses, grows and fades during its lifetime', () => {
     const seed = buildSteamParticleSeeds(1)[0];
     const middle = sampleSteamParticle(seed, seed.lifetimeMs * 0.5, 1);
