@@ -23,7 +23,8 @@ export interface ArenaBackdropAnimationLayout {
   machine: AnimatedMachine;
 }
 
-const HEARTBEAT_PERIOD = 1600;
+const HEARTBEAT_SLOW_PERIOD = 1600;
+const HEARTBEAT_FAST_PERIOD = 760;
 const FLOW_PERIOD = 3300;
 const RING_PERIOD = 18000;
 
@@ -59,10 +60,19 @@ export function getLoopProgress(timeMs: number, periodMs: number): number {
   return ((timeMs % periodMs) + periodMs) % periodMs / periodMs;
 }
 
-export function getHeartbeatIntensity(timeMs: number): number {
-  const phase = ((timeMs % HEARTBEAT_PERIOD) + HEARTBEAT_PERIOD) % HEARTBEAT_PERIOD;
-  const first = pulseAtCyclePhase(phase, 0, 105, HEARTBEAT_PERIOD);
-  const second = pulseAtCyclePhase(phase, 220, 115, HEARTBEAT_PERIOD) * 0.72;
+export function getHeartbeatPeriodMs(pressure: number): number {
+  const normalizedPressure = clamp(pressure, 0, 1);
+  const acceleration = Math.pow(normalizedPressure, 1.35);
+  return HEARTBEAT_SLOW_PERIOD -
+    (HEARTBEAT_SLOW_PERIOD - HEARTBEAT_FAST_PERIOD) * acceleration;
+}
+
+export function getHeartbeatIntensity(timeMs: number, pressure = 0): number {
+  const period = getHeartbeatPeriodMs(pressure);
+  const timingScale = period / HEARTBEAT_SLOW_PERIOD;
+  const phase = ((timeMs % period) + period) % period;
+  const first = pulseAtCyclePhase(phase, 0, 105 * timingScale, period);
+  const second = pulseAtCyclePhase(phase, 220 * timingScale, 115 * timingScale, period) * 0.72;
   return Math.min(1, 0.08 + Math.max(first, second) * 0.92);
 }
 
@@ -185,7 +195,6 @@ export function attachArenaBackdropAnimation(
   const relayMachine = createRelayMachineSystem(scene, animatedLayer, machine);
   const steamSystem = createSteamParticleSystem(scene, animatedLayer, steamOrigins);
 
-  // Heart renders after the reservoir so it remains readable as the chamber fills.
   const heartGlow = scene.add
     .circle(
       machine.x,
@@ -211,7 +220,6 @@ export function attachArenaBackdropAnimation(
   const controller = new ArenaBackdropAnimationController((time) => {
     const dtMs = previousTime === undefined ? 16 : clamp(time - previousTime, 0, 50);
     previousTime = time;
-    const heartbeat = getHeartbeatIntensity(time);
 
     moteSystem.update(time);
     panelSystem.update(time);
@@ -227,6 +235,7 @@ export function attachArenaBackdropAnimation(
     });
 
     const relayState = relayMachine.update(time, dtMs);
+    const heartbeat = getHeartbeatIntensity(time, relayState.pressure);
     const energizedHeartbeat = Math.min(1, heartbeat * 1.18 + relayState.purgeBoost * 0.78);
     machineLighting.update(energizedHeartbeat);
 
