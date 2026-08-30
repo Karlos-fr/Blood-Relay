@@ -4,13 +4,15 @@ import { GAME_HEIGHT, GAME_WIDTH } from './game';
 import { ARENA_CAMERA_ZOOM, ARENA_HEIGHT, ARENA_WIDTH, PLATFORM_LAYOUT } from './arena';
 
 describe('arena layout', () => {
-  it('uses a native 1:1 camera scale', () => {
+  it('uses a wider native 1:1 arena for desktop', () => {
     expect(ARENA_CAMERA_ZOOM).toBe(1);
     expect(ARENA_WIDTH).toBe(GAME_WIDTH);
     expect(ARENA_HEIGHT).toBe(GAME_HEIGHT);
+    expect(ARENA_WIDTH).toBe(1120);
+    expect(ARENA_HEIGHT).toBe(540);
   });
 
-  it('fits the complete arena in the 960x540 viewport', () => {
+  it('fits the complete logical arena in the game viewport', () => {
     expect(ARENA_WIDTH * ARENA_CAMERA_ZOOM).toBe(GAME_WIDTH);
     expect(ARENA_HEIGHT * ARENA_CAMERA_ZOOM).toBe(GAME_HEIGHT);
   });
@@ -23,6 +25,16 @@ describe('arena layout', () => {
 
     expect(counts).toEqual([2, 1, 2]);
     expect(Math.max(...tiers)).toBe(3);
+  });
+
+  it('moves tier-three platforms away from the relay without changing their height', () => {
+    const tierThree = PLATFORM_LAYOUT.filter((platform) => platform.tier === 3);
+    const center = ARENA_WIDTH / 2;
+
+    expect(tierThree).toHaveLength(2);
+    expect(tierThree[0].y).toBe(tierThree[1].y);
+    expect(center - tierThree[0].x).toBeGreaterThanOrEqual(205);
+    expect(tierThree[1].x - center).toBeGreaterThanOrEqual(205);
   });
 
   it('uses widths that produce centered symmetric procedural patterns', () => {
