@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { buildGlowingMoteSeeds, sampleGlowingMote } from './glowingMotes';
+import {
+  GLOWING_MOTE_PALETTE,
+  buildGlowingMoteSeeds,
+  sampleGlowingMote,
+} from './glowingMotes';
 
 describe('glowing motes', () => {
   it('builds exactly sixteen deterministic upward-moving motes', () => {
@@ -9,6 +13,10 @@ describe('glowing motes', () => {
     expect(first).toHaveLength(16);
     expect(second).toEqual(first);
     expect(first.every((mote) => mote.velocityY < 0)).toBe(true);
+  });
+
+  it('uses warm yellow and cream tones that contrast with the red relay', () => {
+    expect(GLOWING_MOTE_PALETTE).toEqual([0xf2c94c, 0xffe08a, 0xfff3bf]);
   });
 
   it('rises and visibly twinkles during a lifetime', () => {
