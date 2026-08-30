@@ -9,7 +9,12 @@ import { createRelayMachineSystem } from './relayMachineSystem';
 import { createSteamParticleSystem } from './steamParticles';
 
 interface Point { x: number; y: number; }
-interface AnimatedPipe { points: Point[]; thickness: number; accent: 'none' | 'red'; }
+interface AnimatedPipe {
+  points: Point[];
+  thickness: number;
+  cornerRadius: number;
+  accent: 'none' | 'red';
+}
 interface AnimatedMachine { x: number; y: number; radius: number; }
 interface AnimatedPanel { x: number; y: number; width: number; height: number; }
 export interface ArenaBackdropAnimationLayout {
@@ -128,7 +133,7 @@ export function attachArenaBackdropAnimation(
   const machineLighting = createMachineLightingSystem(scene, animatedLayer, machine);
 
   const bloodPipeEffects = layout.pipes.map((pipe) => {
-    const path = buildRoundedOrthogonalPath(pipe.points, Math.max(11, pipe.thickness * 1.45));
+    const path = buildRoundedOrthogonalPath(pipe.points, pipe.cornerRadius);
     return createBloodPipeEffect(scene, animatedLayer, path);
   });
 
