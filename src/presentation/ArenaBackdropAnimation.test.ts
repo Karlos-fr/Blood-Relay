@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   HEART_VISUAL_CONFIG,
   getHeartbeatIntensity,
+  getHeartbeatPeriodMs,
   getLedIntensity,
   getLoopProgress,
   samplePolyline,
@@ -15,6 +16,17 @@ describe('ArenaBackdropAnimation helpers', () => {
     expect(firstBeat).toBeGreaterThan(0.8);
     expect(secondBeat).toBeGreaterThan(0.55);
     expect(pause).toBeLessThan(0.25);
+  });
+
+  it('accelerates heartbeat progressively as relay pressure rises', () => {
+    const low = getHeartbeatPeriodMs(0.1);
+    const medium = getHeartbeatPeriodMs(0.5);
+    const high = getHeartbeatPeriodMs(0.9);
+
+    expect(low).toBeGreaterThan(medium);
+    expect(medium).toBeGreaterThan(high);
+    expect(getHeartbeatPeriodMs(0)).toBeCloseTo(1600);
+    expect(getHeartbeatPeriodMs(1)).toBeLessThanOrEqual(800);
   });
 
   it('keeps the relay heart visibly present even between beats', () => {
