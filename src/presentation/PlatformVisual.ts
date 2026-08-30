@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import type Phaser from 'phaser';
 import {
   buildPlatformTileLayout,
   buildSymmetricPlatformTileLayout,
@@ -17,6 +17,12 @@ const UNDERSIDE = 0x151a20;
 const SEAM = 0x0c1015;
 const CYAN = 0x42d9e8;
 const RED_SCRATCH = 0x8d3033;
+
+export const PLATFORM_SHADOW_CONFIG = {
+  offsetY: 7,
+  nearAlpha: 0.16,
+  farAlpha: 0.07,
+} as const;
 
 export interface PlatformVisualOptions {
   visualDepth?: number;
@@ -40,9 +46,24 @@ export function drawIndustrialPlatform(
       ? buildPlatformTileLayout(width, PLATFORM_CAP_WIDTH, PLATFORM_CENTER_TILE_WIDTH)
       : buildSymmetricPlatformTileLayout(width, PLATFORM_CAP_WIDTH, PLATFORM_CENTER_TILE_WIDTH);
 
+  drawPlatformShadow(graphics, width, visualDepth);
   drawUnderside(graphics, width, visualDepth);
   tiles.forEach((tile, index) => drawTile(graphics, tile, index, visualDepth, options));
   return graphics;
+}
+
+function drawPlatformShadow(
+  graphics: Phaser.GameObjects.Graphics,
+  width: number,
+  visualDepth: number,
+): void {
+  const shadowTop = visualDepth + PLATFORM_SHADOW_CONFIG.offsetY;
+
+  graphics.fillStyle(0x000000, PLATFORM_SHADOW_CONFIG.farAlpha);
+  graphics.fillRoundedRect(-width / 2 + 8, shadowTop + 4, width - 16, 11, 4);
+
+  graphics.fillStyle(0x000000, PLATFORM_SHADOW_CONFIG.nearAlpha);
+  graphics.fillRoundedRect(-width / 2 + 4, shadowTop, width - 8, 7, 3);
 }
 
 function drawUnderside(
