@@ -33,6 +33,7 @@ export function createKeyboardProfile(scene: Phaser.Scene, playerIndex: 0 | 1): 
       isLeftDown: () => keys.left.isDown,
       isRightDown: () => keys.right.isDown,
       isDownDown: () => keys.down.isDown,
+      isJumpDown: () => keys.jump.isDown,
       consumeJumpPressed: () => Phaser.Input.Keyboard.JustDown(keys.jump),
     },
     label:
