@@ -72,7 +72,7 @@ export function buildArenaBackdropLayout(
 
   const machine = {
     x: width / 2,
-    y: 270,
+    y: 228,
     radius: 110,
   };
 
@@ -303,36 +303,33 @@ function drawRelayMachine(
     );
   }
 
-  // Empty dark glass reservoir. Dynamic blood is rendered above this shell.
-  const chamberRadius = radius * 0.5;
-  graphics.fillStyle(0x100b0e, 1);
-  graphics.fillCircle(x, y, chamberRadius);
+  // Dark glass reservoir shell; dynamic blood is drawn by RelayMachineSystem.
+  graphics.fillStyle(0x1d0f14, 1);
+  graphics.fillCircle(x, y, radius * 0.5);
+  graphics.lineStyle(4, MACHINE_RED, 0.75);
+  graphics.strokeCircle(x, y, radius * 0.5);
   graphics.fillStyle(MACHINE_RED_DARK, 0.22);
-  graphics.fillEllipse(x, y + chamberRadius * 0.34, chamberRadius * 1.45, chamberRadius * 0.34);
-  graphics.lineStyle(4, MACHINE_RED, 0.58);
-  graphics.strokeCircle(x, y, chamberRadius);
-  graphics.lineStyle(1, 0xa55a63, 0.18);
-  graphics.strokeCircle(x, y, chamberRadius - 5);
+  graphics.fillEllipse(x - radius * 0.06, y + radius * 0.08, radius * 0.5, radius * 0.62);
+  graphics.fillStyle(0xe3c5ca, 0.08);
+  graphics.fillEllipse(x - radius * 0.19, y - radius * 0.22, radius * 0.25, radius * 0.16);
 
-  // Gauge body only; the needle is dynamic.
+  // Static gauge housing; the moving needle is drawn by RelayMachineSystem.
   const gaugeX = x + radius * 0.38;
   const gaugeY = y - radius * 0.46;
   graphics.fillStyle(0x15171c, 1);
   graphics.fillCircle(gaugeX, gaugeY, 15);
   graphics.lineStyle(2, 0x858a96, 0.72);
   graphics.strokeCircle(gaugeX, gaugeY, 14);
+  graphics.lineStyle(1, 0x6f737d, 0.52);
   for (let tick = 0; tick < 5; tick += 1) {
-    const angle = Math.PI * (0.82 + tick * 0.34);
-    graphics.lineStyle(1, tick >= 4 ? 0xb93b47 : 0x747986, 0.72);
+    const angle = -2.25 + tick * 0.52;
     graphics.lineBetween(
-      gaugeX + Math.cos(angle) * 9,
-      gaugeY + Math.sin(angle) * 9,
+      gaugeX + Math.cos(angle) * 10,
+      gaugeY + Math.sin(angle) * 10,
       gaugeX + Math.cos(angle) * 12,
       gaugeY + Math.sin(angle) * 12,
     );
   }
-  graphics.fillStyle(0xb8bdc7, 0.7);
-  graphics.fillCircle(gaugeX, gaugeY, 2);
 
   drawMaintenanceModule(graphics, x, y + radius + 9);
 }
