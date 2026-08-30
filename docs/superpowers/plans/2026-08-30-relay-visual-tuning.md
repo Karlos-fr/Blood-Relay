@@ -29,10 +29,10 @@
 - Modify: `src/presentation/ProceduralArenaBackdrop.ts`
 - Modify: `src/presentation/ProceduralArenaBackdrop.test.ts`
 
-- [ ] Add failing tests for warm yellow/cream mote palette and machine y=228.
-- [ ] Verify red.
-- [ ] Implement palette and machine position.
-- [ ] Verify green and commit.
+- [x] Add failing tests for warm yellow/cream mote palette and machine y=228.
+- [x] Verify red.
+- [x] Implement palette and machine position.
+- [x] Verify green and commit.
 
 ### Task 2: Double-capacity reservoir and delayed-suction vortex
 
@@ -44,11 +44,11 @@
 - Modify: `src/presentation/relayMachineSystem.ts`
 - Modify: `src/presentation/relayMachineSystem.test.ts`
 
-- [ ] Add failing tests for capacity 72, 1000 ms pressurization, 2400 ms purge, and early-vs-late purge force profile.
-- [ ] Verify red.
-- [ ] Implement capacity/timing and two-stage vortex force profile.
-- [ ] Add visual fade toward drain during late purge without affecting simulation determinism.
-- [ ] Verify green and commit.
+- [x] Add failing tests for capacity 72, 1000 ms pressurization, 2400 ms purge, and early-vs-late purge force profile.
+- [x] Verify red.
+- [x] Implement capacity/timing and two-stage vortex force profile.
+- [x] Add visual fade toward drain during late purge without affecting simulation determinism.
+- [x] Verify green and commit.
 
 ### Task 3: Stronger longer steam purge and visible heart
 
@@ -58,15 +58,15 @@
 - Modify: `src/presentation/ArenaBackdropAnimation.ts`
 - Modify: `src/presentation/ArenaBackdropAnimation.test.ts`
 
-- [ ] Add failing tests for stronger purge steam response and stronger heart visual parameters.
-- [ ] Verify red.
-- [ ] Strengthen purge steam scale/alpha/rise/outward displacement.
-- [ ] Increase heart core size/rest alpha/pulse alpha/pulse scale and lighting response.
-- [ ] Verify green and commit.
+- [x] Add failing tests for stronger purge steam response and stronger heart visual parameters.
+- [x] Verify red.
+- [x] Strengthen purge steam scale/alpha/rise/outward displacement and persistence.
+- [x] Increase heart core size/rest alpha/pulse alpha/pulse scale and lighting response.
+- [x] Verify green and commit.
 
 ### Task 4: Full verification and publish
 
-- [ ] Run full CI lint/test/build.
-- [ ] Confirm GitHub Pages deploy succeeds.
-- [ ] Mark technical tasks complete.
-- [ ] Leave visual validation open for motes, machine position, chamber density, vortex turns, steam purge, heart readability, and mobile performance.
+- [x] Run full CI lint/test/build: 23 test files / 79 tests green.
+- [x] Confirm GitHub Pages deploy succeeds.
+- [x] Mark technical tasks complete.
+- [ ] Human visual validation: warm motes, machine position, chamber density, more-than-one-turn vortex feel, steam purge spectacle, heart readability, and mobile performance.
