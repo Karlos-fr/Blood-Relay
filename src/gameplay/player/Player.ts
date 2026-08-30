@@ -4,6 +4,7 @@ import type { PlayerControls } from '../../input/playerControls';
 import {
   getFacingDirection,
   getHorizontalIntent,
+  getReleasedJumpVelocity,
   PLAYER_ACCELERATION,
   PLAYER_DRAG,
   PLAYER_JUMP_SPEED,
@@ -88,6 +89,10 @@ export class Player {
       this.body.setVelocityY(DROP_THROUGH_SPEED);
     } else if (jumpPressed && this.isGrounded) {
       this.body.setVelocityY(-PLAYER_JUMP_SPEED);
+    }
+
+    if (!this.controls.isJumpDown() && this.body.velocity.y < 0) {
+      this.body.setVelocityY(getReleasedJumpVelocity(this.body.velocity.y));
     }
 
     this.syncDecorations();
