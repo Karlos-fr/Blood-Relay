@@ -131,8 +131,18 @@ export function attachArenaBackdropAnimation(
   const ventGraphics = scene.add.graphics();
   const ventY = machine.y - machine.radius * 0.72;
   const steamOrigins = [
-    { x: machine.x - machine.radius * 0.72, y: ventY, phaseOffsetMs: 0 },
-    { x: machine.x + machine.radius * 0.72, y: ventY, phaseOffsetMs: 620 },
+    {
+      x: machine.x - machine.radius * 0.72,
+      y: ventY,
+      phaseOffsetMs: 0,
+      outwardDirection: -1 as const,
+    },
+    {
+      x: machine.x + machine.radius * 0.72,
+      y: ventY,
+      phaseOffsetMs: 620,
+      outwardDirection: 1 as const,
+    },
   ];
   for (const origin of steamOrigins) {
     ventGraphics.fillStyle(0x3c404a, 1);
