@@ -10,8 +10,8 @@ import {
 } from './relayMachineCycle';
 
 describe('relay machine cycle', () => {
-  it('uses a double-capacity reservoir and a longer dramatic pressure cycle', () => {
-    expect(RELAY_CAPACITY).toBe(72);
+  it('uses a quadruple-original reservoir and a longer dramatic pressure cycle', () => {
+    expect(RELAY_CAPACITY).toBe(144);
     expect(RELAY_PRESSURIZE_MS).toBe(1000);
     expect(RELAY_PURGE_MS).toBe(2400);
     expect(RELAY_COOLDOWN_MS).toBe(1600);
