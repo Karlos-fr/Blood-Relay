@@ -54,15 +54,28 @@ const variants: Record<LegsId, LegVariant> = {
   },
 };
 
-export const LEGS_MODULES: Readonly<Record<LegsId, CharacterModuleDefinition>> = Object.fromEntries(
-  Object.entries(variants).map(([id, variant]) => [
+function createLegs(id: LegsId, variant: LegVariant): CharacterModuleDefinition {
+  return {
     id,
-    {
-      id,
-      pieces: [
-        { id: `${id}:rear`, slot: 'rearLeg', anchor: 'hips', views: { right: variant.rear } },
-        { id: `${id}:front`, slot: 'frontLeg', anchor: 'hips', views: { right: variant.front } },
-      ],
-    },
-  ]),
-) as Record<LegsId, CharacterModuleDefinition>;
+    pieces: [
+      {
+        id: `${id}:rear`,
+        slot: 'rearLeg',
+        anchor: 'hips',
+        views: { right: variant.rear },
+      },
+      {
+        id: `${id}:front`,
+        slot: 'frontLeg',
+        anchor: 'hips',
+        views: { right: variant.front },
+      },
+    ],
+  };
+}
+
+export const LEGS_MODULES: Readonly<Record<LegsId, CharacterModuleDefinition>> = {
+  'prison-trousers': createLegs('prison-trousers', variants['prison-trousers']),
+  'reinforced-trousers': createLegs('reinforced-trousers', variants['reinforced-trousers']),
+  'torn-trousers': createLegs('torn-trousers', variants['torn-trousers']),
+};
