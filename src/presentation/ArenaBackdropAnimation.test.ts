@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  HEART_VISUAL_CONFIG,
   getHeartbeatIntensity,
   getLedIntensity,
   getLoopProgress,
@@ -14,6 +15,15 @@ describe('ArenaBackdropAnimation helpers', () => {
     expect(firstBeat).toBeGreaterThan(0.8);
     expect(secondBeat).toBeGreaterThan(0.55);
     expect(pause).toBeLessThan(0.25);
+  });
+
+  it('keeps the relay heart visibly present even between beats', () => {
+    expect(HEART_VISUAL_CONFIG.coreRadiusFactor).toBeGreaterThanOrEqual(0.12);
+    expect(HEART_VISUAL_CONFIG.coreRestAlpha).toBeGreaterThanOrEqual(0.3);
+    expect(HEART_VISUAL_CONFIG.corePulseAlpha).toBeGreaterThanOrEqual(0.5);
+    expect(HEART_VISUAL_CONFIG.corePulseScale).toBeGreaterThanOrEqual(0.22);
+    expect(HEART_VISUAL_CONFIG.glowRestAlpha).toBeGreaterThanOrEqual(0.07);
+    expect(HEART_VISUAL_CONFIG.glowPulseAlpha).toBeGreaterThanOrEqual(0.18);
   });
 
   it('loops normalized progress', () => {
