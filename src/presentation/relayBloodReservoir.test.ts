@@ -7,14 +7,14 @@ import {
 } from './relayBloodReservoir';
 
 describe('relay blood reservoir', () => {
-  it('preallocates and enforces a bounded capacity of 72 particles', () => {
-    const state = createReservoirState(72);
+  it('preallocates and enforces a bounded capacity of 144 particles', () => {
+    const state = createReservoirState(144);
 
-    expect(state.particles).toHaveLength(72);
-    expect(state.particleRadius).toBeLessThanOrEqual(2.1);
-    for (let index = 0; index < 72; index += 1) {
+    expect(state.particles).toHaveLength(144);
+    expect(state.particleRadius).toBeLessThanOrEqual(1.75);
+    for (let index = 0; index < 144; index += 1) {
       expect(
-        injectReservoirParticle(state, { x: 38, y: -8 }, { x: -18, y: index * 0.05 }),
+        injectReservoirParticle(state, { x: 38, y: -8 }, { x: -18, y: index * 0.025 }),
       ).toBe(true);
     }
     expect(injectReservoirParticle(state, { x: 38, y: 0 }, { x: -18, y: 0 })).toBe(false);
