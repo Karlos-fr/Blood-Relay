@@ -22,13 +22,14 @@ export interface ReservoirStepOptions {
   gravityY?: number;
   damping?: number;
   swirlStrength?: number;
+  targetAngularVelocity?: number;
   purgeStrength?: number;
   restitution?: number;
 }
 
-const MAX_CAPACITY = 36;
+const MAX_CAPACITY = 72;
 const DEFAULT_CHAMBER_RADIUS = 50;
-const DEFAULT_PARTICLE_RADIUS = 2.6;
+const DEFAULT_PARTICLE_RADIUS = 2;
 const DEFAULT_GRAVITY_Y = 26;
 const DEFAULT_DAMPING = 0.985;
 const DEFAULT_SWIRL_STRENGTH = 18;
@@ -87,6 +88,7 @@ export function stepReservoir(
   const gravityY = options.gravityY ?? DEFAULT_GRAVITY_Y;
   const damping = options.damping ?? DEFAULT_DAMPING;
   const swirlStrength = options.swirlStrength ?? DEFAULT_SWIRL_STRENGTH;
+  const targetAngularVelocity = Math.max(0, options.targetAngularVelocity ?? 0);
   const purgeStrength = Math.min(1, Math.max(0, options.purgeStrength ?? 0));
   const restitution = options.restitution ?? DEFAULT_RESTITUTION;
   const dampingFactor = Math.pow(Math.max(0, damping), dt * 60);
@@ -104,12 +106,21 @@ export function stepReservoir(
 
     particle.vy += gravityY * dt;
 
-    const effectiveSwirl = swirlStrength * (0.35 + radialFactor * 0.65) * (1 + purgeStrength * 2.4);
+    const effectiveSwirl = swirlStrength * (0.35 + radialFactor * 0.65);
     particle.vx += tangentX * effectiveSwirl * dt;
     particle.vy += tangentY * effectiveSwirl * dt;
 
+    if (targetAngularVelocity > 0 && distance > 1) {
+      const currentTangentialSpeed = particle.vx * tangentX + particle.vy * tangentY;
+      const targetTangentialSpeed = targetAngularVelocity * distance;
+      const coupling = Math.min(1, dt * 5.8);
+      const tangentialCorrection = (targetTangentialSpeed - currentTangentialSpeed) * coupling;
+      particle.vx += tangentX * tangentialCorrection;
+      particle.vy += tangentY * tangentialCorrection;
+    }
+
     if (purgeStrength > 0) {
-      const suction = 125 * purgeStrength * (0.7 + radialFactor * 0.5);
+      const suction = 145 * purgeStrength * (0.65 + radialFactor * 0.55);
       particle.vx -= nx * suction * dt;
       particle.vy -= ny * suction * dt;
     }
@@ -125,8 +136,8 @@ export function stepReservoir(
 
   separateParticles(state);
 
-  if (purgeStrength > 0.45) {
-    const drainRadius = 2.5 + purgeStrength * 4;
+  if (purgeStrength > 0.52) {
+    const drainRadius = 2.2 + purgeStrength * 4.8;
     for (const particle of state.particles) {
       if (!particle.active) continue;
       if (Math.hypot(particle.x, particle.y) <= drainRadius) {
