@@ -38,6 +38,9 @@ const PIPE_DARK = 0x262a32;
 const PIPE_EDGE = 0x565b66;
 const PIPE_RED = 0x9d2734;
 const PIPE_RED_HIGHLIGHT = 0xeb4553;
+const PIPE_SHADOW_ALPHA = 0.62;
+const PIPE_BODY_ALPHA = 0.76;
+const PIPE_EDGE_ALPHA = 0.28;
 const MACHINE_DARK = 0x171920;
 const MACHINE_MID = 0x292c35;
 const MACHINE_EDGE = 0x626775;
@@ -233,11 +236,17 @@ function drawPipes(graphics: Phaser.GameObjects.Graphics, pipes: ArenaPipe[]): v
   for (const pipe of pipes) {
     const path = buildRoundedOrthogonalPath(pipe.points, pipe.cornerRadius);
 
-    drawPipePath(graphics, path, pipe.thickness + 5, 0x08090d, 0.9);
-    drawPipePath(graphics, path, pipe.thickness + 1, PIPE_DARK, 1);
-    drawPipePath(graphics, path, Math.max(2, pipe.thickness - 3), PIPE_EDGE, 0.34);
+    drawPipePath(graphics, path, pipe.thickness + 5, 0x08090d, PIPE_SHADOW_ALPHA);
+    drawPipePath(graphics, path, pipe.thickness + 1, PIPE_DARK, PIPE_BODY_ALPHA);
+    drawPipePath(
+      graphics,
+      path,
+      Math.max(2, pipe.thickness - 3),
+      PIPE_EDGE,
+      PIPE_EDGE_ALPHA,
+    );
 
-    // Blood sits inside the dark tube rather than reading as the pipe itself.
+    // Blood remains readable inside the translucent metal shell.
     drawPipePath(graphics, path, Math.max(2.8, pipe.thickness * 0.34), PIPE_RED, 0.66);
     drawPipePath(graphics, path, 1, PIPE_RED_HIGHLIGHT, 0.36);
   }
