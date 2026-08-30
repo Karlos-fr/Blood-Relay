@@ -1,13 +1,20 @@
 import type Phaser from 'phaser';
+import { createArenaDustSystem } from './arenaDust';
 import { createBloodPipeEffect } from './bloodPipeEffects';
 import { createMachineLightingSystem } from './machineLighting';
+import { createPanelAmbienceSystem } from './panelAmbience';
 import { buildRoundedOrthogonalPath } from './pipeGeometry';
 import { createSteamParticleSystem } from './steamParticles';
 
 interface Point { x: number; y: number; }
 interface AnimatedPipe { points: Point[]; thickness: number; accent: 'none' | 'red'; }
 interface AnimatedMachine { x: number; y: number; radius: number; }
-export interface ArenaBackdropAnimationLayout { pipes: AnimatedPipe[]; machine: AnimatedMachine; }
+interface AnimatedPanel { x: number; y: number; width: number; height: number; }
+export interface ArenaBackdropAnimationLayout {
+  panels: AnimatedPanel[];
+  pipes: AnimatedPipe[];
+  machine: AnimatedMachine;
+}
 
 const HEARTBEAT_PERIOD = 1600;
 const FLOW_PERIOD = 3300;
@@ -86,7 +93,15 @@ export function attachArenaBackdropAnimation(
   const animatedLayer = scene.add.container(0, 0);
   container.add(animatedLayer);
 
+  const ambienceWidth = machine.x * 2;
+  const ambienceHeight = Math.max(
+    ...layout.panels.map((panel) => panel.y + panel.height / 2),
+    machine.y + machine.radius,
+  );
+  const dustSystem = createArenaDustSystem(scene, animatedLayer, ambienceWidth, ambienceHeight);
+  const panelSystem = createPanelAmbienceSystem(scene, animatedLayer, layout.panels);
   const machineLighting = createMachineLightingSystem(scene, animatedLayer, machine);
+
   const heartGlow = scene.add.circle(
     machine.x,
     machine.y,
@@ -155,6 +170,8 @@ export function attachArenaBackdropAnimation(
 
   const controller = new ArenaBackdropAnimationController((time) => {
     const heartbeat = getHeartbeatIntensity(time);
+    dustSystem.update(time);
+    panelSystem.update(time);
     machineLighting.update(heartbeat);
     heartCore.setScale(0.96 + heartbeat * 0.12).setAlpha(0.38 + heartbeat * 0.55);
     heartGlow.setScale(0.9 + heartbeat * 0.28).setAlpha(0.07 + heartbeat * 0.22);
