@@ -1,6 +1,7 @@
 import type Phaser from 'phaser';
 import { createArenaDustSystem } from './arenaDust';
 import { createBloodPipeEffect } from './bloodPipeEffects';
+import { createIndustrialEventSystem } from './industrialEvents';
 import { createMachineLightingSystem } from './machineLighting';
 import { createPanelAmbienceSystem } from './panelAmbience';
 import { buildRoundedOrthogonalPath } from './pipeGeometry';
@@ -100,6 +101,12 @@ export function attachArenaBackdropAnimation(
   );
   const dustSystem = createArenaDustSystem(scene, animatedLayer, ambienceWidth, ambienceHeight);
   const panelSystem = createPanelAmbienceSystem(scene, animatedLayer, layout.panels);
+  const industrialSystem = createIndustrialEventSystem(
+    scene,
+    animatedLayer,
+    layout,
+    buildAmbienceSeed(layout),
+  );
   const machineLighting = createMachineLightingSystem(scene, animatedLayer, machine);
 
   const heartGlow = scene.add.circle(
@@ -172,6 +179,7 @@ export function attachArenaBackdropAnimation(
     const heartbeat = getHeartbeatIntensity(time);
     dustSystem.update(time);
     panelSystem.update(time);
+    industrialSystem.update(time);
     machineLighting.update(heartbeat);
     heartCore.setScale(0.96 + heartbeat * 0.12).setAlpha(0.38 + heartbeat * 0.55);
     heartGlow.setScale(0.9 + heartbeat * 0.28).setAlpha(0.07 + heartbeat * 0.22);
@@ -193,6 +201,13 @@ export function attachArenaBackdropAnimation(
 
   sceneControllers.set(scene, controller);
   return controller;
+}
+
+function buildAmbienceSeed(layout: ArenaBackdropAnimationLayout): string {
+  return layout.panels
+    .slice(0, 4)
+    .map((panel) => `${Math.round(panel.x)}:${Math.round(panel.y)}`)
+    .join('|');
 }
 
 function pulseAtCyclePhase(
