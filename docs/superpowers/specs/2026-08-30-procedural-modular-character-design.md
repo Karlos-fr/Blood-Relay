@@ -20,7 +20,7 @@ The following decisions are locked for the first implementation:
 - The canonical module orientation is **right-facing**.
 - Left-facing visuals are mirrored from the right-facing module by default.
 - Individual asymmetric modules may provide a dedicated left-facing override.
-- Every module format reserves a real **back-facing variant**, but back-facing rendering is not used yet.
+- The module contract reserves a **back-facing slot for future art**, but the first implementation does not need to draw or use back-facing variants.
 - Arms and weapons are **separate modules**.
 - Animation is driven by **discrete pixel poses**, not continuous limb rotations.
 - Character appearance is **deterministic**, represented by a modular configuration plus a seed.
@@ -28,7 +28,9 @@ The following decisions are locked for the first implementation:
 
 ## 3. Visual target
 
-The visual character remains approximately within the current logical player envelope, around 22 × 35 px before small cosmetic overhangs.
+The rendered body must stay visually compatible with the current player footprint. The current physics rectangle is derived from `22.5 × 34.5` base units multiplied by `ARENA_CONTENT_SCALE`; at the current scale of `0.9`, that is approximately **20.25 × 31.05 logical pixels**.
+
+The modular body should fit around that footprint. Small cosmetic overhangs are allowed for an arm, weapon, respirator, tube, blood bag or armor plate, but those overhangs never change gameplay collisions.
 
 The goal is not miniature realism. At this resolution, every item must be reduced to its strongest readable signal:
 
@@ -38,8 +40,6 @@ The goal is not miniature realism. At this resolution, every item must be reduce
 - torn suit: broken silhouette and exposed undersuit pixels;
 - armor plate: a strong block shape and highlight edge;
 - medical mask: light horizontal mask shape across the lower face.
-
-Accessories and weapons may visually extend outside the gameplay hitbox, but they never modify collisions.
 
 Rendering rules:
 
@@ -126,9 +126,9 @@ The first production library should be intentionally small but sufficient to pro
 2. reinforced trousers;
 3. torn/damaged trousers.
 
-### Arms — 2 initially
+### Arms — 2
 
-At least two arm silhouettes/gear treatments, independent from weapon choice.
+Two arm silhouettes/gear treatments, independent from weapon choice.
 
 ### Accessories — 6
 
@@ -139,9 +139,9 @@ At least two arm silhouettes/gear treatments, independent from weapon choice.
 5. external implant;
 6. holster.
 
-### Palettes — about 5
+### Palettes — 5
 
-Palettes use semantic roles rather than one flat tint.
+The first implementation provides exactly five palettes. Palettes use semantic roles rather than one flat tint.
 
 Suggested roles include:
 
@@ -171,16 +171,16 @@ The first lot includes one placeholder weapon module attached through the real w
 
 Each module has a right-facing canonical definition.
 
-Orientation resolution is:
+Orientation resolution in the first implementation is:
 
 ```text
 right -> canonical procedural module
 left  -> mirrored right module by default
 left  -> optional dedicated override for asymmetric modules
-back  -> dedicated definition reserved in the module contract
+back  -> reserved contract slot for future dedicated art
 ```
 
-Back variants are authored/prepared in the data format, but no back animation or gameplay state uses them in the first implementation.
+The code/data model must make it possible to add a dedicated back variant later without changing the public module interface. **No back-facing geometry, animation or gameplay state is required in this first batch.**
 
 ## 8. Character rig
 
@@ -418,7 +418,7 @@ Testable requirements:
 - module identifiers resolve to valid definitions;
 - right-to-left mirroring is deterministic;
 - asymmetric left override wins over mirroring when supplied;
-- back definitions can be represented/resolved but are not selected by current gameplay;
+- the module contract can carry an optional future back definition without current gameplay selecting it;
 - every module references valid palette roles;
 - pose library contains required initial animations and integer offsets;
 - render-layer order is deterministic;
@@ -452,12 +452,12 @@ The first implementation batch should deliver only enough to prove the architect
 - procedural module rendering infrastructure;
 - shared rig;
 - common pose animator;
-- initial 4 torso / 5 head / 3 leg / 2 arm / 6 accessory / ~5 palette library;
+- initial **4 torso / 5 head / 3 leg / 2 arm / 6 accessory / 5 palette** library;
 - one placeholder weapon module;
 - deterministic appearance composition;
 - two fixed P1/P2 combatants;
 - right and mirrored-left gameplay rendering;
-- back variant support in the data contract only;
+- back variant support in the **module contract only**;
 - idle, run, takeoff, rise, apex, fall and landing presentation;
 - integration into the current Player without changing physics behavior;
 - tests, build and GitHub Pages deployment.
@@ -474,7 +474,7 @@ Do not include in this batch:
 - character selection UI;
 - unlocks/cosmetics/progression;
 - online persistence;
-- back-facing gameplay;
+- back-facing geometry or gameplay;
 - procedural anatomy resizing;
 - different hitboxes per appearance;
 - smooth skeletal rotation;
@@ -492,7 +492,7 @@ The architectural batch is successful when:
 3. all initial body categories can be swapped independently without rewriting animations;
 4. one common pose library drives both players;
 5. right/left profile behavior works with mirror-by-default and override support;
-6. the data model already supports real back variants without using them yet;
+6. the public module contract already has a place for future back-facing art without requiring back art now;
 7. the result stays crisp at native gameplay scale;
 8. automated deterministic tests, lint and build pass;
 9. GitHub Pages deploys successfully;
