@@ -47,6 +47,7 @@ export class MobileControls {
       isLeftDown: () => this.state.left,
       isRightDown: () => this.state.right,
       isDownDown: () => this.state.down,
+      isJumpDown: () => this.state.jumpDown,
       consumeJumpPressed: () => {
         const pressed = this.state.jumpPressed;
         this.state.jumpPressed = false;
