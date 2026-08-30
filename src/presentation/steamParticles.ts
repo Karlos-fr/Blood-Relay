@@ -82,7 +82,7 @@ export function sampleSteamParticle(
   const turbulence = Math.sin(progress * Math.PI * 2 + seed.wavePhase) * seed.turbulence;
   const outwardBias = outwardDirection * (10 + Math.abs(seed.lateralDrift) * 0.5) * smoothProgress;
   const localDrift = seed.lateralDrift * 0.12 * smoothProgress;
-  const boostedOutward = outwardDirection * boost * 36 * smoothProgress;
+  const boostedOutward = outwardDirection * boost * 60 * smoothProgress;
   const boostedRise = 1 + boost * 0.68;
   const baseScale = seed.startScale + (seed.endScale - seed.startScale) * progress;
 
