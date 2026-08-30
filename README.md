@@ -8,7 +8,7 @@ La mécanique centrale à venir : le sang perdu pendant les combats reste dans l
 
 La maquette de référence validée pour la direction générale du jeu est conservée dans le dépôt :
 
-<img src="https://raw.githubusercontent.com/Karlos-fr/Blood-Relay/main/docs/visual/blood-relay-visual-direction.webp" alt="Blood Relay — direction visuelle" width="100%">
+<img src="https://raw.githubusercontent.com/Karlos-fr/blood-relay/main/docs/visual/blood-relay-visual-direction.webp" alt="Blood Relay — direction visuelle" width="100%">
 
 Elle fixe notamment la vue de côté, les sprites volontairement lisibles, l'ambiance industrielle sombre, le sang comme ressource et le contraste entre pixel art rétro et effets modernes.
 
@@ -20,11 +20,11 @@ La version actuelle contient :
 
 - Vite + TypeScript strict ;
 - Phaser 3 + Arcade Physics ;
-- résolution logique 960 × 540 en 16:9 ;
-- une arène 960 × 540 entièrement visible, caméra à 100 % sur desktop ;
+- résolution logique panoramique 1120 × 540 ;
+- une arène 1120 × 540 entièrement visible, caméra à 100 % sur desktop ;
 - contenu du prototype compacté à 90 % pour augmenter l'espace de combat sans modifier le cadrage logique ;
-- sur mobile, un canvas adapté au viewport réel tout en conservant l'intégralité de la scène 16:9 sans crop ni déformation ;
-- quatre niveaux verticaux de plateformes traversables selon une structure 2-1-2-1 ;
+- sur mobile, un canvas adapté au viewport réel tout en conservant l'intégralité de la scène panoramique sans crop ni déformation ;
+- quatre niveaux verticaux de plateformes traversables selon une structure 2-2-2-2 ;
 - le niveau supérieur conserve une marge suffisante pour qu'un saut complet reste dans l'écran ;
 - deux joueurs locaux avec collisions, accélération, décélération et saut ;
 - commandes tactiles mobiles pour le joueur 1, affichées uniquement sur appareil tactile mobile, avec boutons Crystal Glass adaptés aux safe areas iPhone ;
@@ -59,7 +59,7 @@ Sur mobile tactile, de grands boutons en verre apparaissent automatiquement :
 
 ## Version jouable
 
-https://karlos-fr.github.io/Blood-Relay/
+https://karlos-fr.github.io/blood-relay/
 
 ## Prérequis locaux
 

@@ -1339,7 +1339,7 @@ Deploy to Pages       success
 
 - [x] **Step 5: Hand off the deployed build and stop**
 
-Send `https://karlos-fr.github.io/Blood-Relay/` and ask the human tester to verify:
+Send `https://karlos-fr.github.io/blood-relay/` and ask the human tester to verify:
 
 - P1/P2 remain the correct apparent size;
 - fighters are immediately distinguishable;
