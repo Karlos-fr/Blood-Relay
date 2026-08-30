@@ -7,7 +7,7 @@ export interface RelayMachineCycleState {
   phaseTimeMs: number;
 }
 
-export const RELAY_CAPACITY = 72;
+export const RELAY_CAPACITY = 144;
 export const RELAY_PRESSURE_THRESHOLD = 0.88;
 export const RELAY_PRESSURIZE_MS = 1000;
 export const RELAY_PURGE_MS = 2400;
