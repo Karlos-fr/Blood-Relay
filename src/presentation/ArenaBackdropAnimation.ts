@@ -22,6 +22,23 @@ const HEARTBEAT_PERIOD = 1600;
 const FLOW_PERIOD = 3300;
 const RING_PERIOD = 18000;
 
+export const HEART_VISUAL_CONFIG = {
+  coreRadiusFactor: 0.125,
+  coreRestAlpha: 0.34,
+  corePulseAlpha: 0.56,
+  coreRestScale: 0.96,
+  corePulseScale: 0.28,
+  corePurgeAlpha: 0.24,
+  corePurgeScale: 0.32,
+  glowRadiusFactor: 0.52,
+  glowRestAlpha: 0.08,
+  glowPulseAlpha: 0.22,
+  glowRestScale: 0.96,
+  glowPulseScale: 0.22,
+  glowPurgeAlpha: 0.18,
+  glowPurgeScale: 0.16,
+} as const;
+
 export class ArenaBackdropAnimationController {
   public constructor(private readonly renderFrame: (time: number) => void) {}
 
@@ -115,21 +132,6 @@ export function attachArenaBackdropAnimation(
     return createBloodPipeEffect(scene, animatedLayer, path);
   });
 
-  // Keep a restrained red backlight behind the dynamic reservoir rather than an opaque core.
-  const heartGlow = scene.add.circle(
-    machine.x,
-    machine.y,
-    machine.radius * 0.48,
-    0xe23343,
-    0.07,
-  );
-  const heartCore = scene.add.circle(
-    machine.x,
-    machine.y,
-    machine.radius * 0.085,
-    0xe13b49,
-    0.16,
-  );
   const rotatingRing = scene.add.graphics().setPosition(machine.x, machine.y);
   rotatingRing.lineStyle(2, 0xa3a8b5, 0.48);
   rotatingRing.beginPath();
@@ -174,9 +176,30 @@ export function attachArenaBackdropAnimation(
     }
   }
 
-  animatedLayer.add([heartGlow, heartCore, rotatingRing, ventGraphics, ...leds]);
+  animatedLayer.add([rotatingRing, ventGraphics, ...leds]);
   const relayMachine = createRelayMachineSystem(scene, animatedLayer, machine);
   const steamSystem = createSteamParticleSystem(scene, animatedLayer, steamOrigins);
+
+  // Heart renders after the reservoir so it remains readable as the chamber fills.
+  const heartGlow = scene.add
+    .circle(
+      machine.x,
+      machine.y,
+      machine.radius * HEART_VISUAL_CONFIG.glowRadiusFactor,
+      0xe23343,
+      1,
+    )
+    .setAlpha(HEART_VISUAL_CONFIG.glowRestAlpha);
+  const heartCore = scene.add
+    .circle(
+      machine.x,
+      machine.y,
+      machine.radius * HEART_VISUAL_CONFIG.coreRadiusFactor,
+      0xe13b49,
+      1,
+    )
+    .setAlpha(HEART_VISUAL_CONFIG.coreRestAlpha);
+  animatedLayer.add([heartGlow, heartCore]);
 
   let previousTime: number | undefined;
   let ringRotation = 0;
@@ -199,15 +222,37 @@ export function attachArenaBackdropAnimation(
     });
 
     const relayState = relayMachine.update(time, dtMs);
-    const energizedHeartbeat = Math.min(1, heartbeat + relayState.purgeBoost * 0.72);
+    const energizedHeartbeat = Math.min(1, heartbeat * 1.18 + relayState.purgeBoost * 0.78);
     machineLighting.update(energizedHeartbeat);
 
     heartCore
-      .setScale(0.9 + heartbeat * 0.16 + relayState.purgeBoost * 0.45)
-      .setAlpha(0.1 + heartbeat * 0.18 + relayState.purgeBoost * 0.42);
+      .setScale(
+        HEART_VISUAL_CONFIG.coreRestScale +
+          heartbeat * HEART_VISUAL_CONFIG.corePulseScale +
+          relayState.purgeBoost * HEART_VISUAL_CONFIG.corePurgeScale,
+      )
+      .setAlpha(
+        Math.min(
+          1,
+          HEART_VISUAL_CONFIG.coreRestAlpha +
+            heartbeat * HEART_VISUAL_CONFIG.corePulseAlpha +
+            relayState.purgeBoost * HEART_VISUAL_CONFIG.corePurgeAlpha,
+        ),
+      );
     heartGlow
-      .setScale(0.94 + heartbeat * 0.16 + relayState.purgeBoost * 0.12)
-      .setAlpha(0.035 + heartbeat * 0.1 + relayState.purgeBoost * 0.2);
+      .setScale(
+        HEART_VISUAL_CONFIG.glowRestScale +
+          heartbeat * HEART_VISUAL_CONFIG.glowPulseScale +
+          relayState.purgeBoost * HEART_VISUAL_CONFIG.glowPurgeScale,
+      )
+      .setAlpha(
+        Math.min(
+          1,
+          HEART_VISUAL_CONFIG.glowRestAlpha +
+            heartbeat * HEART_VISUAL_CONFIG.glowPulseAlpha +
+            relayState.purgeBoost * HEART_VISUAL_CONFIG.glowPurgeAlpha,
+        ),
+      );
 
     const baseAngularSpeed = (Math.PI * 2) / (RING_PERIOD / 1000);
     const angularSpeed =
