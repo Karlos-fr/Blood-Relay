@@ -325,16 +325,51 @@ function drawRelayMachine(
   graphics.fillStyle(0xb8bdc7, 0.8);
   graphics.fillCircle(gaugeX, gaugeY, 2);
 
-  // Service console.
-  const consoleY = y + radius + 10;
-  graphics.fillStyle(0x17181e, 1);
-  graphics.fillRect(x - 98, consoleY, 196, 20);
-  graphics.lineStyle(1, 0x545864, 0.58);
-  graphics.strokeRect(x - 98, consoleY, 196, 20);
-  graphics.fillStyle(MACHINE_RED, 0.72);
-  graphics.fillRect(x - 66, consoleY + 8, 36, 4);
-  graphics.fillStyle(0x42c7d8, 0.62);
-  graphics.fillRect(x + 28, consoleY + 8, 42, 4);
+  drawMaintenanceModule(graphics, x, y + radius + 9);
+}
+
+function drawMaintenanceModule(
+  graphics: Phaser.GameObjects.Graphics,
+  x: number,
+  y: number,
+): void {
+  const width = 126;
+  const height = 24;
+  const left = x - width / 2;
+
+  graphics.fillStyle(0x0b0d11, 0.9);
+  graphics.fillRect(left - 9, y + 5, 9, 13);
+  graphics.fillRect(left + width, y + 5, 9, 13);
+
+  graphics.fillStyle(0x242832, 1);
+  graphics.fillRoundedRect(left, y, width, height, 3);
+  graphics.lineStyle(1, 0x666b76, 0.65);
+  graphics.strokeRoundedRect(left, y, width, height, 3);
+
+  graphics.fillStyle(0x59606b, 0.38);
+  graphics.fillRect(left + 5, y + 3, width - 10, 1);
+
+  graphics.fillStyle(0x101218, 1);
+  graphics.fillRect(x - 24, y + 6, 48, 12);
+  graphics.lineStyle(1, 0x4d525d, 0.5);
+  graphics.strokeRect(x - 24, y + 6, 48, 12);
+  for (let slot = 0; slot < 5; slot += 1) {
+    graphics.lineBetween(x - 18 + slot * 9, y + 9, x - 18 + slot * 9, y + 15);
+  }
+
+  const indicators = [0x9e313b, 0x42c7d8, 0x7b8444] as const;
+  indicators.forEach((color, index) => {
+    graphics.fillStyle(0x0a0b0f, 1);
+    graphics.fillCircle(x + 36 + index * 10, y + 12, 3);
+    graphics.fillStyle(color, 0.72);
+    graphics.fillCircle(x + 36 + index * 10, y + 12, 1.4);
+  });
+
+  graphics.fillStyle(0x8c929c, 0.62);
+  graphics.fillCircle(left + 8, y + 7, 1.3);
+  graphics.fillCircle(left + width - 8, y + 7, 1.3);
+  graphics.fillCircle(left + 8, y + height - 6, 1.3);
+  graphics.fillCircle(left + width - 8, y + height - 6, 1.3);
 }
 
 function createSeededRandom(seed: string): () => number {
