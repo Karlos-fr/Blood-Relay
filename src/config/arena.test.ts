@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { PLAYER_HEIGHT, PLAYER_WIDTH } from '../gameplay/player/playerGeometry';
 import { PLAYER_JUMP_SPEED } from '../gameplay/player/movement';
 import { isSymmetricPlatformWidth } from '../presentation/platformTiles';
 import { GAME_HEIGHT, GAME_WIDTH, GRAVITY_Y } from './game';
@@ -9,6 +10,7 @@ import {
   FLOOR_HEIGHT,
   PLATFORM_HEIGHT,
   PLATFORM_LAYOUT,
+  SPAWN_POINTS,
 } from './arena';
 
 describe('arena layout', () => {
@@ -81,6 +83,22 @@ describe('arena layout', () => {
       expect(verticalGap).toBeGreaterThan(0);
       expect(verticalGap).toBeLessThanOrEqual(maxJumpHeight * 0.9);
     }
+  });
+
+  it('keeps the larger fighter inside the arena at every spawn', () => {
+    for (const spawn of SPAWN_POINTS) {
+      expect(spawn.x - PLAYER_WIDTH / 2).toBeGreaterThanOrEqual(0);
+      expect(spawn.x + PLAYER_WIDTH / 2).toBeLessThanOrEqual(ARENA_WIDTH);
+      expect(spawn.y - PLAYER_HEIGHT / 2).toBeGreaterThanOrEqual(0);
+    }
+  });
+
+  it('keeps a full top-tier jump inside the arena', () => {
+    const maxJumpHeight = PLAYER_JUMP_SPEED ** 2 / (2 * GRAVITY_Y);
+    const topTier = PLATFORM_LAYOUT.find((platform) => platform.tier === 4);
+    if (!topTier) throw new Error('Missing platform tier 4.');
+    const standingCenterY = topTier.y - PLATFORM_HEIGHT / 2 - PLAYER_HEIGHT / 2;
+    expect(standingCenterY - maxJumpHeight - PLAYER_HEIGHT / 2).toBeGreaterThanOrEqual(0);
   });
 
   it('uses widths that produce centered symmetric procedural patterns', () => {

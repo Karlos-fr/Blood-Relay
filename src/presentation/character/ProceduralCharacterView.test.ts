@@ -67,8 +67,8 @@ describe('ProceduralCharacterView', () => {
       'right',
     );
     expect(bakeCharacterFrameMock).toHaveBeenNthCalledWith(2, scene, appearance, 'idle', 1, 'left');
-    expect(image.setPosition).toHaveBeenNthCalledWith(1, 10, 36);
-    expect(image.setPosition).toHaveBeenNthCalledWith(2, 13, 37);
+    expect(image.setPosition).toHaveBeenNthCalledWith(1, 10, 44);
+    expect(image.setPosition).toHaveBeenNthCalledWith(2, 13, 45);
     expect(image.setTexture).toHaveBeenCalledTimes(2);
     expect(image.setTexture).toHaveBeenLastCalledWith('char-frame:test');
     expect(image.setOrigin).toHaveBeenCalledTimes(2);

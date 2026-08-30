@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { ARENA_CONTENT_SCALE } from '../../config/arenaScale';
 import { PLAYER_HEIGHT, PLAYER_WIDTH } from './playerGeometry';
 
 describe('player gameplay geometry', () => {
-  it('preserves the exact existing physics rectangle', () => {
-    expect(PLAYER_WIDTH).toBe(22.5 * ARENA_CONTENT_SCALE);
-    expect(PLAYER_HEIGHT).toBe(34.5 * ARENA_CONTENT_SCALE);
+  it('uses the approved shared 32 × 48 physics body', () => {
+    expect(PLAYER_WIDTH).toBe(32);
+    expect(PLAYER_HEIGHT).toBe(48);
   });
 });
