@@ -25,7 +25,9 @@ export interface GlowingMoteSystem {
   update(time: number): void;
 }
 
-const MOTE_TEXTURE_KEY = 'relay-glowing-mote';
+export const GLOWING_MOTE_PALETTE = [0xf2c94c, 0xffe08a, 0xfff3bf] as const;
+
+const MOTE_TEXTURE_KEY = 'relay-glowing-mote-warm';
 
 export function buildGlowingMoteSeeds(
   width: number,
@@ -115,12 +117,12 @@ function ensureMoteTexture(scene: Phaser.Scene): void {
   if (scene.textures.exists(MOTE_TEXTURE_KEY)) return;
 
   const graphics = scene.add.graphics().setVisible(false);
-  graphics.fillStyle(0xeaf6ff, 0.08);
+  graphics.fillStyle(GLOWING_MOTE_PALETTE[0], 0.1);
   graphics.fillCircle(6, 6, 6);
-  graphics.fillStyle(0xf5fbff, 0.2);
+  graphics.fillStyle(GLOWING_MOTE_PALETTE[1], 0.3);
   graphics.fillCircle(6, 6, 3.5);
-  graphics.fillStyle(0xffffff, 0.95);
-  graphics.fillCircle(6, 6, 1.2);
+  graphics.fillStyle(GLOWING_MOTE_PALETTE[2], 0.98);
+  graphics.fillCircle(6, 6, 1.25);
   graphics.generateTexture(MOTE_TEXTURE_KEY, 12, 12);
   graphics.destroy();
 }
