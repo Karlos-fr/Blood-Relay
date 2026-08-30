@@ -74,7 +74,7 @@ Existing code changed:
 **Interfaces:**
 - Produces `CharacterAppearance`, the seven ID types, `CharacterPalette`, `CHARACTER_PALETTES`, `buildCharacterAppearance(seed)`, and `PLAYER_APPEARANCES`.
 
-- [ ] **Step 1: Write the failing deterministic appearance tests**
+- [x] **Step 1: Write the failing deterministic appearance tests**
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -110,7 +110,7 @@ describe('deterministic procedural character appearance', () => {
 });
 ```
 
-- [ ] **Step 2: Run the focused test and verify RED**
+- [x] **Step 2: Run the focused test and verify RED**
 
 ```bash
 npm run test -- src/presentation/character/deterministicCharacter.test.ts
@@ -118,7 +118,7 @@ npm run test -- src/presentation/character/deterministicCharacter.test.ts
 
 Expected: FAIL because the new modules do not exist.
 
-- [ ] **Step 3: Add the exact serializable ID contract**
+- [x] **Step 3: Add the exact serializable ID contract**
 
 `CharacterAppearance.ts`:
 
@@ -153,7 +153,7 @@ export interface CharacterAppearance {
 }
 ```
 
-- [ ] **Step 4: Add exactly five semantic palettes**
+- [x] **Step 4: Add exactly five semantic palettes**
 
 `characterPalettes.ts`:
 
@@ -198,7 +198,7 @@ export function getCharacterPalette(id: PaletteId): CharacterPalette {
 }
 ```
 
-- [ ] **Step 5: Implement seeded composition and the two fixed configurations**
+- [x] **Step 5: Implement seeded composition and the two fixed configurations**
 
 `deterministicCharacter.ts`:
 
@@ -247,7 +247,7 @@ export const PLAYER_APPEARANCES: Readonly<Record<1 | 2, CharacterAppearance>> = 
 };
 ```
 
-- [ ] **Step 6: Verify GREEN and commit**
+- [x] **Step 6: Verify GREEN and commit**
 
 ```bash
 npm run test -- src/presentation/character/deterministicCharacter.test.ts
@@ -266,7 +266,7 @@ git commit -m "feat: define modular character appearances"
 **Interfaces:**
 - Produces `CharacterPieceSlot`, `RigAnchorName`, `CharacterFacing`, `PixelPrimitive`, `CharacterModulePieceDefinition`, `CharacterModuleDefinition`, `rect()`, `pixels()`, `mirrorGeometry()`, `resolveModuleGeometry()`, `calculateGeometryBounds()`.
 
-- [ ] **Step 1: Write failing geometry tests**
+- [x] **Step 1: Write failing geometry tests**
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -304,13 +304,13 @@ describe('procedural module geometry', () => {
 });
 ```
 
-- [ ] **Step 2: Verify RED**
+- [x] **Step 2: Verify RED**
 
 ```bash
 npm run test -- src/presentation/character/moduleGeometry.test.ts
 ```
 
-- [ ] **Step 3: Implement the geometry vocabulary and compact helpers**
+- [x] **Step 3: Implement the geometry vocabulary and compact helpers**
 
 `moduleGeometry.ts`:
 
@@ -391,7 +391,7 @@ export function calculateGeometryBounds(primitives: readonly PixelPrimitive[]): 
 }
 ```
 
-- [ ] **Step 4: Verify GREEN and commit**
+- [x] **Step 4: Verify GREEN and commit**
 
 ```bash
 npm run test -- src/presentation/character/moduleGeometry.test.ts
@@ -413,7 +413,7 @@ git commit -m "feat: add pixel module geometry contract"
 **Interfaces:**
 - Produces `HEAD_MODULES`, `TORSO_MODULES`, `LEGS_MODULES`, `ARMS_MODULES`, each keyed by the Task 1 ID union.
 
-- [ ] **Step 1: Write failing body-library tests**
+- [x] **Step 1: Write failing body-library tests**
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -440,13 +440,13 @@ describe('initial modular fighter body library', () => {
 });
 ```
 
-- [ ] **Step 2: Verify RED**
+- [x] **Step 2: Verify RED**
 
 ```bash
 npm run test -- src/presentation/character/bodyModules.test.ts
 ```
 
-- [ ] **Step 3: Define the five head signals**
+- [x] **Step 3: Define the five head signals**
 
 `heads.ts` uses only integer `rect()` and `pixels()` primitives around the `head` anchor:
 
@@ -477,7 +477,7 @@ export const HEAD_MODULES: Readonly<Record<HeadId, CharacterModuleDefinition>> =
 };
 ```
 
-- [ ] **Step 4: Define the four torso silhouettes**
+- [x] **Step 4: Define the four torso silhouettes**
 
 `torsos.ts` creates one `torso` piece per ID:
 
@@ -504,7 +504,7 @@ const torsoPieces = {
 
 Map each entry to `{ id, pieces: [{ id: `${id}:torso`, slot: 'torso', anchor: 'torso', views: { right: geometry } }] }` and type the final table as `Readonly<Record<TorsoId, CharacterModuleDefinition>>`.
 
-- [ ] **Step 5: Define the three two-piece leg modules**
+- [x] **Step 5: Define the three two-piece leg modules**
 
 `legs.ts`:
 
@@ -527,7 +527,7 @@ const variants = {
 
 For each ID create `rearLeg` then `frontLeg`, both anchored at `hips`.
 
-- [ ] **Step 6: Define two two-piece arm modules independent from the weapon**
+- [x] **Step 6: Define two two-piece arm modules independent from the weapon**
 
 `arms.ts`:
 
@@ -546,7 +546,7 @@ const variants = {
 
 Rear uses `shoulderBack`; front uses `shoulderFront`.
 
-- [ ] **Step 7: Verify and commit**
+- [x] **Step 7: Verify and commit**
 
 ```bash
 npm run test -- src/presentation/character/bodyModules.test.ts
@@ -568,7 +568,7 @@ git commit -m "feat: add procedural fighter body modules"
 **Interfaces:**
 - Produces `ACCESSORY_MODULES`, `WEAPON_MODULES`, `resolveAppearanceModules()`, `getAllCharacterModules()`.
 
-- [ ] **Step 1: Write failing complete-catalog tests**
+- [x] **Step 1: Write failing complete-catalog tests**
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -606,13 +606,13 @@ describe('complete character module catalog', () => {
 });
 ```
 
-- [ ] **Step 2: Verify RED**
+- [x] **Step 2: Verify RED**
 
 ```bash
 npm run test -- src/presentation/character/characterModuleCatalog.test.ts
 ```
 
-- [ ] **Step 3: Implement the six accessory signals**
+- [x] **Step 3: Implement the six accessory signals**
 
 `accessories.ts` uses these exact definitions:
 
@@ -656,7 +656,7 @@ const specs = {
 
 Wrap each as one `CharacterModuleDefinition`. Do not author `back` art.
 
-- [ ] **Step 4: Implement one independent placeholder weapon**
+- [x] **Step 4: Implement one independent placeholder weapon**
 
 `weapons.ts`:
 
@@ -678,7 +678,7 @@ export const WEAPON_MODULES = {
 
 Do not add firing input or projectiles.
 
-- [ ] **Step 5: Implement catalog expansion**
+- [x] **Step 5: Implement catalog expansion**
 
 `characterModuleCatalog.ts`:
 
@@ -708,7 +708,7 @@ export function getAllCharacterModules(): CharacterModuleDefinition[] {
 }
 ```
 
-- [ ] **Step 6: Verify and commit**
+- [x] **Step 6: Verify and commit**
 
 ```bash
 npm run test -- src/presentation/character/characterModuleCatalog.test.ts
@@ -731,7 +731,7 @@ git commit -m "feat: complete modular fighter catalog"
 - Produces `CHARACTER_RIG`, `CHARACTER_RENDER_ORDER`, `LOWER_BODY_SLOTS`, `UPPER_BODY_SLOTS`, `CHARACTER_ANIMATIONS`, `PixelPoseAnimator`.
 - `PixelPoseAnimator.update(timeMs, motion)` consumes `{ grounded, velocityX, velocityY }` and returns a `PixelPoseFrame`.
 
-- [ ] **Step 1: Write failing rig/animation tests**
+- [x] **Step 1: Write failing rig/animation tests**
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -790,13 +790,13 @@ describe('shared procedural character rig and poses', () => {
 });
 ```
 
-- [ ] **Step 2: Verify RED**
+- [x] **Step 2: Verify RED**
 
 ```bash
 npm run test -- src/presentation/character/PixelPoseAnimator.test.ts
 ```
 
-- [ ] **Step 3: Implement the shared rig and semantic render order**
+- [x] **Step 3: Implement the shared rig and semantic render order**
 
 `CharacterRig.ts`:
 
@@ -823,7 +823,7 @@ export function getRigAnchor(anchor: RigAnchorName, facing: CharacterFacing): Ri
 }
 ```
 
-- [ ] **Step 4: Implement the discrete pose data and future channel grouping**
+- [x] **Step 4: Implement the discrete pose data and future channel grouping**
 
 `pixelPoses.ts`:
 
@@ -876,7 +876,7 @@ export const CHARACTER_ANIMATIONS: Readonly<Record<CharacterAnimationName, reado
 };
 ```
 
-- [ ] **Step 5: Implement deterministic animation selection**
+- [x] **Step 5: Implement deterministic animation selection**
 
 `PixelPoseAnimator.ts`:
 
@@ -949,7 +949,7 @@ function sampleFrames(frames: readonly PixelPoseFrame[], elapsedMs: number): Pix
 }
 ```
 
-- [ ] **Step 6: Verify and commit**
+- [x] **Step 6: Verify and commit**
 
 ```bash
 npm run test -- src/presentation/character/PixelPoseAnimator.test.ts
@@ -972,7 +972,7 @@ git commit -m "feat: add shared pixel pose rig"
 - Produces the single shared `PlayerPresentationState` interface used later by `Player` and now by the view.
 - Produces `buildModuleTextureKey()`, `bakeModulePiece()`, `ProceduralCharacterView.update()`.
 
-- [ ] **Step 1: Create the one presentation-state boundary interface**
+- [x] **Step 1: Create the one presentation-state boundary interface**
 
 `src/gameplay/player/playerPresentationState.ts`:
 
@@ -989,7 +989,7 @@ export interface PlayerPresentationState {
 
 `ProceduralCharacterView` imports this type from gameplay. `Player` will implement the producer in Task 7. There is no second duplicate state interface.
 
-- [ ] **Step 2: Write the failing texture-key test**
+- [x] **Step 2: Write the failing texture-key test**
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -1005,13 +1005,13 @@ describe('module baker cache key', () => {
 });
 ```
 
-- [ ] **Step 3: Verify RED**
+- [x] **Step 3: Verify RED**
 
 ```bash
 npm run test -- src/presentation/character/characterModuleBaker.test.ts
 ```
 
-- [ ] **Step 4: Implement cached CanvasTexture baking with fillRect only**
+- [x] **Step 4: Implement cached CanvasTexture baking with fillRect only**
 
 `characterModuleBaker.ts`:
 
@@ -1072,7 +1072,7 @@ export function bakeModulePiece(
 
 No lines, curves, filtering or runtime redraw after baking.
 
-- [ ] **Step 5: Implement the sprite-composed view**
+- [x] **Step 5: Implement the sprite-composed view**
 
 `ProceduralCharacterView.ts`:
 
@@ -1137,7 +1137,7 @@ export class ProceduralCharacterView {
 
 The view never receives a Phaser physics body or collision size.
 
-- [ ] **Step 6: Verify and commit**
+- [x] **Step 6: Verify and commit**
 
 ```bash
 npm run test -- src/presentation/character/characterModuleBaker.test.ts
@@ -1162,7 +1162,7 @@ git commit -m "feat: render modular procedural fighters"
 - `Player.presentationState` returns the Task 6 `PlayerPresentationState`.
 - `ArenaScene` owns `ProceduralCharacterView[]` and updates each after its matching player.
 
-- [ ] **Step 1: Write the failing hitbox-preservation test**
+- [x] **Step 1: Write the failing hitbox-preservation test**
 
 `playerGeometry.test.ts`:
 
@@ -1179,13 +1179,13 @@ describe('player gameplay geometry', () => {
 });
 ```
 
-- [ ] **Step 2: Verify RED**
+- [x] **Step 2: Verify RED**
 
 ```bash
 npm run test -- src/gameplay/player/playerGeometry.test.ts
 ```
 
-- [ ] **Step 3: Extract the existing dimensions without changing them**
+- [x] **Step 3: Extract the existing dimensions without changing them**
 
 `playerGeometry.ts`:
 
@@ -1197,7 +1197,7 @@ export const PLAYER_HEIGHT = 34.5 * ARENA_CONTENT_SCALE;
 
 Modify `Player.ts` to import these constants and delete only the two duplicate private declarations.
 
-- [ ] **Step 4: Remove placeholder visual responsibilities and expose state**
+- [x] **Step 4: Remove placeholder visual responsibilities and expose state**
 
 In `Player.ts`:
 
@@ -1223,7 +1223,7 @@ public get presentationState(): PlayerPresentationState {
 
 Do not change movement/jump/drop-through/collider logic.
 
-- [ ] **Step 5: Wire the fixed views in ArenaScene**
+- [x] **Step 5: Wire the fixed views in ArenaScene**
 
 Add imports:
 
@@ -1259,7 +1259,7 @@ for (let index = 0; index < this.players.length; index += 1) {
 
 Do not modify colliders, platform processing, world bounds, controls or movement constants.
 
-- [ ] **Step 6: Run focused and complete verification**
+- [x] **Step 6: Run focused and complete verification**
 
 ```bash
 npm run test -- src/gameplay/player/playerGeometry.test.ts
@@ -1270,7 +1270,7 @@ npm run build
 
 Expected: all exit 0.
 
-- [ ] **Step 7: Commit the playable integration**
+- [x] **Step 7: Commit the playable integration**
 
 ```bash
 git add src/gameplay/player src/scenes/ArenaScene.ts src/presentation/character
@@ -1288,7 +1288,7 @@ git commit -m "feat: replace player placeholders with modular fighters"
 **Interfaces:**
 - Produces a GitHub Pages build awaiting manual visual/game-feel acceptance; no new runtime API.
 
-- [ ] **Step 1: Add the Phase 1 character subsection to PLAN.md after technical implementation**
+- [x] **Step 1: Add the Phase 1 character subsection to PLAN.md after technical implementation**
 
 ```md
 ### Personnages procéduraux modulaires
@@ -1306,7 +1306,7 @@ git commit -m "feat: replace player placeholders with modular fighters"
 
 Never check the final two items without explicit human confirmation.
 
-- [ ] **Step 2: Run fresh final verification**
+- [x] **Step 2: Run fresh final verification**
 
 ```bash
 npm run lint
@@ -1316,14 +1316,14 @@ npm run build
 
 Expected: all exit 0. Do not reuse earlier results for the completion claim.
 
-- [ ] **Step 3: Commit documentation state**
+- [x] **Step 3: Commit documentation state**
 
 ```bash
 git add PLAN.md docs/superpowers/plans/2026-08-30-procedural-modular-character.md
 git commit -m "docs: track modular fighter validation"
 ```
 
-- [ ] **Step 4: Verify GitHub Pages on the final commit**
+- [x] **Step 4: Verify GitHub Pages on the final commit**
 
 Require this workflow state before reporting technical completion:
 
@@ -1337,7 +1337,7 @@ Upload Pages artifact success
 Deploy to Pages       success
 ```
 
-- [ ] **Step 5: Hand off the deployed build and stop**
+- [x] **Step 5: Hand off the deployed build and stop**
 
 Send `https://karlos-fr.github.io/Blood-Relay/` and ask the human tester to verify:
 
