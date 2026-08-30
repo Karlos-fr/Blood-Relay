@@ -1,5 +1,6 @@
 import type Phaser from 'phaser';
 import { buildRoundedOrthogonalPath, sampleRoundedPath } from './pipeGeometry';
+import { createSteamParticleSystem } from './steamParticles';
 
 interface Point { x: number; y: number; }
 interface AnimatedPipe { points: Point[]; thickness: number; accent: 'none' | 'red'; }
@@ -9,7 +10,6 @@ export interface ArenaBackdropAnimationLayout { pipes: AnimatedPipe[]; machine: 
 const HEARTBEAT_PERIOD = 1600;
 const FLOW_PERIOD = 3300;
 const RING_PERIOD = 18000;
-const STEAM_PERIOD = 4200;
 
 export class ArenaBackdropAnimationController {
   public constructor(private readonly renderFrame: (time: number) => void) {}
@@ -40,36 +40,16 @@ export function getLedIntensity(timeMs: number, phaseIndex: number): number {
   return 0.22 + Math.pow(wave, 3) * 0.78;
 }
 
-export function getSteamPlumeProfile(progress: number): { alpha: number; rise: number; drift: number; scale: number } {
-  const p = clamp(progress, 0, 1);
-  const envelope = Math.sin(p * Math.PI);
-  return {
-    alpha: envelope * 0.76,
-    rise: p * 78,
-    drift: Math.sin(p * Math.PI * 1.25) * 10,
-    scale: 0.9 + p * 1.35,
-  };
-}
-
-export function getSteamPuffStyle(): {
-  color: number;
-  fillAlpha: number;
-  initialObjectAlpha: number;
-} {
-  return {
-    color: 0xf0f2f4,
-    fillAlpha: 1,
-    initialObjectAlpha: 0,
-  };
-}
-
 export function samplePolyline(points: Point[], progress: number): Point {
   if (points.length === 0) return { x: 0, y: 0 };
   if (points.length === 1) return { ...points[0] };
   const lengths: number[] = [];
   let totalLength = 0;
   for (let index = 1; index < points.length; index += 1) {
-    const length = Math.hypot(points[index].x - points[index - 1].x, points[index].y - points[index - 1].y);
+    const length = Math.hypot(
+      points[index].x - points[index - 1].x,
+      points[index].y - points[index - 1].y,
+    );
     lengths.push(length);
     totalLength += length;
   }
@@ -81,7 +61,10 @@ export function samplePolyline(points: Point[], progress: number): Point {
       const start = points[index];
       const end = points[index + 1];
       const t = segmentLength > 0 ? remaining / segmentLength : 0;
-      return { x: start.x + (end.x - start.x) * t, y: start.y + (end.y - start.y) * t };
+      return {
+        x: start.x + (end.x - start.x) * t,
+        y: start.y + (end.y - start.y) * t,
+      };
     }
     remaining -= segmentLength;
   }
@@ -101,9 +84,27 @@ export function attachArenaBackdropAnimation(
   const animatedLayer = scene.add.container(0, 0);
   container.add(animatedLayer);
 
-  const outerGlow = scene.add.circle(machine.x, machine.y, machine.radius * 1.28, 0xb92735, 0.07);
-  const heartGlow = scene.add.circle(machine.x, machine.y, machine.radius * 0.72, 0xe23343, 0.16);
-  const heartCore = scene.add.circle(machine.x, machine.y, machine.radius * 0.25, 0xe13b49, 0.58);
+  const outerGlow = scene.add.circle(
+    machine.x,
+    machine.y,
+    machine.radius * 1.28,
+    0xb92735,
+    0.07,
+  );
+  const heartGlow = scene.add.circle(
+    machine.x,
+    machine.y,
+    machine.radius * 0.72,
+    0xe23343,
+    0.16,
+  );
+  const heartCore = scene.add.circle(
+    machine.x,
+    machine.y,
+    machine.radius * 0.25,
+    0xe13b49,
+    0.58,
+  );
   const rotatingRing = scene.add.graphics().setPosition(machine.x, machine.y);
   rotatingRing.lineStyle(2, 0xa3a8b5, 0.48);
   rotatingRing.beginPath();
@@ -117,7 +118,7 @@ export function attachArenaBackdropAnimation(
     [0.9,-0.42,0xd83a48],[0.78,-0.14,0x42d9e8],[0.88,0.2,0xd83a48],[0.68,0.49,0x42d9e8],
     [-0.3,-0.8,0x42d9e8],[0,-0.86,0xd83a48],[0.3,-0.8,0x42d9e8],[0,0.84,0xd83a48],
   ] as const;
-  const leds = ledOffsets.map(([x,y,color]) =>
+  const leds = ledOffsets.map(([x, y, color]) =>
     scene.add.circle(machine.x + x * ledRadius, machine.y + y * ledRadius, 3.2, color, 0.5),
   );
 
@@ -130,8 +131,8 @@ export function attachArenaBackdropAnimation(
   const ventGraphics = scene.add.graphics();
   const ventY = machine.y - machine.radius * 0.72;
   const steamOrigins = [
-    { x: machine.x - machine.radius * 0.72, y: ventY, offset: 0 },
-    { x: machine.x + machine.radius * 0.72, y: ventY, offset: 0.43 },
+    { x: machine.x - machine.radius * 0.72, y: ventY, phaseOffsetMs: 0 },
+    { x: machine.x + machine.radius * 0.72, y: ventY, phaseOffsetMs: 620 },
   ];
   for (const origin of steamOrigins) {
     ventGraphics.fillStyle(0x3c404a, 1);
@@ -144,23 +145,6 @@ export function attachArenaBackdropAnimation(
     }
   }
 
-  const steamStyle = getSteamPuffStyle();
-  const steamPuffs = steamOrigins.flatMap((origin, originIndex) =>
-    [0,1,2,3,4,5,6].map((puffIndex) => ({
-      origin,
-      phaseOffset: origin.offset + puffIndex * 0.045 + originIndex * 0.02,
-      circle: scene.add
-        .circle(
-          origin.x,
-          origin.y,
-          13 + puffIndex * 2.1,
-          steamStyle.color,
-          steamStyle.fillAlpha,
-        )
-        .setAlpha(steamStyle.initialObjectAlpha),
-    })),
-  );
-
   animatedLayer.add([
     outerGlow,
     heartGlow,
@@ -169,8 +153,8 @@ export function attachArenaBackdropAnimation(
     ventGraphics,
     ...leds,
     ...flowParticles.flatMap((particle) => [particle.glow, particle.core]),
-    ...steamPuffs.map((puff) => puff.circle),
   ]);
+  const steamSystem = createSteamParticleSystem(scene, animatedLayer, steamOrigins);
 
   const controller = new ArenaBackdropAnimationController((time) => {
     const heartbeat = getHeartbeatIntensity(time);
@@ -196,25 +180,19 @@ export function attachArenaBackdropAnimation(
       particle.glow.setAlpha(0.12 + shimmer * 0.14);
     });
 
-    steamPuffs.forEach((puff) => {
-      const cycle = getLoopProgress(time + puff.phaseOffset * STEAM_PERIOD, STEAM_PERIOD);
-      if (cycle >= 0.68) {
-        puff.circle.setAlpha(0);
-        return;
-      }
-      const profile = getSteamPlumeProfile(cycle / 0.68);
-      puff.circle
-        .setPosition(puff.origin.x + profile.drift, puff.origin.y - profile.rise)
-        .setScale(profile.scale)
-        .setAlpha(profile.alpha);
-    });
+    steamSystem.update(time);
   });
 
   sceneControllers.set(scene, controller);
   return controller;
 }
 
-function pulseAtCyclePhase(phase: number, center: number, halfWidth: number, period: number): number {
+function pulseAtCyclePhase(
+  phase: number,
+  center: number,
+  halfWidth: number,
+  period: number,
+): number {
   const directDistance = Math.abs(phase - center);
   return Math.max(0, 1 - Math.min(directDistance, period - directDistance) / halfWidth);
 }
