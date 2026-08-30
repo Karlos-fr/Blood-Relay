@@ -72,7 +72,7 @@ export function buildArenaBackdropLayout(
 
   const machine = {
     x: width / 2,
-    y: Math.min(142, height * 0.29),
+    y: 270,
     radius: 110,
   };
 
