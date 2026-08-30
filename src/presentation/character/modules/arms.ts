@@ -33,25 +33,27 @@ const variants: Record<ArmsId, ArmVariant> = {
   },
 };
 
-export const ARMS_MODULES: Readonly<Record<ArmsId, CharacterModuleDefinition>> = Object.fromEntries(
-  Object.entries(variants).map(([id, variant]) => [
+function createArms(id: ArmsId, variant: ArmVariant): CharacterModuleDefinition {
+  return {
     id,
-    {
-      id,
-      pieces: [
-        {
-          id: `${id}:rear`,
-          slot: 'rearArm',
-          anchor: 'shoulderBack',
-          views: { right: variant.rear },
-        },
-        {
-          id: `${id}:front`,
-          slot: 'frontArm',
-          anchor: 'shoulderFront',
-          views: { right: variant.front },
-        },
-      ],
-    },
-  ]),
-) as Record<ArmsId, CharacterModuleDefinition>;
+    pieces: [
+      {
+        id: `${id}:rear`,
+        slot: 'rearArm',
+        anchor: 'shoulderBack',
+        views: { right: variant.rear },
+      },
+      {
+        id: `${id}:front`,
+        slot: 'frontArm',
+        anchor: 'shoulderFront',
+        views: { right: variant.front },
+      },
+    ],
+  };
+}
+
+export const ARMS_MODULES: Readonly<Record<ArmsId, CharacterModuleDefinition>> = {
+  'wrapped-arms': createArms('wrapped-arms', variants['wrapped-arms']),
+  'medical-arms': createArms('medical-arms', variants['medical-arms']),
+};
