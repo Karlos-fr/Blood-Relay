@@ -4,6 +4,7 @@ import {
   getLedIntensity,
   getLoopProgress,
   getSteamPlumeProfile,
+  getSteamPuffStyle,
   samplePolyline,
 } from './ArenaBackdropAnimation';
 
@@ -37,5 +38,11 @@ describe('ArenaBackdropAnimation helpers', () => {
     expect(plume.alpha).toBeGreaterThanOrEqual(0.7);
     expect(plume.rise).toBeGreaterThanOrEqual(35);
     expect(plume.scale).toBeGreaterThanOrEqual(1.35);
+  });
+
+  it('keeps the steam shape fill visible while its object starts hidden', () => {
+    const style = getSteamPuffStyle();
+    expect(style.fillAlpha).toBe(1);
+    expect(style.initialObjectAlpha).toBe(0);
   });
 });
