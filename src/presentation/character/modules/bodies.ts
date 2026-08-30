@@ -33,17 +33,17 @@ function renderBody(id: BodyId, context: CharacterRenderContext): void {
 export const BODY_MODULES: CharacterRenderModuleRecord<BodyId> = {
   standard: {
     id: 'standard',
-    layer: 'body',
+    layer: 'frontBody',
     renderRight: (context) => renderBody('standard', context),
   },
   heavy: {
     id: 'heavy',
-    layer: 'body',
+    layer: 'frontBody',
     renderRight: (context) => renderBody('heavy', context),
   },
   gaunt: {
     id: 'gaunt',
-    layer: 'body',
+    layer: 'frontBody',
     renderRight: (context) => renderBody('gaunt', context),
   },
 };

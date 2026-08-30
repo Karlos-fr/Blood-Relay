@@ -45,11 +45,11 @@ export function resolveAppearanceRenderModules(
 ): CharacterRenderModule[] {
   const selected: CharacterRenderModule[] = [
     ...appearance.accessories.map((id) => ACCESSORY_MODULES[id]),
-    BODY_MODULES[appearance.body],
     LEGS_MODULES[appearance.legs],
     TORSO_MODULES[appearance.torso],
     ARMS_MODULES[appearance.arms],
     HEAD_MODULES[appearance.head],
+    BODY_MODULES[appearance.body],
     ARMOR_MODULES[appearance.armor],
     WEAPON_MODULES[appearance.weapon],
     MUTATION_MODULES[appearance.mutation],

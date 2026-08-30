@@ -51,9 +51,9 @@ const legacyVariants: Record<LegsId, LegacyLegVariant> = {
 
 function drawBoot(context: CharacterRenderContext, x: number, footY: number, front: boolean): void {
   const { canvas } = context;
-  const top = Math.max(49, footY - 2);
   const bottom = Math.min(51, footY);
-  if (top <= bottom) canvas.fillRect(x - 2, top, front ? 5 : 4, bottom - top + 1, 'metalDark');
+  const top = bottom - 2;
+  canvas.fillRect(x - 2, top, front ? 5 : 4, bottom - top + 1, 'metalDark');
 }
 
 function renderLegs(id: LegsId, context: CharacterRenderContext): void {

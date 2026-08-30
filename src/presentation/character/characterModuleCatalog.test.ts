@@ -81,6 +81,47 @@ describe('complete character module catalog', () => {
     expect(new Set(signatures).size).toBe(signatures.length);
   });
 
+  it('keeps body-build shading visible after complete module composition in every pose', () => {
+    const erasedCases: string[] = [];
+
+    for (const body of BODY_IDS) {
+      const appearance: CharacterAppearance = {
+        ...PREVIEW_APPEARANCES.clone,
+        body,
+        armor: 'none',
+        mutation: 'none',
+        accessories: [],
+      };
+
+      for (const [animationName, animation] of Object.entries(CHARACTER_ANIMATIONS)) {
+        animation.frames.forEach((frame, frameIndex) => {
+          const withBody = new PixelCanvas(48, 56);
+          const withoutBody = new PixelCanvas(48, 56);
+          const modules = resolveAppearanceRenderModules(appearance);
+
+          for (const module of modules) {
+            const context = {
+              pose: frame.pose,
+              appearance,
+              seed: appearance.seed,
+              accessoryPhase: frame.accessoryPhase,
+            } as const;
+            module.renderRight({ ...context, canvas: withBody });
+            if (module !== BODY_MODULES[body]) {
+              module.renderRight({ ...context, canvas: withoutBody });
+            }
+          }
+
+          if (withBody.snapshot().pixels.join(',') === withoutBody.snapshot().pixels.join(',')) {
+            erasedCases.push(`${body}:${animationName}:${frameIndex}`);
+          }
+        });
+      }
+    }
+
+    expect(erasedCases).toEqual([]);
+  });
+
   it('uses four deterministic dorsal-tube paths', () => {
     const snapshots = ([0, 1, 2, 3] as const).map((accessoryPhase) => {
       const canvas = new PixelCanvas(48, 56);

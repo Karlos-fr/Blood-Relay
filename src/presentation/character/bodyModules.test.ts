@@ -53,7 +53,7 @@ describe('landmark-aware fighter body library', () => {
     }
   });
 
-  it('keeps body variants as body-layer shading without changing the anatomical mask', () => {
+  it('keeps body variants as paint-only shading without changing the anatomical mask', () => {
     for (const module of Object.values(BODY_MODULES)) {
       const canvas = new PixelCanvas(48, 56);
       const appearance = PREVIEW_APPEARANCES.clone;
@@ -65,7 +65,7 @@ describe('landmark-aware fighter body library', () => {
         accessoryPhase: poseFrame.accessoryPhase,
       });
 
-      expect(module.layer).toBe('body');
+      expect(module.layer).not.toBe('anatomy');
       expect(canvas.snapshot().bodyMask.some(Boolean)).toBe(false);
       expect(canvas.snapshot().pixels.some((pixel) => pixel !== null)).toBe(true);
     }
@@ -106,5 +106,32 @@ describe('landmark-aware fighter body library', () => {
     expect([49, 50, 51].every((y) => context.canvas.getPixel(context.pose.footFront.x, y))).toBe(
       true,
     );
+  });
+
+  it('keeps footwear attached to raised and grounded feet across every pose', () => {
+    for (const module of Object.values(LEGS_MODULES)) {
+      for (const animation of Object.values(CHARACTER_ANIMATIONS)) {
+        for (const frame of animation.frames) {
+          const canvas = new PixelCanvas(48, 56);
+          const appearance = PREVIEW_APPEARANCES.clone;
+          module.renderRight({
+            canvas,
+            pose: frame.pose,
+            appearance,
+            seed: appearance.seed,
+            accessoryPhase: frame.accessoryPhase,
+          });
+
+          for (const foot of [frame.pose.footRear, frame.pose.footFront]) {
+            const bootBottom = Math.min(51, foot.y);
+            expect(
+              [bootBottom - 2, bootBottom - 1, bootBottom].every(
+                (y) => canvas.getPixel(foot.x, y) === 'metalDark',
+              ),
+            ).toBe(true);
+          }
+        }
+      }
+    }
   });
 });
