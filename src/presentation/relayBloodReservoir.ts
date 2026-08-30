@@ -27,9 +27,9 @@ export interface ReservoirStepOptions {
   restitution?: number;
 }
 
-const MAX_CAPACITY = 72;
+const MAX_CAPACITY = 144;
 const DEFAULT_CHAMBER_RADIUS = 50;
-const DEFAULT_PARTICLE_RADIUS = 2;
+const DEFAULT_PARTICLE_RADIUS = 1.65;
 const DEFAULT_GRAVITY_Y = 26;
 const DEFAULT_DAMPING = 0.985;
 const DEFAULT_SWIRL_STRENGTH = 18;
@@ -118,8 +118,6 @@ export function stepReservoir(
       particle.vx += tangentX * tangentialCorrection;
       particle.vy += tangentY * tangentialCorrection;
 
-      // Use the tangential speed actually reached this frame for centripetal acceleration.
-      // That prevents the ramp-up phase from collapsing inward before the orbit is established.
       const achievedTangentialSpeed = currentTangentialSpeed + tangentialCorrection;
       const centripetalAcceleration =
         (achievedTangentialSpeed * achievedTangentialSpeed) / Math.max(1, distance);
