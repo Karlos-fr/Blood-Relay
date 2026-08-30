@@ -1,8 +1,16 @@
 import type Phaser from 'phaser';
 import { sampleRoundedPath, type PipePathSegment } from './pipeGeometry';
 
+interface Point { x: number; y: number; }
+
+export interface BloodPipeUpdate {
+  arrived: boolean;
+  entryPoint?: Point;
+  entryVelocity?: Point;
+}
+
 export interface BloodPipeEffect {
-  update(coreProgress: number, shimmer: number): void;
+  update(coreProgress: number, shimmer: number): BloodPipeUpdate;
 }
 
 const TRAIL_SPACING = 0.018;
@@ -13,6 +21,14 @@ export function getBloodTrailProgresses(coreProgress: number, count = 3): number
   return Array.from({ length: count }, (_, index) =>
     positiveModulo(coreProgress - TRAIL_SPACING * (index + 1), 1),
   );
+}
+
+export function didBloodParticleArrive(
+  previousProgress: number | undefined,
+  currentProgress: number,
+): boolean {
+  if (previousProgress === undefined) return false;
+  return previousProgress > 0.8 && currentProgress < 0.2 && previousProgress - currentProgress > 0.5;
 }
 
 export function createBloodPipeEffect(
@@ -28,10 +44,29 @@ export function createBloodPipeEffect(
       .setAlpha(alpha),
   );
 
+  const endPoint = sampleRoundedPath(path, 1);
+  const beforeEnd = sampleRoundedPath(path, 0.985);
+  const directionX = endPoint.x - beforeEnd.x;
+  const directionY = endPoint.y - beforeEnd.y;
+  const directionLength = Math.max(0.0001, Math.hypot(directionX, directionY));
+  const entryVelocity = {
+    x: (directionX / directionLength) * 30,
+    y: (directionY / directionLength) * 30,
+  };
+  const updateResult: BloodPipeUpdate = {
+    arrived: false,
+    entryPoint: endPoint,
+    entryVelocity,
+  };
+  let previousProgress: number | undefined;
+
   container.add([...trails, glow, core]);
 
   return {
-    update(coreProgress: number, shimmer: number): void {
+    update(coreProgress: number, shimmer: number): BloodPipeUpdate {
+      const arrived = didBloodParticleArrive(previousProgress, coreProgress);
+      previousProgress = coreProgress;
+
       const corePoint = sampleRoundedPath(path, coreProgress);
       core.setPosition(corePoint.x, corePoint.y).setAlpha(shimmer);
       glow.setPosition(corePoint.x, corePoint.y).setAlpha(0.1 + shimmer * 0.15);
@@ -43,6 +78,9 @@ export function createBloodPipeEffect(
           .setPosition(point.x, point.y)
           .setAlpha(TRAIL_ALPHAS[index] * shimmer);
       });
+
+      updateResult.arrived = arrived;
+      return updateResult;
     },
   };
 }
