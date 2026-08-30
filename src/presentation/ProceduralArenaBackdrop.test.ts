@@ -15,10 +15,10 @@ describe('buildArenaBackdropLayout', () => {
     expect(second.pipes).not.toEqual(first.pipes);
   });
 
-  it('centers the relay machine on the logical screen while keeping it fully visible', () => {
+  it('positions the relay above screen center while keeping it fully visible', () => {
     const layout = buildArenaBackdropLayout(1120, 502, 'arena-01');
     expect(layout.machine.x).toBe(560);
-    expect(layout.machine.y).toBe(270);
+    expect(layout.machine.y).toBe(228);
     expect(layout.machine.radius).toBeGreaterThanOrEqual(105);
     expect(layout.machine.y - layout.machine.radius).toBeGreaterThanOrEqual(20);
     expect(layout.machine.y + layout.machine.radius).toBeLessThan(502);
