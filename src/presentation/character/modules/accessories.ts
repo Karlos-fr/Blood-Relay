@@ -113,20 +113,30 @@ const specs: Record<AccessoryId, AccessorySpec> = {
   },
 };
 
-export const ACCESSORY_MODULES: Readonly<Record<AccessoryId, CharacterModuleDefinition>> =
-  Object.fromEntries(
-    Object.entries(specs).map(([id, spec]) => [
-      id,
+function createAccessory(
+  id: AccessoryId,
+  spec: AccessorySpec,
+): CharacterModuleDefinition {
+  return {
+    id,
+    pieces: [
       {
-        id,
-        pieces: [
-          {
-            id: `${id}:accessory`,
-            slot: spec.slot,
-            anchor: spec.anchor,
-            views: { right: spec.geometry },
-          },
-        ],
+        id: `${id}:accessory`,
+        slot: spec.slot,
+        anchor: spec.anchor,
+        views: { right: spec.geometry },
       },
-    ]),
-  ) as Record<AccessoryId, CharacterModuleDefinition>;
+    ],
+  };
+}
+
+export const ACCESSORY_MODULES: Readonly<
+  Record<AccessoryId, CharacterModuleDefinition>
+> = {
+  'blood-bag': createAccessory('blood-bag', specs['blood-bag']),
+  'dorsal-tube': createAccessory('dorsal-tube', specs['dorsal-tube']),
+  'medical-pack': createAccessory('medical-pack', specs['medical-pack']),
+  'shoulder-plate': createAccessory('shoulder-plate', specs['shoulder-plate']),
+  'external-implant': createAccessory('external-implant', specs['external-implant']),
+  holster: createAccessory('holster', specs.holster),
+};
