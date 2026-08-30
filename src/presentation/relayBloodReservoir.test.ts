@@ -7,13 +7,14 @@ import {
 } from './relayBloodReservoir';
 
 describe('relay blood reservoir', () => {
-  it('preallocates and enforces a bounded capacity of at most 36 particles', () => {
-    const state = createReservoirState(36);
+  it('preallocates and enforces a bounded capacity of 72 particles', () => {
+    const state = createReservoirState(72);
 
-    expect(state.particles).toHaveLength(36);
-    for (let index = 0; index < 36; index += 1) {
+    expect(state.particles).toHaveLength(72);
+    expect(state.particleRadius).toBeLessThanOrEqual(2.1);
+    for (let index = 0; index < 72; index += 1) {
       expect(
-        injectReservoirParticle(state, { x: 38, y: -8 }, { x: -18, y: index * 0.1 }),
+        injectReservoirParticle(state, { x: 38, y: -8 }, { x: -18, y: index * 0.05 }),
       ).toBe(true);
     }
     expect(injectReservoirParticle(state, { x: 38, y: 0 }, { x: -18, y: 0 })).toBe(false);
@@ -45,16 +46,40 @@ describe('relay blood reservoir', () => {
     );
   });
 
-  it('pulls stored blood toward the center during a purge', () => {
+  it('can spin strongly without immediately sucking blood into the drain', () => {
+    const state = createReservoirState();
+    injectReservoirParticle(state, { x: 34, y: 0 }, { x: 0, y: 0 });
+    const beforeRadius = Math.hypot(state.particles[0].x, state.particles[0].y);
+
+    for (let index = 0; index < 60; index += 1) {
+      stepReservoir(state, 1 / 120, {
+        gravityY: 0,
+        damping: 0.995,
+        swirlStrength: 20,
+        targetAngularVelocity: 7.5,
+        purgeStrength: 0.08,
+      });
+    }
+
+    const particle = state.particles[0];
+    const afterRadius = Math.hypot(particle.x, particle.y);
+    expect(particle.active).toBe(true);
+    expect(afterRadius).toBeGreaterThan(beforeRadius * 0.75);
+    const tangentSpeed = Math.abs((-particle.y * particle.vx + particle.x * particle.vy) / afterRadius);
+    expect(tangentSpeed).toBeGreaterThan(80);
+  });
+
+  it('pulls stored blood toward the center during a strong late purge', () => {
     const state = createReservoirState();
     injectReservoirParticle(state, { x: 32, y: 0 }, { x: 0, y: 0 });
     const before = Math.hypot(state.particles[0].x, state.particles[0].y);
 
-    for (let index = 0; index < 18; index += 1) {
+    for (let index = 0; index < 30; index += 1) {
       stepReservoir(state, 0.016, {
         gravityY: 0,
         damping: 1,
         swirlStrength: 0,
+        targetAngularVelocity: 8,
         purgeStrength: 1,
       });
     }
