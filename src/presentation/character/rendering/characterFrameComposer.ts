@@ -24,98 +24,115 @@ import {
 
 export type RenderFacing = 'left' | 'right';
 
-type LayerCanvases = Record<CharacterRenderLayer, PixelCanvas>;
-
-function createLayerCanvases(): LayerCanvases {
-  return Object.fromEntries(
-    CHARACTER_RENDER_LAYERS.map((layer) => [
-      layer,
-      new PixelCanvas(CHARACTER_FRAME_WIDTH, CHARACTER_FRAME_HEIGHT),
-    ]),
-  ) as LayerCanvases;
+interface RenderedModule {
+  module: CharacterRenderModule;
+  canonicalRight: CharacterPixelFrame;
 }
 
-function renderRightLayers(
+type LayerFrames = Readonly<Record<CharacterRenderLayer, CharacterPixelFrame>>;
+
+function createCanvas(): PixelCanvas {
+  return new PixelCanvas(CHARACTER_FRAME_WIDTH, CHARACTER_FRAME_HEIGHT);
+}
+
+function renderRightAnatomy(
   appearance: CharacterAppearance,
   poseFrame: CharacterPoseFrame,
-  modules: readonly CharacterRenderModule[],
-): LayerCanvases {
-  const layers = createLayerCanvases();
-  renderAnatomicalBody(layers.anatomy, poseFrame.pose, appearance.body);
-
-  for (const module of modules) {
-    module.renderRight({
-      canvas: layers[module.layer],
-      pose: poseFrame.pose,
-      appearance,
-      seed: appearance.seed,
-      accessoryPhase: poseFrame.accessoryPhase,
-    });
-  }
-
-  return layers;
-}
-
-function resolveLeftLayers(
-  rightLayers: LayerCanvases,
-  appearance: CharacterAppearance,
-  poseFrame: CharacterPoseFrame,
-  modules: readonly CharacterRenderModule[],
-): Readonly<Record<CharacterRenderLayer, CharacterPixelFrame>> {
-  const mirroredPose = mirrorAnatomicalPose(poseFrame.pose);
-  const leftLayers = Object.fromEntries(
-    CHARACTER_RENDER_LAYERS.map((layer) => [
-      layer,
-      mirrorCharacterFrame(rightLayers[layer].snapshot()),
-    ]),
-  ) as Record<CharacterRenderLayer, CharacterPixelFrame>;
-
-  for (const module of modules) {
-    if (!module.renderLeft) continue;
-
-    const canvas = new PixelCanvas(CHARACTER_FRAME_WIDTH, CHARACTER_FRAME_HEIGHT);
-    module.renderLeft({
-      canvas,
-      pose: mirroredPose,
-      appearance,
-      seed: appearance.seed,
-      accessoryPhase: poseFrame.accessoryPhase,
-    });
-    leftLayers[module.layer] = canvas.snapshot();
-  }
-
-  return leftLayers;
-}
-
-function blendLayers(
-  layers: Readonly<Record<CharacterRenderLayer, CharacterPixelFrame>>,
 ): CharacterPixelFrame {
+  const canvas = createCanvas();
+  renderAnatomicalBody(canvas, poseFrame.pose, appearance.body);
+  return canvas.snapshot();
+}
+
+function renderModule(
+  module: CharacterRenderModule,
+  appearance: CharacterAppearance,
+  poseFrame: CharacterPoseFrame,
+  pose: AnatomicalPose,
+  facing: RenderFacing,
+): CharacterPixelFrame {
+  const canvas = createCanvas();
+  const context = {
+    canvas,
+    pose,
+    appearance,
+    seed: appearance.seed,
+    accessoryPhase: poseFrame.accessoryPhase,
+  };
+
+  if (facing === 'left' && module.renderLeft) module.renderLeft(context);
+  else module.renderRight(context);
+
+  return canvas.snapshot();
+}
+
+function renderRightModules(
+  appearance: CharacterAppearance,
+  poseFrame: CharacterPoseFrame,
+  modules: readonly CharacterRenderModule[],
+): RenderedModule[] {
+  return modules.map((module) => ({
+    module,
+    canonicalRight: renderModule(module, appearance, poseFrame, poseFrame.pose, 'right'),
+  }));
+}
+
+function blendFrames(frames: readonly CharacterPixelFrame[]): CharacterPixelFrame {
   const size = CHARACTER_FRAME_WIDTH * CHARACTER_FRAME_HEIGHT;
   const pixels: CharacterPixel[] = Array(size).fill(null);
   const bodyMask = Array<boolean>(size).fill(false);
 
-  for (const layer of CHARACTER_RENDER_LAYERS) {
-    const frame = layers[layer];
+  for (const frame of frames) {
     for (let index = 0; index < size; index += 1) {
       if (frame.pixels[index] !== null) pixels[index] = frame.pixels[index];
       bodyMask[index] ||= frame.bodyMask[index];
     }
   }
 
-  return Object.freeze({
-    width: CHARACTER_FRAME_WIDTH,
-    height: CHARACTER_FRAME_HEIGHT,
-    pixels: Object.freeze(pixels),
-    bodyMask: Object.freeze(bodyMask),
-  });
+  return { width: CHARACTER_FRAME_WIDTH, height: CHARACTER_FRAME_HEIGHT, pixels, bodyMask };
 }
 
-function snapshotLayers(
-  layers: LayerCanvases,
-): Readonly<Record<CharacterRenderLayer, CharacterPixelFrame>> {
+function resolveLayers(
+  anatomy: CharacterPixelFrame,
+  renderedModules: readonly RenderedModule[],
+  appearance: CharacterAppearance,
+  poseFrame: CharacterPoseFrame,
+  facing: RenderFacing,
+): LayerFrames {
+  const mirroredPose = facing === 'left' ? mirrorAnatomicalPose(poseFrame.pose) : undefined;
+
   return Object.fromEntries(
-    CHARACTER_RENDER_LAYERS.map((layer) => [layer, layers[layer].snapshot()]),
+    CHARACTER_RENDER_LAYERS.map((layer) => {
+      const frames: CharacterPixelFrame[] = [];
+      if (layer === 'anatomy') {
+        frames.push(facing === 'left' ? mirrorCharacterFrame(anatomy) : anatomy);
+      }
+
+      for (const rendered of renderedModules) {
+        if (rendered.module.layer !== layer) continue;
+        if (facing === 'right') {
+          frames.push(rendered.canonicalRight);
+        } else if (rendered.module.renderLeft) {
+          frames.push(renderModule(rendered.module, appearance, poseFrame, mirroredPose!, 'left'));
+        } else {
+          frames.push(mirrorCharacterFrame(rendered.canonicalRight));
+        }
+      }
+
+      return [layer, blendFrames(frames)];
+    }),
   ) as Record<CharacterRenderLayer, CharacterPixelFrame>;
+}
+
+function blendLayers(layers: LayerFrames): CharacterPixelFrame {
+  const frame = blendFrames(CHARACTER_RENDER_LAYERS.map((layer) => layers[layer]));
+
+  return Object.freeze({
+    width: frame.width,
+    height: frame.height,
+    pixels: Object.freeze([...frame.pixels]),
+    bodyMask: Object.freeze([...frame.bodyMask]),
+  });
 }
 
 export function mirrorAnatomicalPose(pose: AnatomicalPose): AnatomicalPose {
@@ -140,11 +157,9 @@ export function composeCharacterFrame(
   if (!poseFrame) throw new Error(`Invalid ${animation} frame index ${frameIndex}.`);
 
   const modules = resolveAppearanceRenderModules(appearance);
-  const rightLayers = renderRightLayers(appearance, poseFrame, modules);
-  const resolvedLayers =
-    facing === 'right'
-      ? snapshotLayers(rightLayers)
-      : resolveLeftLayers(rightLayers, appearance, poseFrame, modules);
+  const anatomy = renderRightAnatomy(appearance, poseFrame);
+  const renderedModules = renderRightModules(appearance, poseFrame, modules);
+  const resolvedLayers = resolveLayers(anatomy, renderedModules, appearance, poseFrame, facing);
 
   return blendLayers(resolvedLayers);
 }
