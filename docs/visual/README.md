@@ -2,6 +2,8 @@
 
 `blood-relay-visual-direction.webp` is the validated gameplay/art-direction mockup for Blood Relay.
 
+The visual reference remains directional: it guides the game's side view, readability, dark industrial atmosphere and retro/modern contrast, but it is not a fixed sprite-sheet specification. Detailed procedural fighters are generated on a `48 × 56` frame canvas around the shared `32 × 48` gameplay hitbox.
+
 ## Platforms
 
 The selected platform direction is **A** from the platform exploration: dark industrial metal, readable modular plates, cyan light accents and very sparse red wear marks.

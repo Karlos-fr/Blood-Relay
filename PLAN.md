@@ -395,6 +395,21 @@ Pouvoir jouer à deux sur le même clavier dans une arène de côté tenant int�
 - [ ] Valider manuellement la lisibilité, la taille apparente et les animations des personnages sur GitHub Pages.
 - [ ] Confirmer manuellement que le parcours, le saut et les collisions restent inchangés.
 
+### Combattants procéduraux détaillés
+
+- [x] Construire une anatomie connectée autour de repères communs pour la tête, le torse, les bras, les jambes et les pieds.
+- [x] Produire une texture complète mise en cache pour chaque frame d'animation, apparence et orientation.
+- [x] Étendre les modules avec les corps, armures et mutations, et fournir les familles clone, mercenaire, mutant et mixte.
+- [x] Définir les 13 animations anatomiques : idle, run, takeoff, rise, apex, fall, landing, shoot, melee, hurt, transfuse, death et respawn.
+- [x] Ajouter le mode preview `?character-preview=1` avec sélection d'apparence et d'animation, orientation, pause, pas-à-pas et overlay de hitbox.
+- [ ] Valider manuellement l'anatomie et les parties du corps connectées.
+- [ ] Valider manuellement le naturel des animations.
+- [ ] Valider manuellement le parcours de l'arène avec les nouvelles silhouettes.
+- [ ] Valider manuellement que les collisions restent correctes.
+- [ ] Valider manuellement la lisibilité à l'échelle desktop.
+- [ ] Valider manuellement la lisibilité à l'échelle mobile.
+- [ ] Valider manuellement les previews des poses prévues pour les futures mécaniques.
+
 ## Critères de validation
 
 - Deux joueurs peuvent se déplacer simultanément.
