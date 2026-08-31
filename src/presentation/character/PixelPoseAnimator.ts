@@ -13,14 +13,15 @@ export interface CharacterFrameSelection {
   frameIndex: number;
 }
 
-const TAKEOFF_MS = 140;
-const LANDING_MS = 140;
 const AIR_VERTICAL_DEADZONE = 60;
 const RUN_MIN_SPEED = 10;
+const RUN_MIN_RATE = 0.65;
+const RUN_MAX_RATE = 1.35;
 
 export class PixelPoseAnimator {
   public animationName: CharacterAnimationName = 'idle';
-  private startedAt = 0;
+  private animationElapsedMs = 0;
+  private lastUpdateAt = 0;
   private initialized = false;
   private wasGrounded = true;
 
@@ -28,48 +29,66 @@ export class PixelPoseAnimator {
     if (!this.initialized) {
       this.initialized = true;
       this.wasGrounded = motion.grounded;
-      this.start(baseAnimation(motion), timeMs);
+      this.lastUpdateAt = timeMs;
+      this.start(baseAnimation(motion));
     } else {
+      const deltaTimeMs = timeMs - this.lastUpdateAt;
+      this.lastUpdateAt = timeMs;
+      this.animationElapsedMs += deltaTimeMs * animationRate(this.animationName, motion);
+
       const tookOff = this.wasGrounded && !motion.grounded && motion.velocityY < 0;
       const landed = !this.wasGrounded && motion.grounded;
 
       if (tookOff) {
-        this.start('takeoff', timeMs);
+        this.start('takeoff');
       } else if (landed) {
-        this.start('landing', timeMs);
-      } else if (!this.isTransientStillActive(timeMs)) {
+        this.start('landing');
+      } else if (!this.isTransientStillActive()) {
         const next = baseAnimation(motion);
-        if (next !== this.animationName) this.start(next, timeMs);
+        if (next !== this.animationName) this.start(next);
       }
 
       this.wasGrounded = motion.grounded;
     }
 
-    const rate =
-      this.animationName === 'run'
-        ? Math.min(1.35, Math.max(0.65, Math.abs(motion.velocityX) / PLAYER_MOVE_SPEED))
-        : 1;
     return {
       animationName: this.animationName,
       frameIndex: sampleFrameIndex(
         CHARACTER_ANIMATIONS[this.animationName].frames,
-        (timeMs - this.startedAt) * rate,
+        this.animationElapsedMs,
       ),
     };
   }
 
-  private start(name: CharacterAnimationName, timeMs: number): void {
+  private start(name: CharacterAnimationName): void {
     this.animationName = name;
-    this.startedAt = timeMs;
+    this.animationElapsedMs = 0;
   }
 
-  private isTransientStillActive(timeMs: number): boolean {
-    const elapsed = timeMs - this.startedAt;
+  private isTransientStillActive(): boolean {
     return (
-      (this.animationName === 'takeoff' && elapsed < TAKEOFF_MS) ||
-      (this.animationName === 'landing' && elapsed < LANDING_MS)
+      (this.animationName === 'takeoff' || this.animationName === 'landing') &&
+      this.animationElapsedMs < animationDurationMs(this.animationName)
     );
   }
+}
+
+function animationRate(
+  animationName: CharacterAnimationName,
+  motion: CharacterMotionSnapshot,
+): number {
+  if (animationName !== 'run') return 1;
+  return Math.min(
+    RUN_MAX_RATE,
+    Math.max(RUN_MIN_RATE, Math.abs(motion.velocityX) / PLAYER_MOVE_SPEED),
+  );
+}
+
+function animationDurationMs(animationName: CharacterAnimationName): number {
+  return CHARACTER_ANIMATIONS[animationName].frames.reduce(
+    (sum, frame) => sum + frame.durationMs,
+    0,
+  );
 }
 
 function baseAnimation(motion: CharacterMotionSnapshot): CharacterAnimationName {

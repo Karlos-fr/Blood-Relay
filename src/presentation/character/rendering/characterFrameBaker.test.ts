@@ -88,11 +88,22 @@ describe('character frame baker', () => {
     expect(baked).toEqual({ textureKey: baked.textureKey, originX: 0.5, originY: 52 / 56 });
   });
 
-  it('reuses an existing texture without composing or creating it again', () => {
+  it('rejects an invalid frame index before consulting a preseeded cache entry', () => {
     const sceneDouble = createSceneDouble(true);
 
     expect(() =>
       bakeCharacterFrame(sceneDouble.scene, PREVIEW_APPEARANCES.clone, 'idle', 99, 'left'),
+    ).toThrow('Invalid idle frame index 99.');
+    expect(sceneDouble.exists).not.toHaveBeenCalled();
+    expect(sceneDouble.createCanvas).not.toHaveBeenCalled();
+    expect(sceneDouble.refresh).not.toHaveBeenCalled();
+  });
+
+  it('reuses an existing texture for a valid frame without creating it again', () => {
+    const sceneDouble = createSceneDouble(true);
+
+    expect(() =>
+      bakeCharacterFrame(sceneDouble.scene, PREVIEW_APPEARANCES.clone, 'idle', 0, 'left'),
     ).not.toThrow();
     expect(sceneDouble.createCanvas).not.toHaveBeenCalled();
     expect(sceneDouble.refresh).not.toHaveBeenCalled();

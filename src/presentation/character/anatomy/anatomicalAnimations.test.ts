@@ -128,6 +128,36 @@ describe('anatomical animation catalog', () => {
     }
   });
 
+  it('compresses before extending through the authored takeoff phases', () => {
+    const standing = CHARACTER_ANIMATIONS.idle.frames[0].pose;
+    const compressed = CHARACTER_ANIMATIONS.takeoff.frames[0].pose;
+    const extended = CHARACTER_ANIMATIONS.takeoff.frames[1].pose;
+
+    expect(compressed.hipRear.y).toBeGreaterThan(standing.hipRear.y);
+    expect(compressed.hipFront.y).toBeGreaterThan(standing.hipFront.y);
+    expect(compressed.kneeRear.y).toBeGreaterThan(compressed.hipRear.y);
+    expect(compressed.kneeFront.y).toBeGreaterThan(compressed.hipFront.y);
+    expect(extended.headCenter.y).toBeLessThan(compressed.headCenter.y);
+    expect(extended.hipRear.y).toBeLessThan(compressed.hipRear.y);
+    expect(extended.hipFront.y).toBeLessThan(compressed.hipFront.y);
+    expect(extended.footRear.y).toBeLessThan(compressed.footRear.y);
+    expect(extended.footFront.y).toBeLessThan(compressed.footFront.y);
+  });
+
+  it('alternates opposing contact and passing relationships across the run cycle', () => {
+    const firstContact = CHARACTER_ANIMATIONS.run.frames[0].pose;
+    const firstPassing = CHARACTER_ANIMATIONS.run.frames[2].pose;
+    const oppositeContact = CHARACTER_ANIMATIONS.run.frames[4].pose;
+    const oppositePassing = CHARACTER_ANIMATIONS.run.frames[6].pose;
+
+    expect(firstContact.footRear.x).toBeLessThan(firstContact.hipRear.x);
+    expect(firstContact.footFront.x).toBeGreaterThan(firstContact.hipFront.x);
+    expect(oppositeContact.footRear.x).toBeGreaterThan(oppositeContact.hipRear.x);
+    expect(oppositeContact.footFront.x).toBeLessThan(oppositeContact.hipFront.x);
+    expect(firstPassing.footRear.x).toBeLessThan(firstPassing.footFront.x);
+    expect(oppositePassing.footRear.x).toBeGreaterThan(oppositePassing.footFront.x);
+  });
+
   it('lowers the fighter progressively into a horizontal death pose', () => {
     for (const landmark of verticalProgressionLandmarks) {
       const positions = CHARACTER_ANIMATIONS.death.frames.map((frame) => frame.pose[landmark].y);

@@ -1,5 +1,6 @@
 import type Phaser from 'phaser';
 import type { CharacterAppearance } from '../CharacterAppearance';
+import { getAnimationFrame } from '../anatomy/anatomicalAnimations';
 import type { CharacterAnimationName } from '../anatomy/AnatomicalPose';
 import {
   CHARACTER_FRAME_HEIGHT,
@@ -44,6 +45,7 @@ export function bakeCharacterFrame(
   frameIndex: number,
   facing: RenderFacing,
 ): BakedCharacterFrame {
+  getAnimationFrame(animation, frameIndex);
   const textureKey = buildCharacterFrameTextureKey(appearance, animation, frameIndex, facing);
 
   if (!scene.textures.exists(textureKey)) {
