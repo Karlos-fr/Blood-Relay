@@ -7,20 +7,16 @@ import {
   HEAD_IDS,
   LEGS_IDS,
   MUTATION_IDS,
-  PALETTE_IDS,
   TORSO_IDS,
   WEAPON_IDS,
   type CharacterAppearance,
 } from './CharacterAppearance';
 import { CHARACTER_ANIMATIONS } from './anatomy/anatomicalAnimations';
-import { CHARACTER_PALETTES } from './characterPalettes';
 import {
-  getAllCharacterModules,
   getAllCharacterRenderModules,
-  resolveAppearanceModules,
   resolveAppearanceRenderModules,
 } from './characterModuleCatalog';
-import { PLAYER_APPEARANCES, PREVIEW_APPEARANCES } from './deterministicCharacter';
+import { PREVIEW_APPEARANCES } from './deterministicCharacter';
 import { PixelCanvas } from './frame/PixelCanvas';
 import { ACCESSORY_MODULES } from './modules/accessories';
 import { ARMOR_MODULES } from './modules/armor';
@@ -47,6 +43,13 @@ function renderSignature(
 }
 
 describe('complete character module catalog', () => {
+  it('exposes render modules without detached piece data', () => {
+    for (const module of getAllCharacterRenderModules()) {
+      expect('pieces' in module).toBe(false);
+      expect('renderRight' in module).toBe(true);
+    }
+  });
+
   it('implements every body, armor, mutation, accessory, and weapon id', () => {
     expect(Object.keys(BODY_MODULES).sort()).toEqual([...BODY_IDS].sort());
     expect(Object.keys(ARMOR_MODULES).sort()).toEqual([...ARMOR_IDS].sort());
@@ -178,39 +181,7 @@ describe('complete character module catalog', () => {
     expect(canvas.getPixel(poseFrame.pose.handFront.x, poseFrame.pose.handFront.y)).not.toBeNull();
   });
 
-  it('uses palette roles available in every palette for legacy authored views', () => {
-    expect(Object.keys(CHARACTER_PALETTES['inmate-red']).sort()).toEqual(
-      [
-        'accent',
-        'blood',
-        'cloth',
-        'clothDark',
-        'clothLight',
-        'metal',
-        'metalDark',
-        'metalLight',
-        'mutation',
-        'mutationDark',
-        'outline',
-        'shadow',
-        'skin',
-        'skinDark',
-        'skinLight',
-      ].sort(),
-    );
-
-    const roles = new Set(Object.keys(CHARACTER_PALETTES[PALETTE_IDS[0]]));
-    for (const module of getAllCharacterModules()) {
-      for (const piece of module.pieces) {
-        for (const view of [piece.views.right, piece.views.left, piece.views.back]) {
-          if (!view) continue;
-          for (const primitive of view) expect(roles.has(primitive.role)).toBe(true);
-        }
-      }
-    }
-  });
-
-  it('returns every renderer once and keeps the legacy runtime resolver available', () => {
+  it('returns every renderer once', () => {
     const renderModules = getAllCharacterRenderModules();
     expect(renderModules).toHaveLength(
       BODY_IDS.length +
@@ -224,9 +195,5 @@ describe('complete character module catalog', () => {
         ARMS_IDS.length,
     );
 
-    const p1 = resolveAppearanceModules(PLAYER_APPEARANCES[1]);
-    const p2 = resolveAppearanceModules(PLAYER_APPEARANCES[2]);
-    expect(p1.map((module) => module.id)).not.toEqual(p2.map((module) => module.id));
-    expect(p1.filter((module) => module.id === 'relay-pistol')).toHaveLength(1);
   });
 });

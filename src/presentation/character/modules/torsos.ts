@@ -1,71 +1,8 @@
 import type { TorsoId } from '../CharacterAppearance';
-import { pixels, rect, type PixelPrimitive } from '../moduleGeometry';
 import type {
   CharacterRenderContext,
-  LegacyCompatibleCharacterRenderModule,
+  CharacterRenderModule,
 } from '../rendering/CharacterRenderModule';
-
-const legacyGeometry: Record<TorsoId, readonly PixelPrimitive[]> = {
-  'prison-jumpsuit': [
-    rect(-4, -5, 8, 11, 'outline'),
-    rect(-3, -4, 6, 9, 'cloth'),
-    rect(-3, -4, 2, 9, 'clothDark'),
-    pixels(
-      [
-        [2, -3],
-        [2, 1],
-      ],
-      'clothLight',
-    ),
-  ],
-  'medical-suit': [
-    rect(-4, -5, 8, 11, 'outline'),
-    rect(-3, -4, 6, 9, 'clothLight'),
-    rect(-3, 1, 6, 4, 'cloth'),
-    rect(1, -2, 2, 2, 'accent'),
-    pixels(
-      [
-        [-1, -3],
-        [-1, 3],
-      ],
-      'metal',
-    ),
-  ],
-  'torn-suit': [
-    rect(-4, -5, 7, 10, 'outline'),
-    rect(-3, -4, 6, 4, 'cloth'),
-    rect(-3, 0, 5, 4, 'clothDark'),
-    pixels(
-      [
-        [2, 0],
-        [3, 1],
-        [2, 2],
-        [1, 4],
-      ],
-      'skinDark',
-    ),
-    pixels(
-      [
-        [-2, -3],
-        [1, -3],
-      ],
-      'clothLight',
-    ),
-  ],
-  'light-armor': [
-    rect(-4, -5, 8, 11, 'outline'),
-    rect(-3, -4, 6, 9, 'clothDark'),
-    rect(-2, -4, 5, 5, 'metal'),
-    rect(-1, -3, 4, 1, 'metalLight'),
-    pixels(
-      [
-        [2, -1],
-        [2, 0],
-      ],
-      'accent',
-    ),
-  ],
-};
 
 function torsoPolygon(context: CharacterRenderContext) {
   const { pose } = context;
@@ -116,23 +53,15 @@ function renderTorso(id: TorsoId, context: CharacterRenderContext): void {
   }
 }
 
-function createTorso(id: TorsoId): LegacyCompatibleCharacterRenderModule {
+function createTorso(id: TorsoId): CharacterRenderModule {
   return {
     id,
     layer: 'body',
     renderRight: (context) => renderTorso(id, context),
-    pieces: [
-      {
-        id: `${id}:torso`,
-        slot: 'torso',
-        anchor: 'torso',
-        views: { right: legacyGeometry[id] },
-      },
-    ],
   };
 }
 
-export const TORSO_MODULES: Readonly<Record<TorsoId, LegacyCompatibleCharacterRenderModule>> = {
+export const TORSO_MODULES: Readonly<Record<TorsoId, CharacterRenderModule>> = {
   'prison-jumpsuit': createTorso('prison-jumpsuit'),
   'medical-suit': createTorso('medical-suit'),
   'torn-suit': createTorso('torn-suit'),

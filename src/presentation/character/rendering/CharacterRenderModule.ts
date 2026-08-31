@@ -1,7 +1,6 @@
 import type { CharacterAppearance } from '../CharacterAppearance';
 import type { AnatomicalPose } from '../anatomy/AnatomicalPose';
 import type { PixelCanvas } from '../frame/PixelCanvas';
-import type { CharacterModuleDefinition } from '../moduleGeometry';
 
 export const CHARACTER_RENDER_LAYERS = [
   'rearAccessory',
@@ -35,7 +34,3 @@ export interface CharacterRenderModule {
 export type CharacterRenderModuleRecord<Id extends string> = Readonly<
   Record<Id, CharacterRenderModule>
 >;
-
-/** Temporary bridge for the sprite-baking runtime; removed with the legacy view in Task 11. */
-export interface LegacyCompatibleCharacterRenderModule
-  extends CharacterRenderModule, CharacterModuleDefinition {}

@@ -1,8 +1,7 @@
 import type { WeaponId } from '../CharacterAppearance';
-import { pixels, rect } from '../moduleGeometry';
-import type { LegacyCompatibleCharacterRenderModule } from '../rendering/CharacterRenderModule';
+import type { CharacterRenderModule } from '../rendering/CharacterRenderModule';
 
-export const WEAPON_MODULES: Readonly<Record<WeaponId, LegacyCompatibleCharacterRenderModule>> = {
+export const WEAPON_MODULES: Readonly<Record<WeaponId, CharacterRenderModule>> = {
   'relay-pistol': {
     id: 'relay-pistol',
     layer: 'weapon',
@@ -18,27 +17,5 @@ export const WEAPON_MODULES: Readonly<Record<WeaponId, LegacyCompatibleCharacter
       canvas.setPixel(mount.x + 1, mount.y + 2, 'metalLight');
       canvas.setPixel(barrelEnd, mount.y - 1, 'accent');
     },
-    pieces: [
-      {
-        id: 'relay-pistol:weapon',
-        slot: 'weapon',
-        anchor: 'weaponMount',
-        views: {
-          right: [
-            rect(0, -1, 7, 3, 'outline'),
-            rect(1, -1, 5, 2, 'metal'),
-            rect(1, 2, 2, 3, 'outline'),
-            rect(1, 2, 1, 2, 'metalLight'),
-            pixels(
-              [
-                [5, -1],
-                [6, -1],
-              ],
-              'accent',
-            ),
-          ],
-        },
-      },
-    ],
   },
 };

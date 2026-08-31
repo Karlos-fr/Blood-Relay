@@ -1,35 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { PLAYER_MOVE_SPEED } from '../../gameplay/player/movement';
-import { CHARACTER_RENDER_ORDER, getRigAnchor } from './CharacterRig';
 import { PixelPoseAnimator } from './PixelPoseAnimator';
-import { LOWER_BODY_SLOTS, UPPER_BODY_SLOTS } from './pixelPoses';
 
-describe('shared procedural character rig and poses', () => {
-  it('mirrors rig x positions while preserving y', () => {
-    const right = getRigAnchor('weaponMount', 'right');
-    const left = getRigAnchor('weaponMount', 'left');
-    expect(left).toEqual({ x: -right.x, y: right.y });
-  });
-
-  it('uses the locked render order', () => {
-    expect(CHARACTER_RENDER_ORDER).toEqual([
-      'rearAccessory',
-      'rearArm',
-      'rearLeg',
-      'torso',
-      'frontLeg',
-      'head',
-      'frontArm',
-      'weapon',
-      'frontAccessory',
-    ]);
-  });
-
-  it('keeps explicit lower/upper groups for future weapon poses without blending', () => {
-    expect(LOWER_BODY_SLOTS).toEqual(['rearLeg', 'frontLeg']);
-    expect(UPPER_BODY_SLOTS).toEqual(['rearArm', 'torso', 'head', 'frontArm', 'weapon']);
-  });
-
+describe('pixel pose animator', () => {
   it('returns deterministic animation and frame indexes', () => {
     const animator = new PixelPoseAnimator();
     expect(animator.update(0, { grounded: true, velocityX: 0, velocityY: 0 })).toEqual({

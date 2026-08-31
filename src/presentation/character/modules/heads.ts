@@ -1,81 +1,8 @@
 import type { HeadId } from '../CharacterAppearance';
-import { pixels, rect, type PixelPrimitive } from '../moduleGeometry';
 import type {
   CharacterRenderContext,
-  LegacyCompatibleCharacterRenderModule,
+  CharacterRenderModule,
 } from '../rendering/CharacterRenderModule';
-
-const baseHead: PixelPrimitive[] = [
-  rect(-3, -3, 6, 6, 'outline'),
-  rect(-2, -2, 4, 5, 'skin'),
-  pixels(
-    [
-      [2, -1],
-      [3, 0],
-    ],
-    'skin',
-  ),
-  pixels([[2, -2]], 'outline'),
-];
-
-const legacyExtras: Record<HeadId, readonly PixelPrimitive[]> = {
-  shaved: [
-    pixels(
-      [
-        [-2, -3],
-        [-1, -3],
-        [0, -3],
-      ],
-      'skinDark',
-    ),
-  ],
-  'medical-mask': [
-    rect(1, 0, 3, 2, 'clothLight'),
-    pixels(
-      [
-        [0, 0],
-        [0, 1],
-      ],
-      'outline',
-    ),
-  ],
-  respirator: [
-    rect(1, 0, 3, 3, 'metal'),
-    pixels(
-      [
-        [2, 0],
-        [3, 1],
-      ],
-      'metalLight',
-    ),
-    pixels(
-      [
-        [4, 2],
-        [4, 3],
-        [3, 4],
-      ],
-      'accent',
-    ),
-  ],
-  visor: [rect(0, -2, 4, 2, 'metal'), rect(1, -2, 3, 1, 'accent')],
-  implants: [
-    pixels(
-      [
-        [-3, -1],
-        [-3, 0],
-        [-2, 1],
-      ],
-      'metal',
-    ),
-    pixels(
-      [
-        [-3, -2],
-        [-2, -1],
-      ],
-      'accent',
-    ),
-  ],
-};
 
 function paintHeadBase({ canvas, pose }: CharacterRenderContext): void {
   const { headCenter, neck } = pose;
@@ -110,23 +37,15 @@ function renderHead(id: HeadId, context: CharacterRenderContext): void {
   }
 }
 
-function createHead(id: HeadId): LegacyCompatibleCharacterRenderModule {
+function createHead(id: HeadId): CharacterRenderModule {
   return {
     id,
     layer: 'frontBody',
     renderRight: (context) => renderHead(id, context),
-    pieces: [
-      {
-        id: `${id}:head`,
-        slot: 'head',
-        anchor: 'head',
-        views: { right: [...baseHead, ...legacyExtras[id]] },
-      },
-    ],
   };
 }
 
-export const HEAD_MODULES: Readonly<Record<HeadId, LegacyCompatibleCharacterRenderModule>> = {
+export const HEAD_MODULES: Readonly<Record<HeadId, CharacterRenderModule>> = {
   shaved: createHead('shaved'),
   'medical-mask': createHead('medical-mask'),
   respirator: createHead('respirator'),

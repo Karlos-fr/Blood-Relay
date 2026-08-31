@@ -1,53 +1,8 @@
 import type { LegsId } from '../CharacterAppearance';
-import { pixels, rect, type PixelPrimitive } from '../moduleGeometry';
 import type {
   CharacterRenderContext,
-  LegacyCompatibleCharacterRenderModule,
+  CharacterRenderModule,
 } from '../rendering/CharacterRenderModule';
-
-interface LegacyLegVariant {
-  rear: readonly PixelPrimitive[];
-  front: readonly PixelPrimitive[];
-}
-
-const legacyVariants: Record<LegsId, LegacyLegVariant> = {
-  'prison-trousers': {
-    rear: [rect(-3, 0, 3, 8, 'outline'), rect(-2, 0, 2, 7, 'clothDark')],
-    front: [rect(0, 0, 3, 9, 'outline'), rect(0, 0, 2, 8, 'cloth')],
-  },
-  'reinforced-trousers': {
-    rear: [
-      rect(-3, 0, 3, 8, 'outline'),
-      rect(-2, 0, 2, 7, 'clothDark'),
-      rect(-2, 4, 2, 2, 'metal'),
-    ],
-    front: [rect(0, 0, 3, 9, 'outline'), rect(0, 0, 2, 8, 'cloth'), rect(0, 4, 2, 2, 'metalLight')],
-  },
-  'torn-trousers': {
-    rear: [
-      rect(-3, 0, 3, 7, 'outline'),
-      rect(-2, 0, 2, 5, 'clothDark'),
-      pixels(
-        [
-          [-2, 6],
-          [-1, 7],
-        ],
-        'skinDark',
-      ),
-    ],
-    front: [
-      rect(0, 0, 3, 8, 'outline'),
-      rect(0, 0, 2, 6, 'cloth'),
-      pixels(
-        [
-          [1, 7],
-          [2, 8],
-        ],
-        'skin',
-      ),
-    ],
-  },
-};
 
 function drawBoot(context: CharacterRenderContext, x: number, footY: number, front: boolean): void {
   const { canvas } = context;
@@ -81,30 +36,15 @@ function renderLegs(id: LegsId, context: CharacterRenderContext): void {
   }
 }
 
-function createLegs(id: LegsId): LegacyCompatibleCharacterRenderModule {
-  const legacy = legacyVariants[id];
+function createLegs(id: LegsId): CharacterRenderModule {
   return {
     id,
     layer: 'body',
     renderRight: (context) => renderLegs(id, context),
-    pieces: [
-      {
-        id: `${id}:rear`,
-        slot: 'rearLeg',
-        anchor: 'hips',
-        views: { right: legacy.rear },
-      },
-      {
-        id: `${id}:front`,
-        slot: 'frontLeg',
-        anchor: 'hips',
-        views: { right: legacy.front },
-      },
-    ],
   };
 }
 
-export const LEGS_MODULES: Readonly<Record<LegsId, LegacyCompatibleCharacterRenderModule>> = {
+export const LEGS_MODULES: Readonly<Record<LegsId, CharacterRenderModule>> = {
   'prison-trousers': createLegs('prison-trousers'),
   'reinforced-trousers': createLegs('reinforced-trousers'),
   'torn-trousers': createLegs('torn-trousers'),
