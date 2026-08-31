@@ -18,6 +18,7 @@ import {
   type CharacterPreviewState,
   type PreviewAppearanceName,
 } from '../presentation/character/preview/characterPreviewModel';
+import { installCharacterPreviewViewport } from '../presentation/character/preview/characterPreviewViewport';
 import { bakeCharacterFrame } from '../presentation/character/rendering/characterFrameBaker';
 
 const PREVIEW_SCALE = 5;
@@ -34,7 +35,7 @@ interface FighterThumbnail {
 
 export class CharacterPreviewScene extends Phaser.Scene {
   private state = createCharacterPreviewState();
-  private readonly thumbnails: FighterThumbnail[] = [];
+  private thumbnails: FighterThumbnail[] = [];
   private largePreview?: Phaser.GameObjects.Image;
   private hitbox?: Phaser.GameObjects.Rectangle;
   private metadata?: Phaser.GameObjects.Text;
@@ -46,7 +47,19 @@ export class CharacterPreviewScene extends Phaser.Scene {
     super('CharacterPreviewScene');
   }
 
+  public init(): void {
+    this.state = createCharacterPreviewState();
+    this.thumbnails = [];
+    this.largePreview = undefined;
+    this.hitbox = undefined;
+    this.metadata = undefined;
+    this.playButton = undefined;
+    this.frameButtons = [];
+    this.nextFrameAt = 0;
+  }
+
   public create(): void {
+    installCharacterPreviewViewport(this.cameras.main, this.scale, this.events);
     this.cameras.main.setBackgroundColor(0x101218);
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x101218);
     this.add.rectangle(255, 292, 470, 456, 0x171b24).setStrokeStyle(2, 0x303949);
