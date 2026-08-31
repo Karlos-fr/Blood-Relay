@@ -18,8 +18,8 @@ const DROP_THROUGH_MS = 220;
 const PLATFORM_LANDING_TOLERANCE = 13.5 * ARENA_CONTENT_SCALE;
 const MAX_FALL_SPEED = 675 * ARENA_CONTENT_SCALE;
 const DROP_THROUGH_SPEED = 67.5 * ARENA_CONTENT_SCALE;
-const LABEL_OFFSET = 9 * ARENA_CONTENT_SCALE;
-const LABEL_FONT_SIZE = 8.25 * ARENA_CONTENT_SCALE;
+const LABEL_OFFSET = 7;
+const LABEL_FONT_SIZE = 9;
 
 export type PlayerMovementState = 'grounded' | 'airborne';
 
@@ -88,10 +88,7 @@ export class Player {
     this.syncDecorations();
   }
 
-  public shouldCollideWithPlatform(
-    platform: Phaser.GameObjects.Rectangle,
-    time: number,
-  ): boolean {
+  public shouldCollideWithPlatform(platform: Phaser.GameObjects.Rectangle, time: number): boolean {
     if (time < this.dropThroughUntil || this.body.velocity.y < 0) {
       return false;
     }

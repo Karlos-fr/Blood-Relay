@@ -1,59 +1,47 @@
 import type { ArmsId } from '../CharacterAppearance';
-import { rect, type CharacterModuleDefinition, type PixelPrimitive } from '../moduleGeometry';
+import type {
+  CharacterRenderContext,
+  CharacterRenderModule,
+} from '../rendering/CharacterRenderModule';
 
-interface ArmVariant {
-  rear: readonly PixelPrimitive[];
-  front: readonly PixelPrimitive[];
+function renderArm(context: CharacterRenderContext, side: 'Rear' | 'Front', id: ArmsId): void {
+  const { canvas, pose } = context;
+  const shoulder = pose[`shoulder${side}`];
+  const elbow = pose[`elbow${side}`];
+  const hand = pose[`hand${side}`];
+  const rear = side === 'Rear';
+  const upperRole =
+    id === 'medical-arms' ? (rear ? 'clothDark' : 'clothLight') : rear ? 'skinDark' : 'skin';
+
+  canvas.drawThickSegment(shoulder, elbow, 2, upperRole);
+  canvas.drawThickSegment(elbow, hand, 2, upperRole);
+  canvas.fillRect(shoulder.x - 2, shoulder.y - 2, 5, 5, upperRole);
+
+  if (id === 'wrapped-arms') {
+    const wrapStart = {
+      x: Math.round((shoulder.x + elbow.x) / 2),
+      y: Math.round((shoulder.y + elbow.y) / 2),
+    };
+    canvas.drawThickSegment(wrapStart, elbow, 1, 'clothLight');
+  }
+
+  canvas.fillRect(hand.x - 1, hand.y - 1, 3, 3, rear ? 'skinDark' : 'skin');
 }
 
-const variants: Record<ArmsId, ArmVariant> = {
-  'wrapped-arms': {
-    rear: [
-      rect(-2, 0, 3, 7, 'outline'),
-      rect(-1, 0, 2, 5, 'skinDark'),
-      rect(-1, 3, 2, 2, 'clothLight'),
-    ],
-    front: [
-      rect(0, 0, 3, 7, 'outline'),
-      rect(0, 0, 2, 5, 'skin'),
-      rect(0, 3, 2, 2, 'clothLight'),
-    ],
-  },
-  'medical-arms': {
-    rear: [
-      rect(-2, 0, 3, 7, 'outline'),
-      rect(-1, 0, 2, 5, 'clothDark'),
-      rect(-1, 5, 2, 2, 'skinDark'),
-    ],
-    front: [
-      rect(0, 0, 3, 7, 'outline'),
-      rect(0, 0, 2, 5, 'clothLight'),
-      rect(0, 5, 2, 2, 'skin'),
-    ],
-  },
-};
+function renderArms(id: ArmsId, context: CharacterRenderContext): void {
+  renderArm(context, 'Rear', id);
+  renderArm(context, 'Front', id);
+}
 
-function createArms(id: ArmsId, variant: ArmVariant): CharacterModuleDefinition {
+function createArms(id: ArmsId): CharacterRenderModule {
   return {
     id,
-    pieces: [
-      {
-        id: `${id}:rear`,
-        slot: 'rearArm',
-        anchor: 'shoulderBack',
-        views: { right: variant.rear },
-      },
-      {
-        id: `${id}:front`,
-        slot: 'frontArm',
-        anchor: 'shoulderFront',
-        views: { right: variant.front },
-      },
-    ],
+    layer: 'frontBody',
+    renderRight: (context) => renderArms(id, context),
   };
 }
 
-export const ARMS_MODULES: Readonly<Record<ArmsId, CharacterModuleDefinition>> = {
-  'wrapped-arms': createArms('wrapped-arms', variants['wrapped-arms']),
-  'medical-arms': createArms('medical-arms', variants['medical-arms']),
+export const ARMS_MODULES: Readonly<Record<ArmsId, CharacterRenderModule>> = {
+  'wrapped-arms': createArms('wrapped-arms'),
+  'medical-arms': createArms('medical-arms'),
 };

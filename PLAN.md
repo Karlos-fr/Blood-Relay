@@ -386,14 +386,29 @@ Pouvoir jouer à deux sur le même clavier dans une arène de côté tenant int�
 ### Personnages procéduraux modulaires
 
 - [x] Remplacer visuellement les rectangles joueurs par des combattants procéduraux modulaires.
-- [x] Conserver exactement la physique, la hitbox et les contrôles existants.
+- [x] Conserver les constantes de mouvement et les contrôles existants ; remplacer l'ancienne hitbox par l'empreinte approuvée de 32 × 48, ce qui supersède le jalon initial « hitbox inchangée ».
 - [x] Ajouter 4 torses, 5 têtes, 3 jambes, 2 bras, 6 accessoires, 5 palettes et 1 arme placeholder.
 - [x] Ajouter un rig commun et les poses idle, run, takeoff, rise, apex, fall et landing.
 - [x] Ajouter le profil droit canonique et le miroir gauche avec support d’override asymétrique.
 - [x] Réserver le contrat de vue dos sans l’utiliser ni la dessiner dans ce lot.
 - [x] Configurer deux apparences fixes et nettement différentes pour P1 et P2.
 - [ ] Valider manuellement la lisibilité, la taille apparente et les animations des personnages sur GitHub Pages.
-- [ ] Confirmer manuellement que le parcours, le saut et les collisions restent inchangés.
+- [ ] Valider manuellement le parcours, le saut et les collisions avec l'empreinte approuvée de 32 × 48.
+
+### Combattants procéduraux détaillés
+
+- [x] Construire une anatomie connectée autour de repères communs pour la tête, le torse, les bras, les jambes et les pieds.
+- [x] Produire une texture complète mise en cache pour chaque frame d'animation, apparence et orientation.
+- [x] Étendre les modules avec les corps, armures et mutations, et fournir les familles clone, mercenaire, mutant et mixte.
+- [x] Définir les 13 animations anatomiques : idle, run, takeoff, rise, apex, fall, landing, shoot, melee, hurt, transfuse, death et respawn.
+- [x] Ajouter le mode preview `?character-preview=1` avec sélection d'apparence et d'animation, orientation, pause, pas-à-pas et overlay de hitbox.
+- [ ] Valider manuellement l'anatomie et les parties du corps connectées.
+- [ ] Valider manuellement le naturel des animations.
+- [ ] Valider manuellement le parcours de l'arène avec les nouvelles silhouettes.
+- [ ] Valider manuellement que les collisions restent correctes.
+- [ ] Valider manuellement la lisibilité à l'échelle desktop.
+- [ ] Valider manuellement la lisibilité à l'échelle mobile.
+- [ ] Valider manuellement les previews des poses prévues pour les futures mécaniques.
 
 ## Critères de validation
 

@@ -5,6 +5,7 @@ import { isMobileDevice } from './platform/device';
 import { installMobileViewportSync } from './presentation/mobileViewportSync';
 import { ArenaScene } from './scenes/ArenaScene';
 import { BootScene } from './scenes/BootScene';
+import { CharacterPreviewScene } from './scenes/CharacterPreviewScene';
 
 const mobile = isMobileDevice();
 
@@ -36,7 +37,7 @@ const config: Phaser.Types.Core.GameConfig = {
         width: GAME_WIDTH,
         height: GAME_HEIGHT,
       },
-  scene: [BootScene, ArenaScene],
+  scene: [BootScene, ArenaScene, CharacterPreviewScene],
 };
 
 const game = new Phaser.Game(config);

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { selectBootTarget } from './bootTarget';
 
 export class BootScene extends Phaser.Scene {
   public constructor() {
@@ -6,6 +7,6 @@ export class BootScene extends Phaser.Scene {
   }
 
   public create(): void {
-    this.scene.start('ArenaScene');
+    this.scene.start(selectBootTarget(window.location.search));
   }
 }

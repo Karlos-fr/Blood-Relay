@@ -27,6 +27,9 @@ La version actuelle contient :
 - quatre niveaux verticaux de plateformes traversables selon une structure 2-2-2-2 ;
 - le niveau supérieur conserve une marge suffisante pour qu'un saut complet reste dans l'écran ;
 - deux joueurs locaux avec collisions, accélération, décélération et saut ;
+- des combattants procéduraux détaillés et connectés, avec une hitbox partagée de `32 × 48` ;
+- un sprite complet mis en cache pour chaque frame d'animation, afin de composer une silhouette cohérente plutôt que des parties détachées ;
+- les familles visuelles clone, mercenaire, mutant et mixte, consultables dans le preview ;
 - commandes tactiles mobiles pour le joueur 1, affichées uniquement sur appareil tactile mobile, avec boutons Crystal Glass adaptés aux safe areas iPhone ;
 - un debug des hitboxes activable avec `F1` ;
 - déploiement automatique sur GitHub Pages après lint, tests et build.
@@ -59,7 +62,13 @@ Sur mobile tactile, de grands boutons en verre apparaissent automatiquement :
 
 ## Version jouable
 
+L'arène jouable est disponible à l'adresse suivante :
+
 https://karlos-fr.github.io/blood-relay/
+
+Le preview des combattants, de leurs deux orientations et de chaque frame mise en cache est disponible à l'adresse suivante :
+
+https://karlos-fr.github.io/blood-relay/?character-preview=1
 
 ## Prérequis locaux
 

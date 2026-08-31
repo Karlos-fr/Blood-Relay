@@ -1,4 +1,7 @@
-import { ARENA_CONTENT_SCALE } from '../../config/arenaScale';
+import {
+  CHARACTER_BODY_HEIGHT,
+  CHARACTER_BODY_WIDTH,
+} from '../../presentation/character/characterDimensions';
 
-export const PLAYER_WIDTH = 22.5 * ARENA_CONTENT_SCALE;
-export const PLAYER_HEIGHT = 34.5 * ARENA_CONTENT_SCALE;
+export const PLAYER_WIDTH = CHARACTER_BODY_WIDTH;
+export const PLAYER_HEIGHT = CHARACTER_BODY_HEIGHT;

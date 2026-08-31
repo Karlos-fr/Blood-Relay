@@ -8,11 +8,17 @@ export interface CharacterPalette {
   clothLight: number;
   skinDark: number;
   skin: number;
+  skinLight: number;
+  metalDark: number;
   metal: number;
   metalLight: number;
+  mutationDark: number;
+  mutation: number;
   accent: number;
   blood: number;
 }
+
+export type PaletteRole = keyof CharacterPalette;
 
 export const CHARACTER_PALETTES: Readonly<Record<PaletteId, CharacterPalette>> = {
   'inmate-red': {
@@ -23,8 +29,12 @@ export const CHARACTER_PALETTES: Readonly<Record<PaletteId, CharacterPalette>> =
     clothLight: 0xe3606b,
     skinDark: 0x6e4b40,
     skin: 0xc58b73,
+    skinLight: 0xe5b29a,
+    metalDark: 0x343a43,
     metal: 0x59616c,
     metalLight: 0xaeb7c0,
+    mutationDark: 0x54242f,
+    mutation: 0xb74358,
     accent: 0x6de2e8,
     blood: 0xd2263d,
   },
@@ -36,8 +46,12 @@ export const CHARACTER_PALETTES: Readonly<Record<PaletteId, CharacterPalette>> =
     clothLight: 0x83dce4,
     skinDark: 0x684a41,
     skin: 0xbf8974,
+    skinLight: 0xe0ad97,
+    metalDark: 0x333c46,
     metal: 0x55606c,
     metalLight: 0xb8c2cb,
+    mutationDark: 0x423450,
+    mutation: 0x8a6fb2,
     accent: 0xff6374,
     blood: 0xce3042,
   },
@@ -49,8 +63,12 @@ export const CHARACTER_PALETTES: Readonly<Record<PaletteId, CharacterPalette>> =
     clothLight: 0xf1ce62,
     skinDark: 0x67493e,
     skin: 0xba806b,
+    skinLight: 0xdda48c,
+    metalDark: 0x34393b,
     metal: 0x585d61,
     metalLight: 0xaeb3b4,
+    mutationDark: 0x5c421c,
+    mutation: 0xb98434,
     accent: 0x6adbe8,
     blood: 0xc92e3d,
   },
@@ -62,8 +80,12 @@ export const CHARACTER_PALETTES: Readonly<Record<PaletteId, CharacterPalette>> =
     clothLight: 0x88d5bc,
     skinDark: 0x6b4c42,
     skin: 0xc28a74,
+    skinLight: 0xe2ae96,
+    metalDark: 0x313c3d,
     metal: 0x536064,
     metalLight: 0xaebfc0,
+    mutationDark: 0x244f46,
+    mutation: 0x55ad91,
     accent: 0xff6d7e,
     blood: 0xd02d42,
   },
@@ -75,8 +97,12 @@ export const CHARACTER_PALETTES: Readonly<Record<PaletteId, CharacterPalette>> =
     clothLight: 0xb18ed0,
     skinDark: 0x654840,
     skin: 0xb9806f,
+    skinLight: 0xdca58e,
+    metalDark: 0x353943,
     metal: 0x545a66,
     metalLight: 0xaab0bd,
+    mutationDark: 0x49325f,
+    mutation: 0x906eb8,
     accent: 0x68d8e7,
     blood: 0xce2b41,
   },
